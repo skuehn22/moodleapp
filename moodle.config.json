@@ -1,6 +1,6 @@
 {
-    "app_id": "com.moodle.moodlemobile",
-    "appname": "Moodle Mobile",
+    "app_id": "org.ontour.app",
+    "appname": "onTour",
     "versioncode": 3950,
     "versionname": "3.9.5",
     "cache_update_frequency_usually": 420000,
@@ -65,12 +65,12 @@
     "wsextservice": "local_mobile",
     "demo_sites": {
         "student": {
-            "url": "https:\/\/school.moodledemo.net",
+            "url": "https:\/\/reisen.ontour.org",
             "username": "student",
             "password": "moodle"
         },
         "teacher": {
-            "url": "https:\/\/school.moodledemo.net",
+            "url": "https:\/\/reisen.ontour.org",
             "username": "teacher",
             "password": "moodle"
         }
@@ -81,14 +81,14 @@
         "high": 120
     },
     "customurlscheme": "moodlemobile",
-    "siteurl": "",
-    "sitename": "",
+    "siteurl": "https:\/\/reisen.ontour.org",
+    "sitename": "ON TOUR",
     "multisitesdisplay": "",
     "sitefindersettings": {},
     "onlyallowlistedsites": false,
     "skipssoconfirmation": false,
     "forcedefaultlanguage": false,
-    "privacypolicy": "https:\/\/moodle.net\/moodle-app-privacy\/",
+    "privacypolicy": "https:\/\/ontour.org\/\/datenschutz",
     "notificoncolor": "#f98012",
     "enableanalytics": false,
     "enableonboarding": true,
@@ -96,7 +96,7 @@
     "forceLoginLogo": false,
     "ioswebviewscheme": "moodleappfs",
     "appstores": {
-        "android": "com.moodle.moodlemobile",
+        "android": "org.ontour.app",
         "ios": "id633359593"
     }
 }
