@@ -84,7 +84,7 @@
         --background-alternative: var(--gray-lighter);
     }
 
-    --core-bottom-tabs-background: var(--black);
+    --core-bottom-tabs-background: #fac415;
     --core-bottom-tabs-color: var(--gray-lighter);
     --core-bottom-tabs-color-selected: var(--brand-color);
     --core-bottom-tabs-background-selected: var(--core-bottom-tabs-background);
@@ -94,7 +94,7 @@
     ion-tab-bar.mainmenu-tabs {
         --background: var(--core-bottom-tabs-background);
         --color: var(--core-bottom-tabs-color);
-        --color-selected: var(--core-bottom-tabs-color-selected);
+        --color-selected:  #4cb4e5;
         --background-selected: var(--core-bottom-tabs-background-selected);
         ion-badge {
             --background: var(--core-bottom-tabs-badge-color);
@@ -218,8 +218,8 @@
     }
 
     --item-divider-min-height: calc(var(--a11y-min-target-size) + 8px);
-    --item-divider-background: var(--gray-lighter);
-    --item-divider-color: var(--text-color);
+    --item-divider-background: #2ea3f2;
+    --item-divider-color: white;
     ion-item-divider, ion-item.divider {
         --background: var(--item-divider-background);
         --color: var(--item-divider-color);

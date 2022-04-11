@@ -28,14 +28,14 @@ $yellow:          #fbad1a !default; // Accent (never text).
 $yellow-light:    mix($yellow, white, 20%) !default;
 $yellow-dark:     mix($yellow, black, 40%) !default;
 
-$brand-color:    #f98012 !default;
+$brand-color:      #2ea3f2 !default;
 
 $text-color:               $black !default;
 $text-color-rgb:           color-to-rgb-list($text-color) !default;
 $text-color-dark:          $white !default;
 $text-color-dark-rgb:      color-to-rgb-list($text-color-dark) !default;
 
-$background-color:          $gray-light !default;
+$background-color:          #e7f4fd !default;
 $background-color-rgb:      color-to-rgb-list($background-color) !default;
 $background-color-dark:     mix(#ffffff, #000000, 10%) !default; // #1a1a1a
 $background-color-dark-rgb: color-to-rgb-list($background-color-dark) !default;
