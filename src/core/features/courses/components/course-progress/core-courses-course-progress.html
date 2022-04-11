@@ -1,4 +1,11 @@
 <ion-card [attr.course-color]="course.color ? null : course.colorNumber">
+    <div  style="text-align: center; padding:20px;">
+        <h3 style="font-weight: 700;">Herzlich willkommen!</h3>
+        <p>
+            Das onTour Team wünscht viel Spaß,
+            eine schöne Reise und eine unvergessliche Zeit!
+        </p>
+    </div>
     <div (click)="openCourse()" class="core-course-thumb" [class.core-course-color-img]="course.courseImage"
         [style.background-color]="course.color">
         <img *ngIf="course.courseImage" [src]="course.courseImage" core-external-content alt=""/>
