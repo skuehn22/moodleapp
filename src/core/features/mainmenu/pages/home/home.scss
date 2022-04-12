@@ -1,0 +1,6 @@
+@import "~theme/globals";
+
+    .in-toolbar h1 .core-header-logo {
+        max-height: calc(var(--core-header-toolbar-height) - 0px);
+    }
+

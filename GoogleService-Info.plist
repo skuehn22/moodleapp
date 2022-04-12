@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>313335138772-km9gtuvt6bf8j9a8gsgv4kisu8s5fm34.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.313335138772-km9gtuvt6bf8j9a8gsgv4kisu8s5fm34</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDEuxMHSRI4h6IPQeKknpWOhHUSwYvDHfE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>313335138772</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>org.ontour.app</string>
+	<key>PROJECT_ID</key>
+	<string>ontour-app-ecb39</string>
+	<key>STORAGE_BUCKET</key>
+	<string>ontour-app-ecb39.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:313335138772:ios:2857c75b2fcc79d2afee41</string>
+</dict>
+</plist>
