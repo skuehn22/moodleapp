@@ -28,20 +28,16 @@
 <!-- Content. -->
 <core-loading [hideUntil]="loaded">
 
-
     <!-- Activity info. -->
-    <!--
     <core-course-module-info *ngIf="showCompletion" [module]="module" [showManualCompletion]="true"
         (completionChanged)="onCompletionChange()">
     </core-course-module-info>
-    -->
 
     <core-course-module-description [description]="description" [component]="component" [componentId]="componentId"
         contextLevel="module" [contextInstanceId]="module.id" [courseId]="courseId">
     </core-course-module-description>
 
     <!-- Activity availability messages -->
-    <!--
     <ion-card class="core-info-card" *ngIf="choiceNotOpenYet">
         <ion-item>
             <ion-icon name="fas-info-circle" slot="start" aria-hidden="true"></ion-icon>
@@ -51,7 +47,6 @@
             </ion-label>
         </ion-item>
     </ion-card>
-    -->
 
     <ion-card class="core-info-card" *ngIf="choiceClosed">
         <ion-item>
@@ -77,14 +72,12 @@
     </ion-card>
 
     <!-- Inform what will happen with the choices. -->
-    <!--
     <ion-card class="core-info-card" *ngIf="canEdit && publishInfo && options.length">
         <ion-item>
             <ion-icon name="fas-info-circle" slot="start" aria-hidden="true"></ion-icon>
             <ion-label>{{ publishInfo | translate }}</ion-label>
         </ion-item>
     </ion-card>
-    -->
 
     <!-- Choice options -->
     <ion-card *ngIf="options.length && choice">
@@ -113,7 +106,6 @@
     </ion-card>
 
     <!-- Choice results -->
-
     <div *ngIf="canSeeResults && choice">
         <ion-item-divider>
             <ion-label>
@@ -164,14 +156,12 @@
         </ion-grid>
     </div>
 
-    <!--
     <ion-card class="core-info-card" *ngIf="!canSeeResults && !choiceNotOpenYet">
         <ion-item>
             <ion-icon name="fas-info-circle" slot="start" aria-hidden="true"></ion-icon>
             <ion-label><p>{{ 'addon.mod_choice.noresultsviewable' | translate }}</p></ion-label>
         </ion-item>
     </ion-card>
-    -->
 </core-loading>
 
 <!-- Template to render a choice option label. -->

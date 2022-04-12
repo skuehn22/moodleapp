@@ -118,7 +118,7 @@
     }
 
     ion-header ion-toolbar {
-        --color: #2e2e2e;
+        --color: var(--core-header-toolbar-color);
         --background: var(--core-header-toolbar-background);
         --border-width: 0 0 var(--core-header-toolbar-border-width) 0;
         --border-color: var(--core-header-toolbar-border-color);
