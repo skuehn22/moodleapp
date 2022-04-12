@@ -112,8 +112,8 @@ ion-header h1,
 ion-header h2 {
     display: block;
     transform: translateZ(0);
-    --color: initial;
-    color: var(--color);
+    --color: #444;
+    color: #444;
     margin: 0;
     width: 100%;
     text-overflow: ellipsis;
@@ -210,14 +210,14 @@ ion-toolbar {
 ion-header ion-toolbar {
     ion-back-button,
     .in-toolbar.button-clear {
-        --color: white;
-        --ion-toolbar-color: white;
+        --color: #444;
+        --ion-toolbar-color: #444;
     }
 
     .button.button-clear,
     .button.button-solid {
         --background: transparent;
-        --color: var(--core-header-toolbar-color);
+        --color: #444;
         --ion-color-primary: var(--core-header-toolbar-color);
     }
 
