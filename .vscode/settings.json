@@ -1,8 +1,0 @@
-{
-
-    "files.associations": {
-        "moodle.config.json": "jsonc",
-        "moodle.config.*.json": "jsonc",
-    },
-
-}
