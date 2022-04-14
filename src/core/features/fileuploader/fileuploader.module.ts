@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+var os = "test";
+
 import { APP_INITIALIZER, NgModule, Type } from '@angular/core';
 
 import { CoreFileUploaderProvider } from './services/fileuploader';
@@ -29,6 +31,10 @@ export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
     CoreFileUploaderDelegateService,
 ];
 
+function isIOSDevice(){
+    return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+}
+
 @NgModule({
     providers: [
         {
@@ -36,11 +42,17 @@ export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
             multi: true,
             deps: [],
             useFactory: () => () => {
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAlbumHandler.instance);
+
                 CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAudioHandler.instance);
                 CoreFileUploaderDelegate.registerHandler(CoreFileUploaderCameraHandler.instance);
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderVideoHandler.instance);
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderFileHandler.instance);
+                //CoreFileUploaderDelegate.registerHandler(CoreFileUploaderVideoHandler.instance);
+
+                if(isIOSDevice()){
+                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAlbumHandler.instance);
+                }else{
+                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderFileHandler.instance);
+                }
+
             },
         },
     ],
