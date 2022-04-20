@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var os = "test";
-
 import { APP_INITIALIZER, NgModule, Type } from '@angular/core';
-
 import { CoreFileUploaderProvider } from './services/fileuploader';
 import { CoreFileUploaderDelegate, CoreFileUploaderDelegateService } from './services/fileuploader-delegate';
 import { CoreFileUploaderHelperProvider } from './services/fileuploader-helper';
@@ -24,6 +21,7 @@ import { CoreFileUploaderAudioHandler } from './services/handlers/audio';
 import { CoreFileUploaderCameraHandler } from './services/handlers/camera';
 import { CoreFileUploaderFileHandler } from './services/handlers/file';
 import { CoreFileUploaderVideoHandler } from './services/handlers/video';
+import { CoreApp } from '@services/app';
 
 export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
     CoreFileUploaderProvider,
@@ -31,9 +29,6 @@ export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
     CoreFileUploaderDelegateService,
 ];
 
-function isIOSDevice(){
-    return !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
-}
 
 @NgModule({
     providers: [
@@ -47,7 +42,7 @@ function isIOSDevice(){
                 CoreFileUploaderDelegate.registerHandler(CoreFileUploaderCameraHandler.instance);
                 //CoreFileUploaderDelegate.registerHandler(CoreFileUploaderVideoHandler.instance);
 
-                if(isIOSDevice()){
+                if (CoreApp.isIOS()) {
                     CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAlbumHandler.instance);
                 }else{
                     CoreFileUploaderDelegate.registerHandler(CoreFileUploaderFileHandler.instance);
