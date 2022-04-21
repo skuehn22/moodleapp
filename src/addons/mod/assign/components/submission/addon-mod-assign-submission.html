@@ -18,14 +18,14 @@
         </ion-label>
     </ion-item>
 
-    <!-- Status of the submission in the rest of cases.
-    <ion-item class="ion-text-wrap" *ngIf="(blindMarking && user) || (!blindMarking && !user)">
+    <!-- Status of the submission in the rest of cases.-->
+    <ion-item class="ion-text-wrap" *ngIf="(blindMarking && user) || (!blindMarking && !user) && (hasOffline)">
         <ion-label>
             <h2>{{ 'addon.mod_assign.submissionstatus' | translate }}</h2>
             <ng-container *ngTemplateOutlet="submissionStatus"></ng-container>
         </ion-label>
     </ion-item>
-    -->
+
 
     <!-- Tabs: see the submission or grade it. -->
     <core-tabs [selectedIndex]="selectedTab" [hideUntil]="loaded" parentScrollable="true" (ionChange)="tabSelected($event)">
