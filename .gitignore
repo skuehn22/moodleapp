@@ -33,6 +33,6 @@ npm-debug.log*
 /moodle.config.*.json
 !/moodle.config.example.json
 
-/src/assets/lang/*
-/src/assets/env.json
+#/src/assets/lang/*
+#/src/assets/env.json
 node_modules/
