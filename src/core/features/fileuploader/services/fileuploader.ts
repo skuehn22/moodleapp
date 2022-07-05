@@ -611,7 +611,9 @@ export class CoreFileUploaderProvider {
         test.transcodeVideo({
             fileUri: uri,
             outputFileName: uri,
-            outputFileType: test.OutputFileType.MPEG4
+            outputFileType: test.OutputFileType.QUICK_TIME,
+            fps: 15,
+            videoBitrate: 500000,
         })
             .then((fileUri: string) => console.log('video transcode success', fileUri))
             .catch((error: any) => console.log('video transcode error', error));
