@@ -34,6 +34,7 @@ import { CoreError } from '@classes/errors/error';
 import { CoreSite } from '@classes/site';
 import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
 
+import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
 /**
  * File upload options.
  */
@@ -605,6 +606,15 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<CoreWSUploadFileResult> {
         options = options || {};
+
+        var test = new VideoEditor;
+        test.transcodeVideo({
+            fileUri: uri,
+            outputFileName: uri,
+            outputFileType: test.OutputFileType.MPEG4
+        })
+            .then((fileUri: string) => console.log('video transcode success', fileUri))
+            .catch((error: any) => console.log('video transcode error', error));
 
         const deleteAfterUpload = options.deleteAfterUpload;
         const ftOptions = CoreUtils.clone(options);

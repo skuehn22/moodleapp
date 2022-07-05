@@ -205,4 +205,96 @@ in-toolbar {
 }
 
 
+.core-course-header{
+  display:none!important;
+}
 
+.core-course-progress{
+  display:none;
+}
+
+core-context-menu{
+  display: none!important;
+}
+
+.in-toolbar .buttons-last-slot .button{
+  border: 2px solid green;
+  border-radius: 6px;
+  color: green;
+}
+
+core-course-module-completion .core-module-automatic-completion-conditions .ion-color-medium strong{
+  display: none!important;
+}
+
+.button-native{
+  color: #fff!important;
+}
+
+
+:host(.button-solid.ion-color) .button-native {
+  color: #fff!important;
+}
+
+
+.button-solid .ion-color .button-native {
+  color: #fff!important;
+}
+
+.ion-color .button-native {
+  color: #fff!important;
+}
+
+.button-solid {
+  color: #fff!important;
+}
+
+
+.core-format-text-content p{
+  padding-top: 14px;
+  font-size: 30px!important;
+}
+
+.sc-ion-label-md-s p{
+
+  line-height: 30px!important;
+}
+
+.core-tabs-content-container .selected .core-loading-loaded .ng-trigger .ng-star-inserted .ion-text-wrap .sc-ion-label-md-h{
+  display: none!important;
+}
+
+.core-tabs-content-container .selected .core-loading-loaded .ng-trigger .ng-star-inserted .ng-star-inserted .ion-align-items-center .ng-star-inserted .button-solid{
+  margin-left: -188px;
+}
+
+.addon-mod_feedback-item p{
+  font-size: 40px;
+}
+
+.native-textarea{
+  border: 1px #2e2e2e solid!important;
+}
+
+.native-textarea.sc-ion-textarea-md{
+  border: 1px #2e2e2e solid!important;
+}
+
+core-rich-text-editor{
+  height:300px!important;
+  border: 1px #2e2e2e solid!important;
+  margin-top: 10px;
+}
+
+.core-tabs-content-container .selected .core-loading-loaded .ng-trigger .ng-star-inserted .ng-star-inserted .ion-align-items-center .hydrated .button-outline{
+  display:none!important;
+
+}
+
+.core-course-progress{
+  margin-top: -21px;
+}
+
+core-context-menu {
+  display: block !important;
+}
