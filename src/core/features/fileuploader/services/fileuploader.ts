@@ -607,11 +607,14 @@ export class CoreFileUploaderProvider {
     ): Promise<CoreWSUploadFileResult> {
         options = options || {};
 
+        console.log("URI log: "+uri);
+
+
         var test = new VideoEditor;
         test.transcodeVideo({
             fileUri: uri,
             outputFileName: uri,
-            outputFileType: test.OutputFileType.QUICK_TIME,
+            outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
         })
