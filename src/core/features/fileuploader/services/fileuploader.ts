@@ -630,9 +630,13 @@ export class CoreFileUploaderProvider {
 
         const result = await site.uploadFile(uri, ftOptions, onProgress);
 
+
+        /*
         if (deleteAfterUpload) {
             CoreFile.removeExternalFile(uri);
         }
+        */
+         
 
         return result;
     }
