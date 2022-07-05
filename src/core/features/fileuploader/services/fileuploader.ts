@@ -787,7 +787,7 @@ export class CoreFileUploaderProvider {
 
             console.log("full path 1: "+files[0]['fullPath']);
 
-            var fileTest = "/storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
+            var fileTest = "file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
 
             var test = new VideoEditor;
             test.transcodeVideo({
