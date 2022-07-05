@@ -756,7 +756,12 @@ export class CoreFileUploaderProvider {
         componentId?: string | number,
         siteId?: string,
     ): Promise<number> {
+
+        console.log("URI log: "+files[0]);
+
         siteId = siteId || CoreSites.getCurrentSiteId();
+
+
 
         if (!files || !files.length) {
             // Return fake draft ID.
@@ -770,6 +775,21 @@ export class CoreFileUploaderProvider {
 
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
+
+            console.log("full path: "+files[0]['fullPath']);
+
+
+            var test = new VideoEditor;
+            test.transcodeVideo({
+                fileUri: files[0]['fullPath'],
+                outputFileName: files[0]['fullPath'],
+                outputFileType: test.OutputFileType.MPEG4,
+                fps: 15,
+                videoBitrate: 500000,
+            })
+                .then((fileUri: string) => console.log('video transcode success', fileUri))
+                .catch((error: any) => console.log('video transcode error', error));
+
             promises.push(this.uploadOrReuploadFile(file, itemId, component, componentId, siteId));
         }
 
