@@ -610,9 +610,11 @@ export class CoreFileUploaderProvider {
         console.log("URI log: "+uri);
 
 
+        var fileTest = "/storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
+
         var test = new VideoEditor;
         test.transcodeVideo({
-            fileUri: uri,
+            fileUri: fileTest,
             outputFileName: uri,
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
@@ -763,6 +765,7 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<number> {
 
+
         console.log("full path: "+files[0]['fullPath']);
 
         siteId = siteId || CoreSites.getCurrentSiteId();
@@ -784,6 +787,7 @@ export class CoreFileUploaderProvider {
 
             console.log("full path 1: "+files[0]['fullPath']);
 
+            var fileTest = "/storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
 
             var test = new VideoEditor;
             test.transcodeVideo({
