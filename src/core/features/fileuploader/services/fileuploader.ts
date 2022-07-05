@@ -653,6 +653,8 @@ export class CoreFileUploaderProvider {
             return;
         }
 
+        console.log("full path 0: "+files[0]['fullPath']);
+
         // Index the online files by name.
         const usedNames: {[name: string]: CoreFileEntry} = {};
         const filesToUpload: FileEntry[] = [];
@@ -757,7 +759,7 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<number> {
 
-        console.log("URI log: "+files[0]);
+        console.log("full path: "+files[0]['fullPath']);
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 
