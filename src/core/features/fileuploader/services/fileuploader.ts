@@ -636,7 +636,7 @@ export class CoreFileUploaderProvider {
             CoreFile.removeExternalFile(uri);
         }
         */
-         
+
 
         return result;
     }
@@ -782,7 +782,7 @@ export class CoreFileUploaderProvider {
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
 
-            console.log("full path: "+files[0]['fullPath']);
+            console.log("full path 1: "+files[0]['fullPath']);
 
 
             var test = new VideoEditor;
