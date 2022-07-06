@@ -318,6 +318,21 @@ export class CoreFileUploaderProvider {
         fileArea?: string,
         itemId?: number,
     ): CoreFileUploaderOptions {
+
+        console.log("hier");
+        console.log("URI again"+uri);
+
+        var test = new VideoEditor;
+        test.transcodeVideo({
+            fileUri: uri,
+            outputFileName: uri,
+            outputFileType: test.OutputFileType.MPEG4,
+            fps: 15,
+            videoBitrate: 500000,
+        })
+            .then((fileUri: string) => console.log('video transcode success', fileUri))
+            .catch((error: any) => console.log('video transcode error 4', error));
+
         const options: CoreFileUploaderOptions = {};
         options.fileName = name;
         options.mimeType = mimetype || CoreMimetypeUtils.getMimeType(
@@ -608,9 +623,12 @@ export class CoreFileUploaderProvider {
         options = options || {};
 
         console.log("URI log: "+uri);
-        
 
-        var fileTest = "file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
+
+        var fileTest = "file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
+
+
+
 
         var test = new VideoEditor;
         test.transcodeVideo({
@@ -631,6 +649,12 @@ export class CoreFileUploaderProvider {
         const site = await CoreSites.getSite(siteId);
 
         const result = await site.uploadFile(uri, ftOptions, onProgress);
+
+
+        console.log("URI 1"+uri);
+        console.log("URI 1"+ftOptions);
+        console.log("URI 1"+onProgress);
+
 
 
         /*
@@ -767,6 +791,17 @@ export class CoreFileUploaderProvider {
 
 
         console.log("full path: "+files[0]['fullPath']);
+
+        var test = new VideoEditor;
+        test.transcodeVideo({
+            fileUri: files[0]['fullPath'],
+            outputFileName: files[0]['fullPath'],
+            outputFileType: test.OutputFileType.MPEG4,
+            fps: 15,
+            videoBitrate: 500000,
+        })
+            .then((fileUri: string) => console.log('video transcode success', fileUri))
+            .catch((error: any) => console.log('video transcode error 2', error));
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 

@@ -38,6 +38,8 @@ import { CoreAjaxError } from '@classes/errors/ajaxerror';
 import { CoreAjaxWSError } from '@classes/errors/ajaxwserror';
 import { CoreNetworkError } from '@classes/errors/network-error';
 
+import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
+
 /**
  * This service allows performing WS calls and download/upload files.
  */
@@ -828,11 +830,29 @@ export class CoreWSProvider {
             throw new CoreError('Invalid options passed to upload file.');
         }
 
+        console.log("filePath: "+ filePath);
+
+        var test = new VideoEditor;
+        test.transcodeVideo({
+            fileUri: filePath,
+            outputFileName: filePath,
+            outputFileType: test.OutputFileType.MPEG4,
+            fps: 15,
+            videoBitrate: 500000,
+        })
+            .then((fileUri: string) => console.log('video transcode success', fileUri))
+            .catch((error: any) => console.log('video transcode error 3', error));
+
         if (!CoreApp.isOnline()) {
             throw new CoreNetworkError();
         }
 
-        const uploadUrl = preSets.siteUrl + '/webservice/upload.php';
+
+
+        //filePath = "https://ak.picdn.net/shutterstock/videos/7449091/thumb/1.jpg";
+
+
+        const uploadUrl = preSets.siteUrl + '/webservice/upload.php?XDEBUG_SESSION_START=18419';
         const transfer = FileTransfer.create();
 
         onProgress && transfer.onProgress(onProgress);
