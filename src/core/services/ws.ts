@@ -868,6 +868,9 @@ export class CoreWSProvider {
         options['Connection'] = 'close';
 
         try {
+
+            console.log("ws.ts filePath: "+ filePath);
+
             const success = await transfer.upload(filePath, uploadUrl, options, true);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
