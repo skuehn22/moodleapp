@@ -35,7 +35,7 @@ import { CoreSite } from '@classes/site';
 import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
 
 import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
-import { File } from '@awesome-cordova-plugins/file/ngx';
+
 
 /**
  * File upload options.
