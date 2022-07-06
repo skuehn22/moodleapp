@@ -35,6 +35,8 @@ import { CoreSite } from '@classes/site';
 import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
 
 import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
+import { File } from '@awesome-cordova-plugins/file/ngx';
+
 /**
  * File upload options.
  */
@@ -625,9 +627,8 @@ export class CoreFileUploaderProvider {
         console.log("URI log: "+uri);
 
 
-        var fileTest = "file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
-
-
+        var fileTest = "www/file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
+        console.log(fileTest);
 
 
         var test = new VideoEditor;
@@ -822,8 +823,8 @@ export class CoreFileUploaderProvider {
 
             console.log("full path 1: "+files[0]['fullPath']);
 
-            var fileTest = "file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
-
+            var fileTest = "www/file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
+            console.log(fileTest);
             var test = new VideoEditor;
             test.transcodeVideo({
                 fileUri: files[0]['fullPath'],
