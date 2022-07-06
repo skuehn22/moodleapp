@@ -73,7 +73,7 @@
             </feature>
         </config-file>
         <config-file mode="merge" parent="/manifest/application" platform="android" target="AndroidManifest.xml">
-            <provider android:authorities="${applicationId}.darryncampbell.cordova.plugin.intent.fileprovider" android:exported="true" android:grantUriPermissions="true" android:name="com.darryncampbell.cordova.plugin.intent.CordovaPluginIntentFileProvider">
+            <provider android:authorities="${applicationId}.darryncampbell.cordova.plugin.intent.fileprovider" android:exported="false" android:grantUriPermissions="true" android:name="com.darryncampbell.cordova.plugin.intent.CordovaPluginIntentFileProvider">
                 <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
             </provider>
         </config-file>
@@ -140,13 +140,13 @@
             </feature>
         </config-file>
         <config-file parent="/manifest/application" target="AndroidManifest.xml">
-            <provider android:authorities="${applicationId}.localnotifications.provider" android:exported="true" android:grantUriPermissions="true" android:name="de.appplant.cordova.plugin.notification.util.AssetProvider">
+            <provider android:authorities="${applicationId}.localnotifications.provider" android:exported="false" android:grantUriPermissions="true" android:name="de.appplant.cordova.plugin.notification.util.AssetProvider">
                 <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/localnotification_provider_paths" />
             </provider>
-            <receiver android:exported="true" android:name="de.appplant.cordova.plugin.localnotification.TriggerReceiver" />
-            <receiver android:exported="true" android:name="de.appplant.cordova.plugin.localnotification.ClearReceiver" />
-            <service android:exported="true" android:name="de.appplant.cordova.plugin.localnotification.ClickReceiver" />
-            <receiver android:directBootAware="true" android:exported="true" android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver">
+            <receiver android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.TriggerReceiver" />
+            <receiver android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.ClearReceiver" />
+            <service android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.ClickReceiver" />
+            <receiver android:directBootAware="true" android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver">
                 <intent-filter>
                     <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                     <action android:name="android.intent.action.BOOT_COMPLETED" />
