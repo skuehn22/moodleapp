@@ -608,9 +608,9 @@ export class CoreFileUploaderProvider {
         options = options || {};
 
         console.log("URI log: "+uri);
+        
 
-
-        var fileTest = "/storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
+        var fileTest = "file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
 
         var test = new VideoEditor;
         test.transcodeVideo({
