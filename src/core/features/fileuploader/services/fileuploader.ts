@@ -321,8 +321,8 @@ export class CoreFileUploaderProvider {
         itemId?: number,
     ): CoreFileUploaderOptions {
 
-        console.log("hier");
-        console.log("URI again"+uri);
+
+        console.log("URI again "+uri);
 
         var test = new VideoEditor;
         test.transcodeVideo({
@@ -356,6 +356,9 @@ export class CoreFileUploaderProvider {
     getMediaUploadOptions(mediaFile: MediaFile): CoreFileUploaderOptions {
         const options: CoreFileUploaderOptions = {};
         let filename = mediaFile.name;
+
+        console.log("mediafile"+ filename);
+
 
         if (!filename.match(/_\d{14}(\..*)?$/)) {
             // Add a timestamp to the filename to make it unique.
@@ -398,6 +401,8 @@ export class CoreFileUploaderProvider {
      * @return Promise resolved with the list of files.
      */
     async getStoredFiles(folderPath: string): Promise<FileEntry[]> {
+        console.log("folderpath"+ folderPath);
+
         return <FileEntry[]> await CoreFile.getDirectoryContents(folderPath);
     }
 
@@ -572,6 +577,9 @@ export class CoreFileUploaderProvider {
         folderPath: string,
         files: CoreFileEntry[],
     ): Promise<CoreFileUploaderStoreFilesResult> {
+
+        console.log("folderPath 2: "+ folderPath);
+
         const result: CoreFileUploaderStoreFilesResult = {
             online: [],
             offline: 0,
@@ -627,13 +635,13 @@ export class CoreFileUploaderProvider {
         console.log("URI log: "+uri);
 
 
-        var fileTest = "www/file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
-        console.log(fileTest);
+        //var fileTest = "www/file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
+        //console.log(fileTest);
 
 
         var test = new VideoEditor;
         test.transcodeVideo({
-            fileUri: fileTest,
+            fileUri: uri,
             outputFileName: uri,
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,

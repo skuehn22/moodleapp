@@ -62,12 +62,16 @@ export class CoreFileUploaderFileHandlerService implements CoreFileUploaderHandl
         };
 
         if (CoreApp.isMobile()) {
+
+
+
             handler.action = async (
                 maxSize?: number,
                 upload?: boolean,
                 allowOffline?: boolean,
                 mimetypes?: string[],
             ): Promise<CoreFileUploaderHandlerResult> => {
+                console.log("testmaxsize: "+maxSize);
                 const result = await CoreFileUploaderHelper.chooseAndUploadFile(maxSize, upload, allowOffline, mimetypes);
 
                 return {
@@ -115,6 +119,9 @@ export class CoreFileUploaderFileHandlerService implements CoreFileUploaderHandl
                     }
 
                     try {
+
+                        console.log("testlog: "+file);
+
                         // Upload the picked file.
                         const result = await CoreFileUploaderHelper.uploadFileObject(
                             file,

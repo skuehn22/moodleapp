@@ -283,6 +283,9 @@ export class FileTransferObjectMock extends FileTransferObject {
      */
     upload(fileUrl: string, url: string, options?: FileUploadOptions): Promise<FileUploadResult> {
         return new Promise((resolve, reject): void => {
+
+            console.log("fileUrl: "+fileUrl);
+
             const basicAuthHeader = this.getBasicAuthHeader(url);
             let fileKey: string | undefined;
             let fileName: string | undefined;
@@ -347,6 +350,10 @@ export class FileTransferObjectMock extends FileTransferObject {
                 this.source = fileUrl;
                 this.target = url;
                 this.reject = reject;
+
+
+                console.log("target: "+url);
+                console.log("filesize: "+file.size);
 
                 xhr.onerror = (): void => {
                     reject(new FileTransferErrorMock(-1, fileUrl, url, xhr.status, xhr.statusText, ''));

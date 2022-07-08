@@ -152,7 +152,6 @@
                     <action android:name="android.intent.action.BOOT_COMPLETED" />
                 </intent-filter>
             </receiver>
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
         </config-file>
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="Capture">
