@@ -320,10 +320,10 @@ export class CoreFileUploaderProvider {
         fileArea?: string,
         itemId?: number,
     ): CoreFileUploaderOptions {
-
-
+        
         console.log("URI again "+uri);
 
+        /*
         var test = new VideoEditor;
         test.transcodeVideo({
             fileUri: uri,
@@ -334,6 +334,7 @@ export class CoreFileUploaderProvider {
         })
             .then((fileUri: string) => console.log('video transcode success', fileUri))
             .catch((error: any) => console.log('video transcode error 4', error));
+         */
 
         const options: CoreFileUploaderOptions = {};
         options.fileName = name;
