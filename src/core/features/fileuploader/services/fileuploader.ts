@@ -809,7 +809,7 @@ export class CoreFileUploaderProvider {
         var test = new VideoEditor;
         test.transcodeVideo({
             fileUri: fileUri,
-            outputFileName: "file://"+files[0]['fullPath'],
+            outputFileName: fileUri,
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
