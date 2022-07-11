@@ -835,16 +835,16 @@ export class CoreWSProvider {
         var test = new VideoEditor;
         const path_new = test.transcodeVideo({
             fileUri: filePath,
-            outputFileName: "output45",
+            outputFileName: "output55",
             outputFileType: test.OutputFileType.MPEG4,
-            fps: 30,
-            videoBitrate: 1000000,
+            //fps: 30,
+            //videoBitrate: 1000000,
         })
             .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
             .catch((error: any) => console.log('video transcode error 3', error));
 
 
-        console.log(path_new);
+        console.log("path comp"+path_new);
 
         if (!CoreApp.isOnline()) {
             throw new CoreNetworkError();
