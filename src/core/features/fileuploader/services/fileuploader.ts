@@ -635,6 +635,10 @@ export class CoreFileUploaderProvider {
 
         console.log("URI log: "+uri);
 
+        let fileUri = uri;
+        fileUri = location.protocol + '//' + uri
+        console.log("full path 2: "+fileUri);
+
 
         //var fileTest = "www/file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
         //console.log(fileTest);
@@ -642,8 +646,8 @@ export class CoreFileUploaderProvider {
 
         var test = new VideoEditor;
         test.transcodeVideo({
-            fileUri: uri,
-            outputFileName: uri,
+            fileUri: fileUri,
+            outputFileName: fileUri,
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
@@ -739,10 +743,16 @@ export class CoreFileUploaderProvider {
         componentId?: string | number,
         siteId?: string,
     ): Promise<number> {
+
+        console.log("CoreFileEntry: "+file);
+
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         let fileName: string | undefined;
         let fileEntry: FileEntry | undefined;
+
+
+        console.log("fileEntry: "+fileEntry);
 
         const isOnline = !CoreUtils.isFileEntry(file);
 
@@ -750,6 +760,10 @@ export class CoreFileUploaderProvider {
             // Local file, we already have the file entry.
             fileName = file.name;
             fileEntry = file;
+
+            console.log("fileEntry: "+file);
+            console.log("fileName: "+file.name);
+
         } else {
             // It's an online file. We need to download it and re-upload it.
             fileName = file.filename;
@@ -767,14 +781,27 @@ export class CoreFileUploaderProvider {
             );
 
             fileEntry = await CoreFile.getExternalFile(path);
+
+            console.log("fileEntry 123: "+fileEntry);
         }
 
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
+
+        console.log("extension: "+extension);
+
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
+
+        console.log("mimetype: "+mimetype);
+
         const options = this.getFileUploadOptions(fileEntry.toURL(), fileName!, mimetype, isOnline, 'draft', itemId);
 
+
+        console.log("fileEntry 999: "+fileEntry);
+
         const result = await this.uploadFile(fileEntry.toURL(), options, undefined, siteId);
+
+
 
         return result.itemid;
     }
