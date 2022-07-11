@@ -835,7 +835,7 @@ export class CoreWSProvider {
         var test = new VideoEditor;
         test.transcodeVideo({
             fileUri: filePath,
-            outputFileName: filePath,
+            outputFileName: "output.mp4",
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
