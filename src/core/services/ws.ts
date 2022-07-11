@@ -857,7 +857,7 @@ export class CoreWSProvider {
                 var video = new VideoEditor;
                 const path_new = video.transcodeVideo({
                     fileUri: filePath,
-                    outputFileName: "outpu123",
+                    outputFileName: "outpu1ss23",
                     //outputFileType: video.OutputFileType.MPEG4,
                     //fps: 30,
                     //videoBitrate: 1000000,
