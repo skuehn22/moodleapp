@@ -833,20 +833,25 @@ export class CoreWSProvider {
         console.log("filePath: "+ filePath);
 
         var test = new VideoEditor;
-        test.transcodeVideo({
+        const path_new = test.transcodeVideo({
             fileUri: filePath,
-            outputFileName: "output1.mp4",
+            outputFileName: "output",
             outputFileType: test.OutputFileType.MPEG4,
-            fps: 15,
+            fps: 30,
             videoBitrate: 500000,
         })
-            .then((fileUri: string) => console.log('video transcode success', fileUri))
+            .then((fileUri: string) => {
+                console.log('video transcode success pfad:', fileUri);
+                return fileUri;
+            })
             .catch((error: any) => console.log('video transcode error 3', error));
+
+
+        console.log(path_new);
 
         if (!CoreApp.isOnline()) {
             throw new CoreNetworkError();
         }
-
 
 
         //filePath = "https://ak.picdn.net/shutterstock/videos/7449091/thumb/1.jpg";
@@ -869,7 +874,9 @@ export class CoreWSProvider {
 
         try {
 
-            console.log("ws.ts filePath: "+ filePath);
+            console.log("ws.ts filePath: "+ path_new);
+            console.log(uploadUrl);
+            console.log("Promise Path" +filePath);
 
             const success = await transfer.upload(filePath, uploadUrl, options, true);
 

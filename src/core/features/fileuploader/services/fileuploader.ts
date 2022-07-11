@@ -643,6 +643,7 @@ export class CoreFileUploaderProvider {
         //var fileTest = "www/file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
         //console.log(fileTest);
 
+        /*
 
         var test = new VideoEditor;
         test.transcodeVideo({
@@ -654,6 +655,9 @@ export class CoreFileUploaderProvider {
         })
             .then((fileUri: string) => console.log('video transcode success', fileUri))
             .catch((error: any) => console.log('video transcode error', error));
+
+
+         */
 
         const deleteAfterUpload = options.deleteAfterUpload;
         const ftOptions = CoreUtils.clone(options);
@@ -830,6 +834,7 @@ export class CoreFileUploaderProvider {
     ): Promise<number> {
 
 
+        /*
         console.log("full path: "+files[0]['fullPath']);
 
         let fileUri = files[0]['fullPath'];
@@ -849,6 +854,8 @@ export class CoreFileUploaderProvider {
                  }
             )
             .catch((error: any) => console.log('video transcode error 2', error));
+         */
+
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 
@@ -867,6 +874,7 @@ export class CoreFileUploaderProvider {
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
 
+            /*
             console.log("full path 1: "+files[0]['fullPath']);
 
             var fileTest = "www/file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
@@ -881,6 +889,8 @@ export class CoreFileUploaderProvider {
             })
                 .then((fileUri: string) => console.log('video transcode success', fileUri))
                 .catch((error: any) => console.log('video transcode error', error));
+
+             */
 
             promises.push(this.uploadOrReuploadFile(file, itemId, component, componentId, siteId));
         }
