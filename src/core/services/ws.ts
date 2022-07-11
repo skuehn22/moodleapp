@@ -830,32 +830,11 @@ export class CoreWSProvider {
             throw new CoreError('Invalid options passed to upload file.');
         }
 
-
-
-        /*
-        var test = new VideoEditor;
-        const path_new = test.transcodeVideo({
-            fileUri: filePath,
-            outputFileName: "output55",
-            outputFileType: test.OutputFileType.MPEG4,
-            //fps: 30,
-            //videoBitrate: 1000000,
-        })
-            .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
-            .catch((error: any) => console.log('video transcode error 3', error));
-
-
-        console.log("path comp"+path_new);
-
-         */
-
         if (!CoreApp.isOnline()) {
             throw new CoreNetworkError();
         }
 
-
         //filePath = "https://ak.picdn.net/shutterstock/videos/7449091/thumb/1.jpg";
-
 
         const uploadUrl = preSets.siteUrl + '/webservice/upload.php?XDEBUG_SESSION_START=18419';
         const transfer = FileTransfer.create();
@@ -874,15 +853,21 @@ export class CoreWSProvider {
 
         try {
 
-            //console.log("ws.ts filePath: "+ path_new);
-            //console.log(uploadUrl);
-            //console.log("Promise Path" +filePath);
+            let promise = new Promise((resolve, reject) => {
+                var video = new VideoEditor;
+                const path_new = video.transcodeVideo({
+                    fileUri: filePath,
+                    outputFileName: "outpu123",
+                    //outputFileType: video.OutputFileType.MPEG4,
+                    //fps: 30,
+                    //videoBitrate: 1000000,
+                })
+                    .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
+                    .catch((error: any) => console.log('video transcode error 3', error));
+            });
 
-
-            const compress = await this.compressVideo(filePath);
-
-            console.log("compress: "+ compress);
-
+            let result = await promise;
+            
 
             const success = await transfer.upload(filePath, uploadUrl, options, true);
 
@@ -937,7 +922,7 @@ export class CoreWSProvider {
         var video = new VideoEditor;
         const path_new = video.transcodeVideo({
             fileUri: filePath,
-            outputFileName: "output5556",
+            outputFileName: "outpu123",
             //outputFileType: video.OutputFileType.MPEG4,
             //fps: 30,
             //videoBitrate: 1000000,
