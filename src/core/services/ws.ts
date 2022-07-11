@@ -862,12 +862,12 @@ export class CoreWSProvider {
                     //fps: 30,
                     //videoBitrate: 1000000,
                 })
-                    .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
+                    .then((fileUri: string) => resolve ('video transcode success'))
                     .catch((error: any) => console.log('video transcode error 3', error));
             });
 
             let result = await promise;
-            
+
 
             const success = await transfer.upload(filePath, uploadUrl, options, true);
 
