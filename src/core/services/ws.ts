@@ -830,8 +830,12 @@ export class CoreWSProvider {
             throw new CoreError('Invalid options passed to upload file.');
         }
 
-        console.log("filePath: "+ filePath);
 
+        const compress = await this.compressVideo(filePath);
+
+        console.log("compress: "+ compress);
+
+        /*
         var test = new VideoEditor;
         const path_new = test.transcodeVideo({
             fileUri: filePath,
@@ -845,6 +849,8 @@ export class CoreWSProvider {
 
 
         console.log("path comp"+path_new);
+
+         */
 
         if (!CoreApp.isOnline()) {
             throw new CoreNetworkError();
@@ -871,9 +877,9 @@ export class CoreWSProvider {
 
         try {
 
-            console.log("ws.ts filePath: "+ path_new);
-            console.log(uploadUrl);
-            console.log("Promise Path" +filePath);
+            //console.log("ws.ts filePath: "+ path_new);
+            //console.log(uploadUrl);
+            //console.log("Promise Path" +filePath);
 
             const success = await transfer.upload(filePath, uploadUrl, options, true);
 
@@ -920,6 +926,28 @@ export class CoreWSProvider {
             throw new CoreError(Translate.instant('core.errorinvalidresponse'));
         }
     }
+
+
+    async compressVideo(filePath: string): Promise<string> {
+        console.log("filePath: "+ filePath);
+
+        var video = new VideoEditor;
+        const path_new = video.transcodeVideo({
+            fileUri: filePath,
+            outputFileName: "output555",
+            outputFileType: video.OutputFileType.MPEG4,
+            //fps: 30,
+            //videoBitrate: 1000000,
+        })
+            .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
+            .catch((error: any) => console.log('video transcode error 3', error));
+
+
+        console.log("path comp"+path_new);
+        return filePath;
+    }
+
+
 
     /**
      * Perform an HTTP request requesting for a text response.
