@@ -802,15 +802,22 @@ export class CoreFileUploaderProvider {
 
         console.log("full path: "+files[0]['fullPath']);
 
+        let fileUri = files[0]['fullPath'];
+        fileUri = location.protocol + '//' + fileUri
+        console.log("full path 2: "+fileUri);
+
         var test = new VideoEditor;
         test.transcodeVideo({
-            fileUri: files[0]['fullPath'],
-            outputFileName: files[0]['fullPath'],
+            fileUri: fileUri,
+            outputFileName: "file://"+files[0]['fullPath'],
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
         })
-            .then((fileUri: string) => console.log('video transcode success', fileUri))
+            .then((fileUri: string) => {
+                    console.log('video transcode success', fileUri)
+                 }
+            )
             .catch((error: any) => console.log('video transcode error 2', error));
 
         siteId = siteId || CoreSites.getCurrentSiteId();
