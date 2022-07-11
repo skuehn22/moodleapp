@@ -840,10 +840,7 @@ export class CoreWSProvider {
             fps: 30,
             videoBitrate: 500000,
         })
-            .then((fileUri: string) => {
-                console.log('video transcode success pfad:', fileUri);
-                return fileUri;
-            })
+            .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
             .catch((error: any) => console.log('video transcode error 3', error));
 
 
