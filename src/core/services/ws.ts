@@ -831,9 +831,6 @@ export class CoreWSProvider {
         }
 
 
-        const compress = await this.compressVideo(filePath);
-
-        console.log("compress: "+ compress);
 
         /*
         var test = new VideoEditor;
@@ -880,6 +877,12 @@ export class CoreWSProvider {
             //console.log("ws.ts filePath: "+ path_new);
             //console.log(uploadUrl);
             //console.log("Promise Path" +filePath);
+
+
+            const compress = await this.compressVideo(filePath);
+
+            console.log("compress: "+ compress);
+
 
             const success = await transfer.upload(filePath, uploadUrl, options, true);
 
@@ -934,8 +937,8 @@ export class CoreWSProvider {
         var video = new VideoEditor;
         const path_new = video.transcodeVideo({
             fileUri: filePath,
-            outputFileName: "output555",
-            outputFileType: video.OutputFileType.MPEG4,
+            outputFileName: "output5556",
+            //outputFileType: video.OutputFileType.MPEG4,
             //fps: 30,
             //videoBitrate: 1000000,
         })
