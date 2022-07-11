@@ -647,7 +647,7 @@ export class CoreFileUploaderProvider {
         var test = new VideoEditor;
         test.transcodeVideo({
             fileUri: fileUri,
-            outputFileName: "output.mp4",
+            outputFileName: "output3.mp4",
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
@@ -839,7 +839,7 @@ export class CoreFileUploaderProvider {
         var test = new VideoEditor;
         test.transcodeVideo({
             fileUri: fileUri,
-            outputFileName: "output.mp4",
+            outputFileName: "output4.mp4",
             outputFileType: test.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
@@ -874,7 +874,7 @@ export class CoreFileUploaderProvider {
             var test = new VideoEditor;
             test.transcodeVideo({
                 fileUri: files[0]['fullPath'],
-                outputFileName: "output.mp4",
+                outputFileName: "output2.mp4",
                 outputFileType: test.OutputFileType.MPEG4,
                 fps: 15,
                 videoBitrate: 500000,
