@@ -763,6 +763,9 @@ export class CoreFileUploaderProvider {
 
             console.log("fileEntry: "+file);
             console.log("fileName: "+file.name);
+            console.log("fileNameFullPath: "+file.fullPath);
+            console.log("fileNamenativeURL: "+file.nativeURL);
+
 
         } else {
             // It's an online file. We need to download it and re-upload it.
