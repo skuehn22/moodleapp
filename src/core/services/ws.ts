@@ -38,7 +38,7 @@ import { CoreAjaxError } from '@classes/errors/ajaxerror';
 import { CoreAjaxWSError } from '@classes/errors/ajaxwserror';
 import { CoreNetworkError } from '@classes/errors/network-error';
 
-import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
+import { VideoEditor } from '@ionic-native/video-editor/ngx';
 
 /**
  * This service allows performing WS calls and download/upload files.
@@ -860,6 +860,8 @@ export class CoreWSProvider {
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
+                console.log("filePath log" + filePath);
+
                 const path_new = video.transcodeVideo({
                     fileUri: filePath,
                     outputFileName: name.toString(),
@@ -879,7 +881,7 @@ export class CoreWSProvider {
 
             let result = await promise;
 
-            console.log(result);
+            console.log("result:" + result);
 
             const success = await transfer.upload(result as string, uploadUrl, options, true);
 
@@ -936,7 +938,7 @@ export class CoreWSProvider {
         }
     }
 
-    
+
     /**
      * Perform an HTTP request requesting for a text response.
      *
