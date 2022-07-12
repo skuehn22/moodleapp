@@ -854,22 +854,34 @@ export class CoreWSProvider {
         try {
 
             let promise = new Promise((resolve, reject) => {
+
                 var video = new VideoEditor;
+
+                //use timestamp as filename
+                var name = Math.round(+new Date()/1000);
+
                 const path_new = video.transcodeVideo({
                     fileUri: filePath,
-                    outputFileName: "outpu1ss23",
+                    outputFileName: name.toString(),
                     //outputFileType: video.OutputFileType.MPEG4,
                     //fps: 30,
                     //videoBitrate: 1000000,
                 })
-                    .then((fileUri: string) => resolve ('video transcode success'))
-                    .catch((error: any) => console.log('video transcode error 3', error));
+                    .then((fileUri: string) =>{
+                        resolve(fileUri);
+                    })
+
+                    .catch((error: any) => {
+                        reject(error)
+                    });
             });
+
 
             let result = await promise;
 
+            console.log(result);
 
-            const success = await transfer.upload(filePath, uploadUrl, options, true);
+            const success = await transfer.upload(result as string, uploadUrl, options, true);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data = CoreTextUtils.parseJSON<any>(
@@ -879,33 +891,42 @@ export class CoreWSProvider {
             );
 
             if (data === null) {
+                console.log("errorinvalidresponse");
                 throw new CoreError(Translate.instant('core.errorinvalidresponse'));
             }
 
             if (!data) {
+                console.log("serverconnection");
                 throw new CoreError(Translate.instant('core.serverconnection'));
             } else if (typeof data != 'object') {
                 this.logger.warn('Upload file: Response of type "' + typeof data + '" received, expecting "object"');
-
                 throw new CoreError(Translate.instant('core.errorinvalidresponse'));
             }
 
             if (typeof data.exception !== 'undefined') {
+                console.log("undefined");
                 throw new CoreWSError(data);
             } else if (typeof data.error !== 'undefined') {
+                console.log("undefined2");
                 throw new CoreWSError({
                     errorcode: data.errortype,
                     message: data.error,
                 });
             } else if (data[0] && typeof data[0].error !== 'undefined') {
+                console.log("undefined3");
                 throw new CoreWSError({
                     errorcode: data[0].errortype,
                     message: data[0].error,
                 });
             }
 
+
             // We uploaded only 1 file, so we only return the first file returned.
             this.logger.debug('Successfully uploaded file', filePath);
+
+
+            console.log("uploaded:" + filePath);
+            console.log("uploaded:" + data[0]);
 
             return data[0];
         } catch (error) {
@@ -915,28 +936,7 @@ export class CoreWSProvider {
         }
     }
 
-
-    async compressVideo(filePath: string): Promise<string> {
-        console.log("filePath: "+ filePath);
-
-        var video = new VideoEditor;
-        const path_new = video.transcodeVideo({
-            fileUri: filePath,
-            outputFileName: "outpu123",
-            //outputFileType: video.OutputFileType.MPEG4,
-            //fps: 30,
-            //videoBitrate: 1000000,
-        })
-            .then((fileUri: string) => console.log('video transcode success pfad:', fileUri))
-            .catch((error: any) => console.log('video transcode error 3', error));
-
-
-        console.log("path comp"+path_new);
-        return filePath;
-    }
-
-
-
+    
     /**
      * Perform an HTTP request requesting for a text response.
      *
