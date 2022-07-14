@@ -851,6 +851,9 @@ export class CoreWSProvider {
         options.headers = {};
         options['Connection'] = 'close';
 
+        console.log("filePath log" + filePath);
+
+
         try {
 
             let promise = new Promise((resolve, reject) => {
@@ -881,9 +884,10 @@ export class CoreWSProvider {
 
             //let result = await promise;
 
-            console.log("result:" + result);
+            //console.log("result:" + result);
 
-            const success = await transfer.upload(result as string, uploadUrl, options, true);
+            //const success = await transfer.upload(result as string, uploadUrl, options, true);
+            const success = await transfer.upload(filePath, uploadUrl, options, true);
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const data = CoreTextUtils.parseJSON<any>(
