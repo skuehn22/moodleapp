@@ -884,7 +884,7 @@ export class CoreWSProvider {
                 console.log(pathTranscodedVideo);
             }).catch(  );
 
-             
+
 
             let promise = new Promise((resolve, reject) => {
 
@@ -912,7 +912,7 @@ export class CoreWSProvider {
             });
 
 
-            //let result = await promise;
+            let result = await promise;
 
             //console.log("result:" + result);
 
