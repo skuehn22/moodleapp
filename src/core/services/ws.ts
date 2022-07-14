@@ -860,6 +860,7 @@ export class CoreWSProvider {
 
         try {
 
+            /*
             var video = new VideoEditor;
 
             let optionsTranscoding = {
@@ -882,6 +883,8 @@ export class CoreWSProvider {
             video.transcodeVideo(optionsTranscoding).then((pathTranscodedVideo: string) => {
                 console.log(pathTranscodedVideo);
             }).catch(  );
+
+             */
 
             let promise = new Promise((resolve, reject) => {
 
