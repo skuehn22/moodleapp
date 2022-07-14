@@ -40,6 +40,7 @@ import { CoreNetworkError } from '@classes/errors/network-error';
 
 import { VideoEditor } from '@ionic-native/video-editor/ngx';
 
+
 /**
  * This service allows performing WS calls and download/upload files.
  */
@@ -834,7 +835,6 @@ export class CoreWSProvider {
             throw new CoreNetworkError();
         }
 
-        //filePath = "https://ak.picdn.net/shutterstock/videos/7449091/thumb/1.jpg";
 
         const uploadUrl = preSets.siteUrl + '/webservice/upload.php?XDEBUG_SESSION_START=18419';
         const transfer = FileTransfer.create();
@@ -853,14 +853,10 @@ export class CoreWSProvider {
 
         console.log("filePath log " + filePath);
 
-
-        //const fileExists = require('file-exists');
-
-        //fileExists(filePath, (err, exists) => console.log(exists)) // OUTPUTS: tru
-
         try {
 
 
+/*
             var video = new VideoEditor;
 
             let optionsTranscoding = {
@@ -884,6 +880,9 @@ export class CoreWSProvider {
                 console.log(pathTranscodedVideo);
             }).catch(  );
 
+            */
+
+
 
 
             let promise = new Promise((resolve, reject) => {
@@ -896,7 +895,7 @@ export class CoreWSProvider {
                 console.log("filePath log" + filePath);
 
                 const path_new = video.transcodeVideo({
-                    fileUri: filePath,
+                    fileUri: "file:///storage/111D-3405/Movies/TestVideo70MB.mp4",
                     outputFileName: name.toString(),
                     //outputFileType: video.OutputFileType.MPEG4,
                     //fps: 30,
