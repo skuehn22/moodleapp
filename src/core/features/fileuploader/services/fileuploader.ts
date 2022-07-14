@@ -594,12 +594,22 @@ export class CoreFileUploaderProvider {
         await CoreFile.removeUnusedFiles(folderPath, files);
 
         await Promise.all(files.map(async (file) => {
+
+
+
             if (!CoreUtils.isFileEntry(file)) {
+
+                console.log("filename: "+file.filename);
+
                 // It's an online file, add it to the result and ignore it.
                 result.online.push({
                     filename: file.filename,
                     fileurl: CoreFileHelper.getFileUrl(file),
                 });
+
+                let fileurl2 =  CoreFileHelper.getFileUrl(file);
+                console.log("fileurl: "+ fileurl2);
+
             } else if (file.fullPath?.indexOf(folderPath) != -1) {
                 // File already in the submission folder.
                 result.offline++;
@@ -607,6 +617,10 @@ export class CoreFileUploaderProvider {
                 // Local file, copy it.
                 // Use copy instead of move to prevent having a unstable state if some copies succeed and others don't.
                 const destFile = CoreTextUtils.concatenatePaths(folderPath, file.name);
+
+                console.log("folderPath 3: "+ folderPath);
+                console.log("file.name: "+ file.name);
+
                 result.offline++;
 
                 await CoreFile.copyFile(file.toURL(), destFile);
@@ -648,7 +662,7 @@ export class CoreFileUploaderProvider {
         })
             .then((fileUri: string) => console.log('video transcode success', fileUri))
             .catch((error: any) => console.log('video transcode error', error));
-        
+
 
         const deleteAfterUpload = options.deleteAfterUpload;
         const ftOptions = CoreUtils.clone(options);
@@ -868,7 +882,7 @@ export class CoreFileUploaderProvider {
             /*
             console.log("full path 1: "+files[0]['fullPath']);
 
-            var fileTest = "www/file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
+            var fileTest = "file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
             console.log(fileTest);
             var test = new VideoEditor;
             test.transcodeVideo({
