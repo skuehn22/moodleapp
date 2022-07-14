@@ -633,31 +633,22 @@ export class CoreFileUploaderProvider {
     ): Promise<CoreWSUploadFileResult> {
         options = options || {};
 
-        console.log("URI log: "+uri);
+        console.log("URI log new: "+uri);
 
-        let fileUri = uri;
-        fileUri = location.protocol + '//' + uri
-        console.log("full path 2: "+fileUri);
+        //use timestamp as filename
+        var name = Math.round(+new Date()/1000);
 
-
-        //var fileTest = "www/file:///storage/111D-3405/Movies/TestVideo70MB.mp4";
-        //console.log(fileTest);
-
-        /*
-
-        var test = new VideoEditor;
-        test.transcodeVideo({
-            fileUri: fileUri,
-            outputFileName: "output3.mp4",
-            outputFileType: test.OutputFileType.MPEG4,
+        var video = new VideoEditor;
+        video.transcodeVideo({
+            fileUri: uri,
+            outputFileName: name.toString(),
+            outputFileType: video.OutputFileType.MPEG4,
             fps: 15,
             videoBitrate: 500000,
         })
             .then((fileUri: string) => console.log('video transcode success', fileUri))
             .catch((error: any) => console.log('video transcode error', error));
-
-
-         */
+        
 
         const deleteAfterUpload = options.deleteAfterUpload;
         const ftOptions = CoreUtils.clone(options);
