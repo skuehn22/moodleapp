@@ -854,13 +854,13 @@ export class CoreWSProvider {
         console.log("filePath log " + filePath);
 
 
-        const fileExists = require('file-exists');
+        //const fileExists = require('file-exists');
 
-        fileExists(filePath, (err, exists) => console.log(exists)) // OUTPUTS: tru
+        //fileExists(filePath, (err, exists) => console.log(exists)) // OUTPUTS: tru
 
         try {
 
-            /*
+
             var video = new VideoEditor;
 
             let optionsTranscoding = {
@@ -884,7 +884,7 @@ export class CoreWSProvider {
                 console.log(pathTranscodedVideo);
             }).catch(  );
 
-             */
+             
 
             let promise = new Promise((resolve, reject) => {
 
