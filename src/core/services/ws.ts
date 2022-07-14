@@ -851,10 +851,37 @@ export class CoreWSProvider {
         options.headers = {};
         options['Connection'] = 'close';
 
-        console.log("filePath log" + filePath);
+        console.log("filePath log " + filePath);
 
+
+        const fileExists = require('file-exists');
+
+        fileExists(filePath, (err, exists) => console.log(exists)) // OUTPUTS: tru
 
         try {
+
+            var video = new VideoEditor;
+
+            let optionsTranscoding = {
+                fileUri             : filePath,
+                outputFileName      : new Date().getTime().toString() + '.mp4',
+                outputFileType      : video.OutputFileType.MPEG4,
+                saveToLibrary       : true,
+                maintainAspectRatio : true,
+                width               : 480,
+                height              : 360,
+                videoBitrate        : 500000,
+                audioChannels       : 1,
+                audioSampleRate     : 22050,
+                audioBitrate        : 96000,
+                progress            : (info: number) => {
+                    console.log('Progreso: ' + info * 100 + '%');
+                }
+            };
+
+            video.transcodeVideo(optionsTranscoding).then((pathTranscodedVideo: string) => {
+                console.log(pathTranscodedVideo);
+            }).catch(  );
 
             let promise = new Promise((resolve, reject) => {
 
