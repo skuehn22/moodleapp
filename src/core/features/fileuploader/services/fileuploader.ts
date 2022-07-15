@@ -838,33 +838,7 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<number> {
 
-
-        /*
-        console.log("full path: "+files[0]['fullPath']);
-
-        let fileUri = files[0]['fullPath'];
-        fileUri = location.protocol + '//' + fileUri
-        console.log("full path 2: "+fileUri);
-
-        var test = new VideoEditor;
-        test.transcodeVideo({
-            fileUri: fileUri,
-            outputFileName: "output4.mp4",
-            outputFileType: test.OutputFileType.MPEG4,
-            fps: 15,
-            videoBitrate: 500000,
-        })
-            .then((fileUri: string) => {
-                    console.log('video transcode success', fileUri)
-                 }
-            )
-            .catch((error: any) => console.log('video transcode error 2', error));
-         */
-
-
         siteId = siteId || CoreSites.getCurrentSiteId();
-
-
 
         if (!files || !files.length) {
             // Return fake draft ID.
@@ -878,25 +852,6 @@ export class CoreFileUploaderProvider {
 
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
-
-            /*
-            console.log("full path 1: "+files[0]['fullPath']);
-
-            var fileTest = "file:///storage/emulated/0/Android/data/com.android.chrome/files/Download/test.mp4";
-            console.log(fileTest);
-            var test = new VideoEditor;
-            test.transcodeVideo({
-                fileUri: files[0]['fullPath'],
-                outputFileName: "output2.mp4",
-                outputFileType: test.OutputFileType.MPEG4,
-                fps: 15,
-                videoBitrate: 500000,
-            })
-                .then((fileUri: string) => console.log('video transcode success', fileUri))
-                .catch((error: any) => console.log('video transcode error', error));
-
-             */
-
             promises.push(this.uploadOrReuploadFile(file, itemId, component, componentId, siteId));
         }
 

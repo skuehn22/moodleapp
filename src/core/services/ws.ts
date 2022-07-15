@@ -851,40 +851,7 @@ export class CoreWSProvider {
         options.headers = {};
         options['Connection'] = 'close';
 
-        console.log("filePath log " + filePath);
-
         try {
-
-
-/*
-            var video = new VideoEditor;
-
-            let optionsTranscoding = {
-                fileUri             : filePath,
-                outputFileName      : new Date().getTime().toString() + '.mp4',
-                outputFileType      : video.OutputFileType.MPEG4,
-                saveToLibrary       : true,
-                maintainAspectRatio : true,
-                width               : 480,
-                height              : 360,
-                videoBitrate        : 500000,
-                audioChannels       : 1,
-                audioSampleRate     : 22050,
-                audioBitrate        : 96000,
-                progress            : (info: number) => {
-                    console.log('Progreso: ' + info * 100 + '%');
-                }
-            };
-
-            video.transcodeVideo(optionsTranscoding).then((pathTranscodedVideo: string) => {
-                console.log(pathTranscodedVideo);
-            }).catch(  );
-
-            */
-
-
-
-
             let promise = new Promise((resolve, reject) => {
 
                 var video = new VideoEditor;
@@ -892,10 +859,10 @@ export class CoreWSProvider {
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
-                console.log("filePath log" + filePath);
+                console.log("filePath log 2" + filePath);
 
                 const path_new = video.transcodeVideo({
-                    fileUri: "file:///storage/111D-3405/Movies/TestVideo70MB.mp4",
+                    fileUri: filePath,
                     outputFileName: name.toString(),
                     //outputFileType: video.OutputFileType.MPEG4,
                     //fps: 30,
