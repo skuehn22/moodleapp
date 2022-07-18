@@ -38,8 +38,10 @@ import { CoreAjaxError } from '@classes/errors/ajaxerror';
 import { CoreAjaxWSError } from '@classes/errors/ajaxwserror';
 import { CoreNetworkError } from '@classes/errors/network-error';
 
-import { VideoEditor } from '@ionic-native/video-editor/ngx';
-
+//import { VideoEditor } from '@ionic-native/video-editor/ngx';
+//import { VideoEditor } from 'cordova-plugin-video-editor';
+import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
+import { File } from '@awesome-cordova-plugins/file/ngx';
 
 /**
  * This service allows performing WS calls and download/upload files.
@@ -810,6 +812,9 @@ export class CoreWSProvider {
         return data;
     }
 
+
+
+
     /*
      * Uploads a file.
      *
@@ -851,7 +856,15 @@ export class CoreWSProvider {
         options.headers = {};
         options['Connection'] = 'close';
 
+        console.log("check dir: " + filePath);
+
+        var file = new File;
+        file.checkDir(file.dataDirectory, filePath)
+            .then(_ => console.log('Directory exists'))
+            .catch(err => console.log('Directory doesnt exist'));
+
         try {
+
             let promise = new Promise((resolve, reject) => {
 
                 var video = new VideoEditor;
@@ -859,7 +872,7 @@ export class CoreWSProvider {
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
-                console.log("filePath log 2" + filePath);
+                console.log("filePath log 2: " + filePath);
 
                 const path_new = video.transcodeVideo({
                     fileUri: filePath,
@@ -880,7 +893,7 @@ export class CoreWSProvider {
 
             let result = await promise;
 
-            //console.log("result:" + result);
+            console.log("result:" + result);
 
             //const success = await transfer.upload(result as string, uploadUrl, options, true);
             const success = await transfer.upload(filePath, uploadUrl, options, true);
@@ -1367,3 +1380,13 @@ export type CoreWSUploadFileResult = {
     author: string; // Author name.
     source: string; // File source.
 };
+
+function transcodeSuccess(result) {
+    // result is the path to the trimmed video on the device
+    console.log('trimSuccess, result: ' + result);
+}
+
+function transcodeFail(err) {
+    console.log('trimFail, err: ' + err);
+}
+
