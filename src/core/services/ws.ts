@@ -41,7 +41,7 @@ import { CoreNetworkError } from '@classes/errors/network-error';
 //import { VideoEditor } from '@ionic-native/video-editor/ngx';
 //import { VideoEditor } from 'cordova-plugin-video-editor';
 import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
-import { File } from '@awesome-cordova-plugins/file/ngx';
+import { File } from '@awesome-cordova-plugins/file';
 
 /**
  * This service allows performing WS calls and download/upload files.
