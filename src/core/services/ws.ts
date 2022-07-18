@@ -38,10 +38,11 @@ import { CoreAjaxError } from '@classes/errors/ajaxerror';
 import { CoreAjaxWSError } from '@classes/errors/ajaxwserror';
 import { CoreNetworkError } from '@classes/errors/network-error';
 
+
 //import { VideoEditor } from '@ionic-native/video-editor/ngx';
 //import { VideoEditor } from 'cordova-plugin-video-editor';
 import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
-import { File } from '@awesome-cordova-plugins/file';
+
 
 /**
  * This service allows performing WS calls and download/upload files.
@@ -858,10 +859,11 @@ export class CoreWSProvider {
 
         console.log("check dir: " + filePath);
 
-        var file = new File;
-        file.checkDir(file.dataDirectory, filePath)
-            .then(_ => console.log('Directory exists'))
-            .catch(err => console.log('Directory doesnt exist'));
+
+
+        const fileEntry = await CoreFile.getFile(filePath);
+
+        console.log("fileEntry: " + fileEntry);
 
         try {
 
