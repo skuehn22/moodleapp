@@ -40,8 +40,8 @@ import { CoreNetworkError } from '@classes/errors/network-error';
 
 
 //import { VideoEditor } from '@ionic-native/video-editor/ngx';
-//import { VideoEditor } from 'cordova-plugin-video-editor';
 import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
+//import { VideoEditor } from 'cordova-plugin-video-editor';
 
 
 /**
@@ -60,6 +60,8 @@ export class CoreWSProvider {
     constructor() {
         this.logger = CoreLogger.getInstance('CoreWSProvider');
     }
+
+
 
     /**
      * Adds the call data to an special queue to be processed when retrying.
@@ -841,7 +843,6 @@ export class CoreWSProvider {
             throw new CoreNetworkError();
         }
 
-
         const uploadUrl = preSets.siteUrl + '/webservice/upload.php?XDEBUG_SESSION_START=18419';
         const transfer = FileTransfer.create();
 
@@ -859,11 +860,38 @@ export class CoreWSProvider {
 
         console.log("check dir: " + filePath);
 
+        // parameters passed to transcodeVideo
+
+        /*
+        VideoEditor.transcodeVideo(
+            transcodeSuccess, // success cb
+            transcodeFail, // error cb
+            {
+                fileUri: filePath, // the path to the video on the device
+                outputFileName: 'output-name', // the file name for the transcoded video
+                //outputFileType: VideoEditorOptions.OutputFileType.MPEG4, // android is always mp4
+                //optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES, // ios only
+                saveToLibrary: true, // optional, defaults to true
+                deleteInputFile: false, // optional (android only), defaults to false
+                maintainAspectRatio: true, // optional (ios only), defaults to true
+                width: 640, // optional, see note below on width and height
+                height: 640, // optional, see notes below on width and height
+                videoBitrate: 1000000, // optional, bitrate in bits, defaults to 1 megabit (1000000)
+                fps: 24, // optional (android only), defaults to 24
+                audioChannels: 2, // optional (ios only), number of audio channels, defaults to 2
+                audioSampleRate: 44100, // optional (ios only), sample rate for the audio, defaults to 44100
+                audioBitrate: 128000, // optional (ios only), audio bitrate for the video in bits, defaults to 128 kilobits (128000)
+                progress: function(info) {} // info will be a number from 0 to 100
+            }
+        );
+        */
 
 
         const fileEntry = await CoreFile.getFile(filePath);
-
-        console.log("fileEntry: " + fileEntry);
+        var str = JSON.stringify(filePath);
+        str = JSON.stringify(filePath, null, 4);
+        console.log("fileEntry: " + str);
+        alert(str);
 
         try {
 
@@ -1383,6 +1411,9 @@ export type CoreWSUploadFileResult = {
     source: string; // File source.
 };
 
+
+
+
 function transcodeSuccess(result) {
     // result is the path to the trimmed video on the device
     console.log('trimSuccess, result: ' + result);
@@ -1392,3 +1423,12 @@ function transcodeFail(err) {
     console.log('trimFail, err: ' + err);
 }
 
+
+function success(result) {
+    // result is the path to the trimmed video on the device
+    console.log('trimSuccess, result: ' + result);
+}
+
+function error(err) {
+    console.log('trimFail, err: ' + err);
+}
