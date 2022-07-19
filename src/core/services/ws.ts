@@ -905,7 +905,7 @@ export class CoreWSProvider {
                 console.log("filePath log 2: " + filePath);
 
                 const path_new = video.transcodeVideo({
-                    fileUri: filePath,
+                    fileUri: "file:///storage/emulated/0/DCIM/Camera/V_20220719_090839_OC3.mp4",
                     outputFileName: name.toString(),
                     //outputFileType: video.OutputFileType.MPEG4,
                     //fps: 30,

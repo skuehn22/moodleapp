@@ -268,6 +268,9 @@ export class CoreFileUploaderProvider {
             }
         }
 
+        console.log(" options.fileName :" + options.fileName);
+
+
         return options;
     }
 
@@ -624,6 +627,9 @@ export class CoreFileUploaderProvider {
                 result.offline++;
 
                 await CoreFile.copyFile(file.toURL(), destFile);
+
+                console.log("destFile" + destFile);
+
             }
         }));
 
@@ -650,6 +656,8 @@ export class CoreFileUploaderProvider {
         console.log("URI log new: "+uri);
 
         //use timestamp as filename
+
+        /*
         var name = Math.round(+new Date()/1000);
 
         var video = new VideoEditor;
@@ -662,7 +670,7 @@ export class CoreFileUploaderProvider {
         })
             .then((fileUri: string) => console.log('video transcode success', fileUri))
             .catch((error: any) => console.log('video transcode error', error));
-
+        */
 
         const deleteAfterUpload = options.deleteAfterUpload;
         const ftOptions = CoreUtils.clone(options);
