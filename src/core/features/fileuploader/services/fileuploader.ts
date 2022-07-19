@@ -37,6 +37,7 @@ import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
 import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
 
 
+
 /**
  * File upload options.
  */
@@ -621,12 +622,74 @@ export class CoreFileUploaderProvider {
                 // Use copy instead of move to prevent having a unstable state if some copies succeed and others don't.
                 const destFile = CoreTextUtils.concatenatePaths(folderPath, file.name);
 
+
+
                 console.log("folderPath 3: "+ folderPath);
                 console.log("file.name: "+ file.name);
 
                 result.offline++;
 
                 await CoreFile.copyFile(file.toURL(), destFile);
+
+                let promise = new Promise((resolve, reject) => {
+                    console.log("filePath log 2: " + destFile);
+                    var video = new VideoEditor;
+                    //use timestamp as filename
+                    var name = Math.round(+new Date()/1000);
+                    const path_new = video.transcodeVideo({
+                        fileUri: destFile,
+                        outputFileName: name.toString(),
+                        //outputFileType: video.OutputFileType.MPEG4,
+                        //fps: 30,
+                        //videoBitrate: 1000000,
+                    })
+                        .then((fileUri: string) =>{
+                            resolve(fileUri);
+                        })
+                        .catch((error: any) => {
+                            reject(error)
+                        });
+                });
+
+                let promise2 = new Promise((resolve, reject) => {
+                    console.log("filePath log 2: " + "file:///"+destFile);
+                    var video = new VideoEditor;
+                    //use timestamp as filename
+                    var name = Math.round(+new Date()/1000);
+                    const path_new = video.transcodeVideo({
+                        fileUri: "file:///"+destFile,
+                        outputFileName: name.toString(),
+                        //outputFileType: video.OutputFileType.MPEG4,
+                        //fps: 30,
+                        //videoBitrate: 1000000,
+                    })
+                        .then((fileUri: string) =>{
+                            resolve(fileUri);
+                        })
+                        .catch((error: any) => {
+                            reject(error)
+                        });
+                });
+
+                let promise3 = new Promise((resolve, reject) => {
+                    console.log("filePath log 2: " + "file:///"+destFile);
+                    var video = new VideoEditor;
+                    //use timestamp as filename
+                    var name = Math.round(+new Date()/1000);
+                    const path_new = video.transcodeVideo({
+                        fileUri: file.toURL(),
+                        outputFileName: name.toString(),
+                        //outputFileType: video.OutputFileType.MPEG4,
+                        //fps: 30,
+                        //videoBitrate: 1000000,
+                    })
+                        .then((fileUri: string) =>{
+                            resolve(fileUri);
+                        })
+                        .catch((error: any) => {
+                            reject(error)
+                        });
+                });
 
                 console.log("destFile" + destFile);
 
@@ -782,6 +845,33 @@ export class CoreFileUploaderProvider {
             console.log("fileName: "+file.name);
             console.log("fileNameFullPath: "+file.fullPath);
             console.log("fileNamenativeURL: "+file.nativeURL);
+
+            let promise = new Promise((resolve, reject) => {
+
+                console.log("filePath log 2: " + file.fullPath);
+                var video = new VideoEditor;
+
+                //use timestamp as filename
+                var name = Math.round(+new Date()/1000);
+
+
+
+                const path_new = video.transcodeVideo({
+                    fileUri: file.fullPath,
+                    outputFileName: name.toString(),
+                    //outputFileType: video.OutputFileType.MPEG4,
+                    //fps: 30,
+                    //videoBitrate: 1000000,
+                })
+                    .then((fileUri: string) =>{
+                        resolve(fileUri);
+                    })
+
+                    .catch((error: any) => {
+                        reject(error)
+                    });
+            });
+
 
 
         } else {
