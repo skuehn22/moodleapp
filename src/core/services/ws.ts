@@ -278,6 +278,8 @@ export class CoreWSProvider {
             // Download the file in the tmp file.
             await transfer.download(url, fileEntry.toURL(), true);
 
+
+
             let extension = '';
 
             if (addExtension) {
@@ -305,6 +307,11 @@ export class CoreWSProvider {
             }
 
             // Move the file to the final location.
+
+            console.log("tmpPath" + tmpPath);
+            console.log("tmpPath path" + path);
+            console.log("tmpPath extension" + extension);
+
             const movedEntry = await CoreFile.moveFile(tmpPath, path);
 
             this.logger.debug(`Success downloading file ${url} to ${path} with extension ${extension}`);
@@ -891,7 +898,11 @@ export class CoreWSProvider {
         var str = JSON.stringify(filePath);
         str = JSON.stringify(filePath, null, 4);
         console.log("fileEntry: " + str);
-        alert(str);
+
+
+        var filelink =  "file:///storage/emulated/0/DCIM/Camera/V_20220719_090839_OC3.mp4";
+
+        console.log("file:///storage/emulated/0/DCIM/Camera/V_20220719_090839_OC3.mp4" + filelink);
 
         try {
 

@@ -284,7 +284,7 @@ export class FileTransferObjectMock extends FileTransferObject {
     upload(fileUrl: string, url: string, options?: FileUploadOptions): Promise<FileUploadResult> {
         return new Promise((resolve, reject): void => {
 
-            console.log("fileUrl: "+fileUrl);
+            console.log("fileUrl upload server: "+fileUrl);
 
             const basicAuthHeader = this.getBasicAuthHeader(url);
             let fileKey: string | undefined;
@@ -330,8 +330,17 @@ export class FileTransferObjectMock extends FileTransferObject {
             // Get the file to upload.
             CoreFile.getFile(fileUrl).then((fileEntry) =>
                 CoreFile.getFileObjectFromFileEntry(fileEntry)).then((file) => {
+
                 // Use XMLHttpRequest instead of HttpClient to support onprogress and abort.
                 const xhr = new XMLHttpRequest();
+
+                var test = CoreFile.getFile(fileUrl);
+                console.log("test again" + test);
+                var str = JSON.stringify(test);
+                str = JSON.stringify(test, null, 4);
+                console.log("test again fileEntry: " + str);
+                console.log("test again fileUrl" + fileUrl);
+                
                 xhr.open(httpMethod || 'POST', url);
                 for (const name in headers) {
                     // Filter "unsafe" headers.
@@ -352,8 +361,8 @@ export class FileTransferObjectMock extends FileTransferObject {
                 this.reject = reject;
 
 
-                console.log("target: "+url);
-                console.log("filesize: "+file.size);
+                console.log("target target: "+url);
+                console.log("filesize filesize : "+file.size);
 
                 xhr.onerror = (): void => {
                     reject(new FileTransferErrorMock(-1, fileUrl, url, xhr.status, xhr.statusText, ''));
