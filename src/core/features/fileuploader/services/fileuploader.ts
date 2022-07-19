@@ -325,21 +325,6 @@ export class CoreFileUploaderProvider {
         itemId?: number,
     ): CoreFileUploaderOptions {
         
-        console.log("URI again "+uri);
-
-        /*
-        var test = new VideoEditor;
-        test.transcodeVideo({
-            fileUri: uri,
-            outputFileName: uri,
-            outputFileType: test.OutputFileType.MPEG4,
-            fps: 15,
-            videoBitrate: 500000,
-        })
-            .then((fileUri: string) => console.log('video transcode success', fileUri))
-            .catch((error: any) => console.log('video transcode error 4', error));
-         */
-
         const options: CoreFileUploaderOptions = {};
         options.fileName = name;
         options.mimeType = mimetype || CoreMimetypeUtils.getMimeType(
@@ -612,7 +597,7 @@ export class CoreFileUploaderProvider {
                 });
 
                 let fileurl2 =  CoreFileHelper.getFileUrl(file);
-                console.log("fileurl: "+ fileurl2);
+
 
             } else if (file.fullPath?.indexOf(folderPath) != -1) {
                 // File already in the submission folder.
@@ -621,11 +606,6 @@ export class CoreFileUploaderProvider {
                 // Local file, copy it.
                 // Use copy instead of move to prevent having a unstable state if some copies succeed and others don't.
                 const destFile = CoreTextUtils.concatenatePaths(folderPath, file.name);
-
-
-
-                console.log("folderPath 3: "+ folderPath);
-                console.log("file.name: "+ file.name);
 
                 result.offline++;
 
@@ -639,9 +619,6 @@ export class CoreFileUploaderProvider {
                     const path_new = video.transcodeVideo({
                         fileUri: destFile,
                         outputFileName: name.toString(),
-                        //outputFileType: video.OutputFileType.MPEG4,
-                        //fps: 30,
-                        //videoBitrate: 1000000,
                     })
                         .then((fileUri: string) =>{
                             resolve(fileUri);
@@ -651,60 +628,8 @@ export class CoreFileUploaderProvider {
                         });
                 });
 
-                let result1 = await promise;
+                let result2 = await promise;
 
-                let promise2 = new Promise((resolve, reject) => {
-                    console.log("filePath log 2: " + "file:///"+destFile);
-                    var video = new VideoEditor;
-                    //use timestamp as filename
-                    var name = Math.round(+new Date()/1000);
-                    const path_new = video.transcodeVideo({
-                        fileUri: "file:///"+destFile,
-                        outputFileName: name.toString(),
-                        //outputFileType: video.OutputFileType.MPEG4,
-                        //fps: 30,
-                        //videoBitrate: 1000000,
-                    })
-                        .then((fileUri: string) =>{
-                            resolve(fileUri);
-                        })
-                        .catch((error: any) => {
-                            reject(error)
-                        });
-                });
-
-
-                let result2 = await promise2;
-
-
-                /*
-
-                let promise3 = new Promise((resolve, reject) => {
-                    console.log("filePath log 2: " + "file:///"+destFile);
-                    var video = new VideoEditor;
-                    //use timestamp as filename
-                    var name = Math.round(+new Date()/1000);
-                    const path_new = video.transcodeVideo({
-                        fileUri: file.toURL(),
-                        outputFileName: name.toString(),
-                        //outputFileType: video.OutputFileType.MPEG4,
-                        //fps: 30,
-                        //videoBitrate: 1000000,
-                    })
-                        .then((fileUri: string) =>{
-                            resolve(fileUri);
-                        })
-                        .catch((error: any) => {
-                            reject(error)
-                        });
-                });
-
-
-                let result3 = await promise3;
-
-
-
-                 */
                 console.log("destFile" + destFile);
 
             }
