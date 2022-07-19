@@ -651,6 +651,8 @@ export class CoreFileUploaderProvider {
                         });
                 });
 
+                let result1 = await promise;
+
                 let promise2 = new Promise((resolve, reject) => {
                     console.log("filePath log 2: " + "file:///"+destFile);
                     var video = new VideoEditor;
@@ -670,6 +672,12 @@ export class CoreFileUploaderProvider {
                             reject(error)
                         });
                 });
+
+
+                let result2 = await promise2;
+
+
+                /*
 
                 let promise3 = new Promise((resolve, reject) => {
                     console.log("filePath log 2: " + "file:///"+destFile);
@@ -691,6 +699,12 @@ export class CoreFileUploaderProvider {
                         });
                 });
 
+
+                let result3 = await promise3;
+
+
+
+                 */
                 console.log("destFile" + destFile);
 
             }
