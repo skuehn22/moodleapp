@@ -324,7 +324,7 @@ export class CoreFileUploaderProvider {
         fileArea?: string,
         itemId?: number,
     ): CoreFileUploaderOptions {
-        
+
         const options: CoreFileUploaderOptions = {};
         options.fileName = name;
         options.mimeType = mimetype || CoreMimetypeUtils.getMimeType(
@@ -655,25 +655,6 @@ export class CoreFileUploaderProvider {
     ): Promise<CoreWSUploadFileResult> {
         options = options || {};
 
-        console.log("URI log new: "+uri);
-
-        //use timestamp as filename
-
-        /*
-        var name = Math.round(+new Date()/1000);
-
-        var video = new VideoEditor;
-        video.transcodeVideo({
-            fileUri: uri,
-            outputFileName: name.toString(),
-            outputFileType: video.OutputFileType.MPEG4,
-            fps: 15,
-            videoBitrate: 500000,
-        })
-            .then((fileUri: string) => console.log('video transcode success', fileUri))
-            .catch((error: any) => console.log('video transcode error', error));
-        */
-
         const deleteAfterUpload = options.deleteAfterUpload;
         const ftOptions = CoreUtils.clone(options);
 
@@ -793,14 +774,9 @@ export class CoreFileUploaderProvider {
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
-
-
                 const path_new = video.transcodeVideo({
                     fileUri: file.fullPath,
                     outputFileName: name.toString(),
-                    //outputFileType: video.OutputFileType.MPEG4,
-                    //fps: 30,
-                    //videoBitrate: 1000000,
                 })
                     .then((fileUri: string) =>{
                         resolve(fileUri);
@@ -810,7 +786,6 @@ export class CoreFileUploaderProvider {
                         reject(error)
                     });
             });
-
 
 
         } else {

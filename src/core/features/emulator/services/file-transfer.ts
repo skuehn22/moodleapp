@@ -340,7 +340,7 @@ export class FileTransferObjectMock extends FileTransferObject {
                 str = JSON.stringify(test, null, 4);
                 console.log("test again fileEntry: " + str);
                 console.log("test again fileUrl" + fileUrl);
-                
+
                 xhr.open(httpMethod || 'POST', url);
                 for (const name in headers) {
                     // Filter "unsafe" headers.

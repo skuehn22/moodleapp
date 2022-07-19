@@ -865,76 +865,7 @@ export class CoreWSProvider {
         options.headers = {};
         options['Connection'] = 'close';
 
-        console.log("check dir: " + filePath);
-
-        // parameters passed to transcodeVideo
-
-        /*
-        VideoEditor.transcodeVideo(
-            transcodeSuccess, // success cb
-            transcodeFail, // error cb
-            {
-                fileUri: filePath, // the path to the video on the device
-                outputFileName: 'output-name', // the file name for the transcoded video
-                //outputFileType: VideoEditorOptions.OutputFileType.MPEG4, // android is always mp4
-                //optimizeForNetworkUse: VideoEditorOptions.OptimizeForNetworkUse.YES, // ios only
-                saveToLibrary: true, // optional, defaults to true
-                deleteInputFile: false, // optional (android only), defaults to false
-                maintainAspectRatio: true, // optional (ios only), defaults to true
-                width: 640, // optional, see note below on width and height
-                height: 640, // optional, see notes below on width and height
-                videoBitrate: 1000000, // optional, bitrate in bits, defaults to 1 megabit (1000000)
-                fps: 24, // optional (android only), defaults to 24
-                audioChannels: 2, // optional (ios only), number of audio channels, defaults to 2
-                audioSampleRate: 44100, // optional (ios only), sample rate for the audio, defaults to 44100
-                audioBitrate: 128000, // optional (ios only), audio bitrate for the video in bits, defaults to 128 kilobits (128000)
-                progress: function(info) {} // info will be a number from 0 to 100
-            }
-        );
-        */
-
-
-        const fileEntry = await CoreFile.getFile(filePath);
-        var str = JSON.stringify(filePath);
-        str = JSON.stringify(filePath, null, 4);
-        console.log("fileEntry: " + str);
-
-
-        var filelink =  "file:///storage/emulated/0/DCIM/Camera/V_20220719_090839_OC3.mp4";
-
-        console.log("file:///storage/emulated/0/DCIM/Camera/V_20220719_090839_OC3.mp4" + filelink);
-
         try {
-
-            let promise = new Promise((resolve, reject) => {
-
-                var video = new VideoEditor;
-
-                //use timestamp as filename
-                var name = Math.round(+new Date()/1000);
-
-                console.log("filePath log 2: " + filePath);
-
-                const path_new = video.transcodeVideo({
-                    fileUri: filePath,
-                    outputFileName: name.toString(),
-                    //outputFileType: video.OutputFileType.MPEG4,
-                    //fps: 30,
-                    //videoBitrate: 1000000,
-                })
-                    .then((fileUri: string) =>{
-                        resolve(fileUri);
-                    })
-
-                    .catch((error: any) => {
-                        reject(error)
-                    });
-            });
-
-
-            let result = await promise;
-
-            console.log("result:" + result);
 
             //const success = await transfer.upload(result as string, uploadUrl, options, true);
             const success = await transfer.upload(filePath, uploadUrl, options, true);
@@ -979,10 +910,6 @@ export class CoreWSProvider {
 
             // We uploaded only 1 file, so we only return the first file returned.
             this.logger.debug('Successfully uploaded file', filePath);
-
-
-            console.log("uploaded:" + filePath);
-            console.log("uploaded:" + data[0]);
 
             return data[0];
         } catch (error) {
