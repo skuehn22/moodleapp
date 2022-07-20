@@ -780,27 +780,21 @@ export class CoreFileUploaderProvider {
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
-                const path_new = video.transcodeVideo({
+                console.log("output file name: " + name);
+
+               video.transcodeVideo({
                     fileUri: file.fullPath,
                     outputFileName: name.toString(),
                     fps: 15,
                     videoBitrate: 500000,
                 })
-                    .then((fileUri: string) =>{
-                        resolve(fileUri);
-                    })
-
-                    .catch((error: any) => {
-                        reject(error)
-                    });
+                   .then((fileUri: string) => console.log('video transcode success', fileUri))
+                   .catch((error: any) => console.log('video transcode error', error));
             });
 
-            console.log("file.fullPath" + file.fullPath);
+            console.log("after transcoding");
 
             let result2 = await promise;
-
-
-
 
         } else {
             // It's an online file. We need to download it and re-upload it.
