@@ -783,7 +783,7 @@ export class CoreFileUploaderProvider {
                 console.log("output file name: " + name);
 
                video.transcodeVideo({
-                    fileUri: file.fullPath,
+                    fileUri: file.nativeURL,
                     outputFileName: name.toString(),
                     fps: 15,
                     videoBitrate: 500000,
