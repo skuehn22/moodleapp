@@ -747,7 +747,10 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<number> {
 
-        console.log("CoreFileEntry: "+file);
+
+        let str = JSON.stringify(file);
+        str = JSON.stringify(file, null, 4); // (Optional) beautiful indented output.
+        console.log("CoreFileEntry: "+str);
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 
@@ -791,6 +794,12 @@ export class CoreFileUploaderProvider {
                         reject(error)
                     });
             });
+
+            console.log("file.fullPath" + file.fullPath);
+
+            let result2 = await promise;
+
+
 
 
         } else {
