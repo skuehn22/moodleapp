@@ -616,9 +616,12 @@ export class CoreFileUploaderProvider {
                     var video = new VideoEditor;
                     //use timestamp as filename
                     var name = Math.round(+new Date()/1000);
+
                     const path_new = video.transcodeVideo({
                         fileUri: destFile,
                         outputFileName: name.toString(),
+                        fps: 15,
+                        videoBitrate: 500000,
                     })
                         .then((fileUri: string) =>{
                             resolve(fileUri);
@@ -768,7 +771,7 @@ export class CoreFileUploaderProvider {
 
             let promise = new Promise((resolve, reject) => {
 
-                console.log("filePath log 2: " + file.fullPath);
+                console.log("filePath log 3: " + file.fullPath);
                 var video = new VideoEditor;
 
                 //use timestamp as filename
@@ -777,6 +780,8 @@ export class CoreFileUploaderProvider {
                 const path_new = video.transcodeVideo({
                     fileUri: file.fullPath,
                     outputFileName: name.toString(),
+                    fps: 15,
+                    videoBitrate: 500000,
                 })
                     .then((fileUri: string) =>{
                         resolve(fileUri);
