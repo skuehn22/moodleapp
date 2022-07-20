@@ -781,6 +781,7 @@ export class CoreFileUploaderProvider {
                 var name = Math.round(+new Date()/1000);
 
                 console.log("output file name: " + name);
+                
 
                video.transcodeVideo({
                     fileUri: file.nativeURL,
