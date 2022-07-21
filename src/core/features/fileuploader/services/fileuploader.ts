@@ -33,8 +33,8 @@ import { CoreEmulatorCaptureMediaComponent } from '@features/emulator/components
 import { CoreError } from '@classes/errors/error';
 import { CoreSite } from '@classes/site';
 import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
-import { VideoEditor } from '@ionic-native/video-editor/ngx';
-
+//import { VideoEditor } from '@ionic-native/video-editor/ngx';
+//import { WKUserScriptWindow } from 'cordova-plugin-video-editor/ngx';
 
 /**
  * File upload options.
@@ -609,6 +609,7 @@ export class CoreFileUploaderProvider {
 
                 await CoreFile.copyFile(file.toURL(), destFile);
 
+                /*
                 let promise = new Promise((resolve, reject) => {
                     console.log("filePath log 2: " + destFile);
                     var video = new VideoEditor;
@@ -630,6 +631,8 @@ export class CoreFileUploaderProvider {
                 });
 
                 let result2 = await promise;
+
+                 */
 
                 console.log("destFile" + destFile);
 
@@ -773,23 +776,27 @@ export class CoreFileUploaderProvider {
             let promise = new Promise((resolve, reject) => {
 
                 console.log("filePath log 3: " + file.fullPath);
-                var video = new VideoEditor;
+
+                //var video = new VideoEditor;
 
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
                 console.log("output file name: " + name);
-                
 
-               video.transcodeVideo({
-                    fileUri: file.nativeURL,
-                    outputFileName: name.toString(),
-                    fps: 15,
-                    videoBitrate: 500000,
-                })
-                   .then((fileUri: string) => console.log('video transcode success', fileUri))
-                   .catch((error: any) => console.log('video transcode error', error));
-            });
+
+                VideoEditor.transcodeVideo(
+                    success, // success cb
+                    error, // error cb
+                    {
+                        fileUri: file.nativeURL,
+                        outputFileName: name.toString(),
+                        fps: 15,
+                        videoBitrate: 500000,
+                        progress: function(info) {} // info will be a number from 0 to 100
+                    }
+                );
+
 
             console.log("after transcoding");
 
@@ -897,3 +904,14 @@ export type CoreFileUploaderTypeListInfoEntry = {
     name?: string;
     extlist: string;
 };
+
+
+
+function success(result) {
+    // result is the path to the trimmed video on the device
+    console.log('trimSuccess, result: ' + result);
+}
+
+function error(err) {
+    console.log('trimFail, err: ' + err);
+}
