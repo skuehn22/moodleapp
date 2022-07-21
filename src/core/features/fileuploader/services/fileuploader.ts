@@ -33,9 +33,7 @@ import { CoreEmulatorCaptureMediaComponent } from '@features/emulator/components
 import { CoreError } from '@classes/errors/error';
 import { CoreSite } from '@classes/site';
 import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
-
-import { VideoEditor } from '@awesome-cordova-plugins/video-editor/ngx';
-
+import { VideoEditor } from '@ionic-native/video-editor/ngx';
 
 
 /**
