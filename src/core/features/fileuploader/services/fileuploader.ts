@@ -614,31 +614,6 @@ export class CoreFileUploaderProvider {
 
                 await CoreFile.copyFile(file.toURL(), destFile);
 
-
-                let promise = new Promise((resolve, reject) => {
-                    console.log("filePath log 2: " + destFile);
-                    //var video = new VideoEditor;
-                    //use timestamp as filename
-                    var name = Math.round(+new Date()/1000);
-
-                    const path_new = VideoEditor.transcodeVideo({
-                        fileUri: destFile,
-                        outputFileName: name.toString(),
-                        fps: 15,
-                        videoBitrate: 500000,
-                    })
-                        .then((fileUri: string) =>{
-                            resolve(fileUri);
-                        })
-                        .catch((error: any) => {
-                            reject(error)
-                        });
-                });
-
-                let result2 = await promise;
-
-
-
                 console.log("destFile" + destFile);
 
             }
@@ -790,29 +765,22 @@ export class CoreFileUploaderProvider {
 
                 console.log("output file name: " + name);
 
-
                 VideoEditor.transcodeVideo(
                     success, // success cb
                     error, // error cb
                     {
                         fileUri: file.nativeURL,
                         outputFileName: name.toString(),
+                        videoBitrate: 1000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                        fps: 30, // optional (android only), defaults to 30
                     });
 
-
-                VideoEditor.transcodeVideo({
-                    fileUri: file.nativeURL,
-                    outputFileName: name.toString(),
-                    fps: 15,
-                    videoBitrate: 500000,
-                })
-                   .then((fileUri: string) => console.log('video transcode success', fileUri))
-                   .catch((error: any) => console.log('video transcode error', error));
             });
 
             console.log("after transcoding");
 
             let result2 = await promise;
+
 
 
 
