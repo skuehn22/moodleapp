@@ -649,17 +649,9 @@ export class CoreFileUploaderProvider {
         const result = await site.uploadFile(uri, ftOptions, onProgress);
 
 
-        console.log("URI 1"+uri);
-        console.log("URI 1"+ftOptions);
-        console.log("URI 1"+onProgress);
-
-
-
-        /*
         if (deleteAfterUpload) {
             CoreFile.removeExternalFile(uri);
         }
-        */
 
 
         return result;
@@ -680,8 +672,6 @@ export class CoreFileUploaderProvider {
         if (!files || !files.length) {
             return;
         }
-
-        console.log("full path 0: "+files[0]['fullPath']);
 
         // Index the online files by name.
         const usedNames: {[name: string]: CoreFileEntry} = {};
@@ -755,7 +745,7 @@ export class CoreFileUploaderProvider {
                     {
                         fileUri: file.nativeURL,
                         outputFileName: name.toString(),
-                        videoBitrate: 1000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                        videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                         fps: 30, // optional (android only), defaults to 30
                     })
 
@@ -797,6 +787,8 @@ export class CoreFileUploaderProvider {
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
         const options = this.getFileUploadOptions(fileEntry.toURL(), fileName!, mimetype, isOnline, 'draft', itemId);
         const result = await this.uploadFile(fileEntry.toURL(), options, undefined, siteId);
+
+        console.log("result.itemid" + result.itemid);
 
         return result.itemid;
     }
@@ -867,8 +859,6 @@ export type CoreFileUploaderTypeListInfoEntry = {
 function success(result) {
     // result is the path to the trimmed video on the device
     console.log('trimSuccess, result: ' + result);
-
-    return result;
 }
 
 function error(err) {
