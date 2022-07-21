@@ -728,18 +728,10 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<number> {
 
-
-        let str = JSON.stringify(file);
-        str = JSON.stringify(file, null, 4); // (Optional) beautiful indented output.
-        console.log("CoreFileEntry: "+str);
-
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         let fileName: string | undefined;
         let fileEntry: FileEntry | undefined;
-
-
-        console.log("fileEntry: "+fileEntry);
 
         const isOnline = !CoreUtils.isFileEntry(file);
 
@@ -753,19 +745,11 @@ export class CoreFileUploaderProvider {
             console.log("fileNameFullPath: "+file.fullPath);
             console.log("fileNamenativeURL: "+file.nativeURL);
 
-
             let promise = new Promise((resolve, reject) => {
 
-                console.log("filePath log 3: " + file.fullPath);
-
-                //var video = new VideoEditor;
-
-                //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
 
-                console.log("output file name: " + name);
-
-                VideoEditor.transcodeVideo(
+                let test = VideoEditor.transcodeVideo(
                     success, // success cb
                     error, // error cb
                     {
@@ -774,14 +758,14 @@ export class CoreFileUploaderProvider {
                         videoBitrate: 1000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                         fps: 30, // optional (android only), defaults to 30
                     });
-
+                
+                    console.log("promise1 test: "  +test);
             });
-
-            console.log("after transcoding");
 
             let result2 = await promise;
 
-
+            console.log("promise1 output: "  +result2);
+            console.log("promise1 promise: " +promise);
 
 
         } else {
@@ -802,26 +786,13 @@ export class CoreFileUploaderProvider {
 
             fileEntry = await CoreFile.getExternalFile(path);
 
-            console.log("fileEntry 123: "+fileEntry);
         }
 
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
-
-        console.log("extension: "+extension);
-
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
-
-        console.log("mimetype: "+mimetype);
-
         const options = this.getFileUploadOptions(fileEntry.toURL(), fileName!, mimetype, isOnline, 'draft', itemId);
-
-
-        console.log("fileEntry 999: "+fileEntry);
-
         const result = await this.uploadFile(fileEntry.toURL(), options, undefined, siteId);
-
-
 
         return result.itemid;
     }
@@ -892,6 +863,8 @@ export type CoreFileUploaderTypeListInfoEntry = {
 function success(result) {
     // result is the path to the trimmed video on the device
     console.log('trimSuccess, result: ' + result);
+
+    return result;
 }
 
 function error(err) {
