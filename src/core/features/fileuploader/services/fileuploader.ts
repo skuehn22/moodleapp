@@ -757,8 +757,12 @@ export class CoreFileUploaderProvider {
                         outputFileName: name.toString(),
                         videoBitrate: 1000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                         fps: 30, // optional (android only), defaults to 30
-                    });
-                
+                    })
+
+
+                    .then((fileUri: string) => resolve ('video transcode success'))
+                    .catch((error: any) => console.log('video transcode error 3', error));
+
                     console.log("promise1 test: "  +test);
             });
 
