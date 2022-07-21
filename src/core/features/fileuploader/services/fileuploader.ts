@@ -735,31 +735,36 @@ export class CoreFileUploaderProvider {
             console.log("fileNameFullPath: "+file.fullPath);
             console.log("fileNamenativeURL: "+file.nativeURL);
 
-            let promise = new Promise((resolve, reject) => {
+            try {
 
-                var name = Math.round(+new Date()/1000);
+                let promise = new Promise((resolve, reject) => {
 
-                let test = VideoEditor.transcodeVideo(
-                    success, // success cb
-                    error, // error cb
-                    {
-                        fileUri: file.nativeURL,
-                        outputFileName: name.toString(),
-                        videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
-                        fps: 30, // optional (android only), defaults to 30
-                    })
+                    var name = Math.round(+new Date()/1000);
 
-
-                    .then((fileUri: string) => resolve ('video transcode success'))
-                    .catch((error: any) => console.log('video transcode error 3', error));
+                    let test = VideoEditor.transcodeVideo(
+                        success, // success cb
+                        error, // error cb
+                        {
+                            fileUri: file.nativeURL,
+                            outputFileName: name.toString(),
+                            videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                            fps: 30, // optional (android only), defaults to 30
+                        })
 
                     console.log("promise1 test: "  +test);
-            });
+                });
 
-            let result2 = await promise;
+                let result2 = await promise;
 
-            console.log("promise1 output: "  +result2);
-            console.log("promise1 promise: " +promise);
+                console.log("promise1 output: "  +result2);
+                console.log("promise1 promise: " +promise);
+
+
+            } catch (error) {
+                this.logger.error('Error while transcoding file', file.nativeURL, error);
+
+                throw new CoreError(Translate.instant('core.errorinvalidresponse'));
+            }
 
 
         } else {
