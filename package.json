@@ -47,6 +47,7 @@
     "@awesome-cordova-plugins/android-permissions": "^5.44.0",
     "@awesome-cordova-plugins/core": "^5.44.0",
     "@awesome-cordova-plugins/file": "^5.44.0",
+    "@awesome-cordova-plugins/video-editor": "^5.44.0",
     "@capacitor/core": "3.6.0",
     "@ionic-native/badge": "5.33.0",
     "@ionic-native/camera": "5.33.0",
