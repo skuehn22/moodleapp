@@ -36,7 +36,9 @@ import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
 //import { VideoEditor } from '@ionic-native/video-editor/ngx';
 //import { VideoEditor } from 'cordova-plugin-video-editor-fix/ngx';
 
-import { VideoEditor } from '@awesome-cordova-plugins/video-editor';
+//import { VideoEditor } from '@awesome-cordova-plugins/video-editor';
+
+declare var VideoEditor: any;
 
 
 /**
@@ -615,11 +617,11 @@ export class CoreFileUploaderProvider {
 
                 let promise = new Promise((resolve, reject) => {
                     console.log("filePath log 2: " + destFile);
-                    var video = new VideoEditor;
+                    //var video = new VideoEditor;
                     //use timestamp as filename
                     var name = Math.round(+new Date()/1000);
 
-                    const path_new = video.transcodeVideo({
+                    const path_new = VideoEditor.transcodeVideo({
                         fileUri: destFile,
                         outputFileName: name.toString(),
                         fps: 15,
@@ -781,7 +783,7 @@ export class CoreFileUploaderProvider {
 
                 console.log("filePath log 3: " + file.fullPath);
 
-                var video = new VideoEditor;
+                //var video = new VideoEditor;
 
                 //use timestamp as filename
                 var name = Math.round(+new Date()/1000);
@@ -789,7 +791,16 @@ export class CoreFileUploaderProvider {
                 console.log("output file name: " + name);
 
 
-               video.transcodeVideo({
+                VideoEditor.transcodeVideo(
+                    success, // success cb
+                    error, // error cb
+                    {
+                        fileUri: file.nativeURL,
+                        outputFileName: name.toString(),
+                    });
+
+
+                VideoEditor.transcodeVideo({
                     fileUri: file.nativeURL,
                     outputFileName: name.toString(),
                     fps: 15,
