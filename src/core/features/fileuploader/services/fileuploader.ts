@@ -754,7 +754,7 @@ export class CoreFileUploaderProvider {
                     console.log("promise1 test: "  +test);
                 });
 
-                let result2 = await promise;
+
 
                 console.log("promise1 output: "  +result2);
                 console.log("promise1 promise: " +promise);
@@ -765,6 +765,8 @@ export class CoreFileUploaderProvider {
 
                 throw new CoreError(Translate.instant('core.errorinvalidresponse'));
             }
+            
+              let result2 = await promise;
 
 
         } else {
