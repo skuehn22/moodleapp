@@ -749,22 +749,15 @@ export class CoreFileUploaderProvider {
                         fps: 30, // optional (android only), defaults to 30
                     })
 
+                    .then((fileUri: string) => resolve ('video transcode success'))
+                    .catch((error: any) => console.log('video transcode error 3', error));
+
                 console.log("promise1 test: "  +test);
             });
 
             let result2 = await promise;
             console.log("promise1 output: "  +result2);
             console.log("promise1 promise: " +promise);
-
-            try {
-
-            } catch (error) {
-                this.logger.error('Error while transcoding file', file.nativeURL, error);
-
-                throw new CoreError(Translate.instant('core.errorinvalidresponse'));
-            }
-
-
 
 
         } else {
@@ -787,11 +780,18 @@ export class CoreFileUploaderProvider {
 
         }
 
+        console.log("fileEntry before" + fileEntry.toURL());
+        console.log("isOnline" + isOnline);
 
 
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
+
+        console.log("extension" + extension);
+
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
+
+        console.log("mimitype2" + mimetype);
         const options = this.getFileUploadOptions(fileEntry.toURL(), fileName!, mimetype, isOnline, 'draft', itemId);
         const result = await this.uploadFile(fileEntry.toURL(), options, undefined, siteId);
 
