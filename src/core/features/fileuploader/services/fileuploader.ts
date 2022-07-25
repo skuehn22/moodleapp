@@ -741,18 +741,23 @@ export class CoreFileUploaderProvider {
 
                 var name = Math.round(+new Date()/1000);
 
-                let test = VideoEditor.transcodeVideo(
-                    success((fileUri: string) => resolve ('video transcode success')),
-                    error, // error cb
+                let test = VideoEditor.transcodeVideo(function (success) {
+                        console.log(success);
+                        resolve ('video transcode success')
+
+                    }, function (error) {
+                        console.log(error);
+                        reject ('video transcode error')
+                    },
                     {
                         fileUri: file.nativeURL,
                         outputFileName: name.toString(),
                         videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                         fps: 30, // optional (android only), defaults to 30
                     },
-
-
                     )
+
+
 
                     console.log("promise1 test: "  +test);
             });
@@ -763,6 +768,8 @@ export class CoreFileUploaderProvider {
             console.log("new_path"+  name);
 
             let result2 = await promise;
+
+
             console.log("promise1 output: "  +result2);
             console.log("promise1 promise: " +promise);
 
