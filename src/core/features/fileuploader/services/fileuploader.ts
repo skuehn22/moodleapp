@@ -742,7 +742,7 @@ export class CoreFileUploaderProvider {
                 var name = Math.round(+new Date()/1000);
 
                 let test = VideoEditor.transcodeVideo(
-                    success,
+                    success((fileUri: string) => resolve ('video transcode success')),
                     error, // error cb
                     {
                         fileUri: file.nativeURL,
@@ -751,7 +751,7 @@ export class CoreFileUploaderProvider {
                         fps: 30, // optional (android only), defaults to 30
                     },
 
-                    resolve
+
                     )
 
                     console.log("promise1 test: "  +test);
@@ -765,6 +765,10 @@ export class CoreFileUploaderProvider {
             let result2 = await promise;
             console.log("promise1 output: "  +result2);
             console.log("promise1 promise: " +promise);
+
+            //str = JSON.stringify(fileEntry);
+            var str = JSON.stringify(fileEntry, null, 4); // (Optional) beautiful indented output.
+            console.log(str); // Logs output to dev tools console.
 
             fileEntry.nativeURL = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
 
@@ -791,7 +795,7 @@ export class CoreFileUploaderProvider {
         console.log("fileEntry before" + fileEntry.toURL());
         console.log("isOnline" + isOnline);
 
-        
+
 
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
