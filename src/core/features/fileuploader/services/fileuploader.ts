@@ -740,19 +740,16 @@ export class CoreFileUploaderProvider {
                 var name = Math.round(+new Date()/1000);
 
                 let test = VideoEditor.transcodeVideo(
-                    success,
-                    error, // error cb
+                    success(   resolve("toll weil is so")),
+                    error( reject("error weil is so")), // error cb
                     {
                         fileUri: file.nativeURL,
                         outputFileName: name.toString(),
                         videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                         fps: 30, // optional (android only), defaults to 30
                     })
-
-                    .then((fileUri: string) => resolve ('video transcode success'))
-                    .catch((error: any) => console.log('video transcode error 3', error));
-
-                console.log("promise1 test: "  +test);
+                
+                    console.log("promise1 test: "  +test);
             });
 
             let result2 = await promise;
@@ -866,6 +863,9 @@ export type CoreFileUploaderTypeListInfoEntry = {
 function success(result) {
     // result is the path to the trimmed video on the device
     console.log('trimSuccess, result: ' + result);
+
+    return "yeah";
+
 }
 
 function error(err) {
