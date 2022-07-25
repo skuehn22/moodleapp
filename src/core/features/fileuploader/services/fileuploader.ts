@@ -740,8 +740,8 @@ export class CoreFileUploaderProvider {
                 var name = Math.round(+new Date()/1000);
 
                 let test = VideoEditor.transcodeVideo(
-                    success((fileUri: string) => resolve ('video transcode success')), // success cb
-                    error((error: any) => console.log('video transcode error 3', error)), // error cb
+                    //success((fileUri: string) => resolve ('video transcode success')), // success cb
+                    //error((error: any) => console.log('video transcode error 3', error)), // error cb
                     {
                         fileUri: file.nativeURL,
                         outputFileName: name.toString(),
@@ -749,8 +749,8 @@ export class CoreFileUploaderProvider {
                         fps: 30, // optional (android only), defaults to 30
                     })
 
-                    //.then((fileUri: string) => resolve ('video transcode success'))
-                    //.catch((error: any) => console.log('video transcode error 3', error));
+                    .then((fileUri: string) => resolve ('video transcode success'))
+                    .catch((error: any) => console.log('video transcode error 3', error));
 
                 console.log("promise1 test: "  +test);
             });
