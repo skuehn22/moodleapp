@@ -742,12 +742,12 @@ export class CoreFileUploaderProvider {
                 var name = Math.round(+new Date()/1000);
 
                 let test = VideoEditor.transcodeVideo(function (success) {
-                        console.log(success);
-                        resolve ('video transcode success')
+                        console.log("let me know" + success);
+                        resolve (success)
 
                     }, function (error) {
-                        console.log(error);
-                        reject ('video transcode error')
+                        console.log("give me error" + error);
+                        reject (error)
                     },
                     {
                         fileUri: file.nativeURL,
@@ -756,16 +756,11 @@ export class CoreFileUploaderProvider {
                         fps: 30, // optional (android only), defaults to 30
                     },
                     )
-
-
-
-                    console.log("promise1 test: "  +test);
             });
 
-            var new_path = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
-
+            //var new_path = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
             ///storage/emulated/0/Android/data/org.ontour.app/tmp/1658737894.mp4
-            console.log("new_path"+  name);
+            //console.log("new_path"+  name);
 
             let result2 = await promise;
 
@@ -777,7 +772,7 @@ export class CoreFileUploaderProvider {
             var str = JSON.stringify(fileEntry, null, 4); // (Optional) beautiful indented output.
             console.log(str); // Logs output to dev tools console.
 
-            fileEntry.nativeURL = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
+            fileEntry.nativeURL = result2 as string;
 
         } else {
             // It's an online file. We need to download it and re-upload it.
@@ -801,6 +796,7 @@ export class CoreFileUploaderProvider {
 
         console.log("fileEntry before" + fileEntry.toURL());
         console.log("isOnline" + isOnline);
+        console.log(" fileEntry.nativeURL" +  fileEntry.nativeURL);
 
 
 
