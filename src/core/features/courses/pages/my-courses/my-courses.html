@@ -4,7 +4,6 @@
             <ion-back-button [text]="'core.back' | translate"></ion-back-button>
         </ion-buttons>
         <h1>{{ 'core.courses.mycourses' | translate }}</h1>
-
         <ion-buttons slot="end">
             <core-navbar-buttons>
                 <ion-button *ngIf="searchEnabled" (click)="openSearch()"
