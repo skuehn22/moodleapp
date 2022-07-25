@@ -1268,6 +1268,7 @@ export class CoreSite {
         const space = await this.getSpaceUsage();
         const cache = await this.getCacheUsage();
 
+        console.log("log here");
         return space + cache;
     }
 

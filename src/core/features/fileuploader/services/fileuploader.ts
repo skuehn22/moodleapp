@@ -743,6 +743,12 @@ export class CoreFileUploaderProvider {
                             outputFileName: name.toString(),
                             videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                             fps: 30, // optional (android only), defaults to 30
+                            progress: function(info) {
+
+                                console.log("Fortschritt: " +info);
+
+
+                            } // info will be a number from 0 to 100
                         },
                     )
                 });

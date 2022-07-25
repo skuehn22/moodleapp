@@ -170,6 +170,7 @@ export class AddonModAssignSubmissionFileHandlerService implements AddonModAssig
     async getSizeForCopy(assign: AddonModAssignAssign, plugin: AddonModAssignPlugin): Promise<number> {
         const files = AddonModAssign.getSubmissionPluginAttachments(plugin);
 
+        console.log("log ere");
         return CoreFileHelper.getTotalFilesSize(files);
     }
 
@@ -189,7 +190,7 @@ export class AddonModAssignSubmissionFileHandlerService implements AddonModAssig
         // Check if there's any change.
         if (this.hasDataChanged(assign, submission, plugin)) {
             const files = CoreFileSession.getFiles(AddonModAssignProvider.COMPONENT, assign.id);
-
+            console.log("log here22");
             return CoreFileHelper.getTotalFilesSize(files);
         } else {
             // Nothing has changed, we won't upload any file.

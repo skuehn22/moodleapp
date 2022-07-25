@@ -120,8 +120,6 @@ export class CoreFileUploaderFileHandlerService implements CoreFileUploaderHandl
 
                     try {
 
-                        console.log("testlog: "+file);
-
                         // Upload the picked file.
                         const result = await CoreFileUploaderHelper.uploadFileObject(
                             file,

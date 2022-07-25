@@ -141,6 +141,8 @@ export class AddonModAssignSubmissionOnlineTextHandlerService implements AddonMo
 
         const filesSize = await CoreFileHelper.getTotalFilesSize(files);
 
+        console.log("sjdsa,dns");
+
         return text.length + filesSize;
     }
 
