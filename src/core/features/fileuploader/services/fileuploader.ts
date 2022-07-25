@@ -749,18 +749,24 @@ export class CoreFileUploaderProvider {
                         outputFileName: name.toString(),
                         videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                         fps: 30, // optional (android only), defaults to 30
-                    })
+                    },
+
+                    resolve
+                    )
 
                     console.log("promise1 test: "  +test);
             });
 
+            var new_path = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
 
-            console.log(name);
+            ///storage/emulated/0/Android/data/org.ontour.app/tmp/1658737894.mp4
+            console.log("new_path"+  name);
 
             let result2 = await promise;
             console.log("promise1 output: "  +result2);
             console.log("promise1 promise: " +promise);
 
+            fileEntry.nativeURL = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
 
         } else {
             // It's an online file. We need to download it and re-upload it.
@@ -785,6 +791,7 @@ export class CoreFileUploaderProvider {
         console.log("fileEntry before" + fileEntry.toURL());
         console.log("isOnline" + isOnline);
 
+        
 
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
@@ -794,8 +801,8 @@ export class CoreFileUploaderProvider {
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
 
         console.log("mimitype2" + mimetype);
-        const options = this.getFileUploadOptions(fileEntry.toURL(), fileName!, mimetype, isOnline, 'draft', itemId);
-        const result = await this.uploadFile(fileEntry.toURL(), options, undefined, siteId);
+        const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
+        const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
 
         console.log("result.itemid" + result.itemid);
 
