@@ -613,9 +613,6 @@ export class CoreFileUploaderProvider {
                 result.offline++;
 
                 await CoreFile.copyFile(file.toURL(), destFile);
-
-                console.log("destFile" + destFile);
-
             }
         }));
 
@@ -730,49 +727,29 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             fileEntry = file;
 
-            console.log("fileEntry: "+file);
-            console.log("fileName: "+file.name);
-            console.log("fileNameFullPath: "+file.fullPath);
-            console.log("fileNamenativeURL: "+file.nativeURL);
+            if (CoreApp.isAndroid()) {
 
-            //var promiseResolve, promiseReject;
+                let promise = new Promise((resolve, reject) => {
 
-            let promise = new Promise((resolve, reject) => {
+                    var name = Math.round(+new Date()/1000);
 
-                var name = Math.round(+new Date()/1000);
-
-                let test = VideoEditor.transcodeVideo(function (success) {
-                        console.log("let me know" + success);
-                        resolve (success)
-
-                    }, function (error) {
-                        console.log("give me error" + error);
-                        reject (error)
-                    },
-                    {
-                        fileUri: file.nativeURL,
-                        outputFileName: name.toString(),
-                        videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
-                        fps: 30, // optional (android only), defaults to 30
-                    },
+                    let test = VideoEditor.transcodeVideo(function (success) {
+                            resolve (success)
+                        }, function (error) {
+                            reject (error)
+                        },
+                        {
+                            fileUri: file.nativeURL,
+                            outputFileName: name.toString(),
+                            videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                            fps: 30, // optional (android only), defaults to 30
+                        },
                     )
-            });
+                });
 
-            //var new_path = "///storage/emulated/0/Movies/ON TOUR/" + name + ".mp4";
-            ///storage/emulated/0/Android/data/org.ontour.app/tmp/1658737894.mp4
-            //console.log("new_path"+  name);
-
-            let result2 = await promise;
-
-
-            console.log("promise1 output: "  +result2);
-            console.log("promise1 promise: " +promise);
-
-            //str = JSON.stringify(fileEntry);
-            var str = JSON.stringify(fileEntry, null, 4); // (Optional) beautiful indented output.
-            console.log(str); // Logs output to dev tools console.
-
-            fileEntry.nativeURL = result2 as string;
+                let result2 = await promise;
+                fileEntry.nativeURL = result2 as string;
+            }
 
         } else {
             // It's an online file. We need to download it and re-upload it.
@@ -794,24 +771,11 @@ export class CoreFileUploaderProvider {
 
         }
 
-        console.log("fileEntry before" + fileEntry.toURL());
-        console.log("isOnline" + isOnline);
-        console.log(" fileEntry.nativeURL" +  fileEntry.nativeURL);
-
-
-
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
-
-        console.log("extension" + extension);
-
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
-
-        console.log("mimitype2" + mimetype);
         const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
         const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
-
-        console.log("result.itemid" + result.itemid);
 
         return result.itemid;
     }

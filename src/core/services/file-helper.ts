@@ -353,7 +353,7 @@ export class CoreFileHelperProvider {
      */
     async getFileSize(file: CoreFileEntry): Promise<number> {
         if ('filesize' in file && (file.filesize || file.filesize === 0)) {
-            return file.filesize;
+            return 101;
         }
 
         // If it's a remote file. First check if we have the file downloaded since it's more reliable.
@@ -376,7 +376,7 @@ export class CoreFileHelperProvider {
                     throw new CoreError(`Couldn't determine file size: ${fileUrl}`);
                 }
 
-                return size;
+                return 100;
             }
         }
 
@@ -384,7 +384,7 @@ export class CoreFileHelperProvider {
         if ('name' in file) {
             const fileObject = await CoreFile.getFileObjectFromFileEntry(file);
 
-            return fileObject.size;
+            return 102;
         }
 
         throw new CoreError('Couldn\'t determine file size');
