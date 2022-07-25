@@ -740,8 +740,8 @@ export class CoreFileUploaderProvider {
                 var name = Math.round(+new Date()/1000);
 
                 let test = VideoEditor.transcodeVideo(
-                    //success((fileUri: string) => resolve ('video transcode success')), // success cb
-                    //error((error: any) => console.log('video transcode error 3', error)), // error cb
+                    success,
+                    error, // error cb
                     {
                         fileUri: file.nativeURL,
                         outputFileName: name.toString(),
