@@ -728,13 +728,9 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             fileEntry = file;
 
-            var progressbar = 0;
-
             if (CoreApp.isAndroid()) {
 
-                //var modal = CoreDomUtils.showModalLoading("Fortschritt: " + progressbar + "%", true);
-
-                let modal = await CoreDomUtils.showModalLoading("Fortschritt: " + progressbar + "%", true);
+                let modal = await CoreDomUtils.showModalLoading("Fortschritt: 0%", true);
 
                 let promise = new Promise((resolve, reject) => {
 
@@ -752,13 +748,13 @@ export class CoreFileUploaderProvider {
                             fps: 30, // optional (android only), defaults to 30
 
                             progress: function(info) {
-                                modal.updateText("Fortschritt: " + (info * 100) + "%");
+                                modal.updateText("Komprimierung: " + Math.round(info * 100) + "%");
                             }
                         },
                     )
                 });
                 let result2 = await promise;
-                
+
                 modal.dismiss();
 
                 fileEntry.nativeURL = result2 as string;

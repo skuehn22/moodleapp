@@ -23,7 +23,11 @@ import { Translate } from '@singletons';
 import { CoreConstants } from '@/core/constants';
 import { CoreEnrolledCourseDataWithExtraInfoAndOptions } from '../../services/courses-helper';
 import { CoreCoursesCourseOptionsMenuComponent } from '../course-options-menu/course-options-menu';
-import { CoreUser } from '@features/user/services/user';
+import {
+    CoreUser,
+    CoreUserProfile,
+    CoreUserProvider,
+} from '@features/user/services/user';
 
 /**
  * This component is meant to display a course for a list of courses with progress.
@@ -56,6 +60,23 @@ export class CoreCoursesCourseProgressComponent implements OnInit, OnDestroy {
     showSpinner = false;
     downloadCourseEnabled = false;
     courseOptionMenuEnabled = false;
+
+    /*
+
+
+    async fetchUser(){
+        let userId = CoreSites.getCurrentSite()?.getUserId();
+        const user = await CoreUser.getProfile(userId as number, 8)
+        this.courseStatus = "test";
+
+        return user.firstname;
+    }
+    
+     */
+
+    //brummer = CoreUser.getProfile(1080, 8)
+
+
 
     protected isDestroyed = false;
     protected courseStatusObserver?: CoreEventObserver;
