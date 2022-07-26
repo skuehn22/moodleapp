@@ -38,9 +38,10 @@ export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
             deps: [],
             useFactory: () => () => {
 
+                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAudioHandler.instance);
+
                 if (CoreApp.isIOS()) {
                     CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAlbumHandler.instance);
-                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAudioHandler.instance);
                     CoreFileUploaderDelegate.registerHandler(CoreFileUploaderCameraHandler.instance);
                     CoreFileUploaderDelegate.registerHandler(CoreFileUploaderVideoHandler.instance);
                 }else{
