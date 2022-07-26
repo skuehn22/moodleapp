@@ -33,6 +33,7 @@ import { CoreEmulatorCaptureMediaComponent } from '@features/emulator/components
 import { CoreError } from '@classes/errors/error';
 import { CoreSite } from '@classes/site';
 import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
+import { CoreDomUtils } from '@services/utils/dom';
 //import { VideoEditor } from '@ionic-native/video-editor/ngx';
 //import { VideoEditor } from 'cordova-plugin-video-editor-fix/ngx';
 
@@ -743,12 +744,11 @@ export class CoreFileUploaderProvider {
                             outputFileName: name.toString(),
                             videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                             fps: 30, // optional (android only), defaults to 30
+
                             progress: function(info) {
-
+                                CoreDomUtils.showModalLoading("Fortschritt: " +info, true);
                                 console.log("Fortschritt: " +info);
-
-
-                            } // info will be a number from 0 to 100
+                            }
                         },
                     )
                 });
