@@ -23,6 +23,7 @@ import { Translate } from '@singletons';
 import { CoreConstants } from '@/core/constants';
 import { CoreEnrolledCourseDataWithExtraInfoAndOptions } from '../../services/courses-helper';
 import { CoreCoursesCourseOptionsMenuComponent } from '../course-options-menu/course-options-menu';
+import { CoreSiteInfo } from '@classes/site';
 import {
     CoreUser,
     CoreUserProfile,
@@ -48,6 +49,8 @@ export class CoreCoursesCourseProgressComponent implements OnInit, OnDestroy {
     @Input() showAll = false; // If true, will show all actions, options, star and progress.
     @Input() showDownload = true; // If true, will show download button. Only works if the options menu is not shown.
 
+
+
     courseStatus = CoreConstants.NOT_DOWNLOADED;
     isDownloading = false;
     prefetchCourseData: CorePrefetchStatusInfo = {
@@ -60,23 +63,15 @@ export class CoreCoursesCourseProgressComponent implements OnInit, OnDestroy {
     showSpinner = false;
     downloadCourseEnabled = false;
     courseOptionMenuEnabled = false;
+    siteInfo?: CoreSiteInfo;
 
-    /*
-
-
-    async fetchUser(){
-        let userId = CoreSites.getCurrentSite()?.getUserId();
-        const user = await CoreUser.getProfile(userId as number, 8)
-        this.courseStatus = "test";
-
-        return user.firstname;
+    constructor() {
+        this.loadSiteInfo();
     }
-    
-     */
-
-    //brummer = CoreUser.getProfile(1080, 8)
 
 
+    //currentSite = CoreSites.getCurrentSite();
+    //siteInfo =
 
     protected isDestroyed = false;
     protected courseStatusObserver?: CoreEventObserver;
@@ -145,6 +140,18 @@ export class CoreCoursesCourseProgressComponent implements OnInit, OnDestroy {
                 CoreCourse.setCoursePreviousStatus(this.course.id);
             }
         }
+
+    }
+
+
+    protected async loadSiteInfo(): Promise<void> {
+        const currentSite = CoreSites.getCurrentSite();
+
+        if (!currentSite) {
+            return;
+        }
+
+        this.siteInfo = currentSite.getInfo();
 
     }
 
