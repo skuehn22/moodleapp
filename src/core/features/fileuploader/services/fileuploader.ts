@@ -728,13 +728,19 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             fileEntry = file;
 
+            var progressbar = 0;
+
             if (CoreApp.isAndroid()) {
+
+                //var modal = CoreDomUtils.showModalLoading("Fortschritt: " + progressbar + "%", true);
+
+                let modal = await CoreDomUtils.showModalLoading("Fortschritt: " + progressbar + "%", true);
 
                 let promise = new Promise((resolve, reject) => {
 
                     var name = Math.round(+new Date()/1000);
 
-                    let test = VideoEditor.transcodeVideo(function (success) {
+                    VideoEditor.transcodeVideo(function (success) {
                             resolve (success)
                         }, function (error) {
                             reject (error)
@@ -746,16 +752,19 @@ export class CoreFileUploaderProvider {
                             fps: 30, // optional (android only), defaults to 30
 
                             progress: function(info) {
-                                CoreDomUtils.showModalLoading("Fortschritt: " +info, true);
-                                console.log("Fortschritt: " +info);
+                                modal.updateText("Fortschritt: " + (info * 100) + "%");
                             }
                         },
                     )
                 });
-
                 let result2 = await promise;
+                
+                modal.dismiss();
+
                 fileEntry.nativeURL = result2 as string;
             }
+
+
 
         } else {
             // It's an online file. We need to download it and re-upload it.
@@ -859,3 +868,5 @@ function success(result) {
 function error(err) {
     console.log('trimFail, err: ' + err);
 }
+
+
