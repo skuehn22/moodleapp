@@ -731,43 +731,13 @@ export class CoreFileUploaderProvider {
             if (CoreApp.isAndroid()) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
-                const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
+                const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
 
                 console.log("mime: " + mimetype);
 
-                if(mimetype != "jpg" && mimetype != "png" && mimetype != "image/jpeg"){
+                if(mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml"){
                     console.log("bin ein video");
-                }else{
-                    console.log("bin ein bild");
-                }
 
-                let checkIfVideo = new Promise((resolve, reject) => {
-
-                    VideoEditor.getVideoInfo(function (success) {
-
-                            let info = JSON.stringify(success, null, 2);
-                            console.log("info vom transcoder" +  info);
-                            console.log("info duration" +  info['duration']);
-
-                            let video = true;
-
-                            resolve (video)
-                        }, function (error) {
-                            console.log("error bild" +  error);
-
-                            let video = false;
-                            
-                            reject (video)
-                        },
-                        {
-                            fileUri: file.nativeURL,
-                        },
-                    )
-                });
-
-                let videoCheck = await checkIfVideo;
-
-                if(videoCheck){
                     let modal = await CoreDomUtils.showModalLoading("Fortschritt: 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
@@ -798,11 +768,39 @@ export class CoreFileUploaderProvider {
                     fileEntry.nativeURL = result2 as string;
                 }
 
+                }else{
+                    console.log("bin ein bild");
+                }
 
-            }
+                /*
+                let checkIfVideo = new Promise((resolve, reject) => {
 
+                    VideoEditor.getVideoInfo(function (success) {
 
+                            let info = JSON.stringify(success, null, 2);
+                            console.log("info vom transcoder" +  info);
+                            console.log("info duration" +  info['duration']);
 
+                            let video = true;
+
+                            resolve (video)
+                        }, function (error) {
+                            console.log("error bild" +  error);
+
+                            let video = false;
+
+                            reject (video)
+                        },
+                        {
+                            fileUri: file.nativeURL,
+                        },
+                    )
+                });
+
+                let videoCheck = await checkIfVideo;
+
+                console.log("Videocheck: " + videoCheck);
+                 */
         } else {
             // It's an online file. We need to download it and re-upload it.
             fileName = file.filename;
