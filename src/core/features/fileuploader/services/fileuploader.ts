@@ -735,7 +735,7 @@ export class CoreFileUploaderProvider {
 
                 console.log("mime: " + mimetype);
 
-                if(mimetype != "jpg" && mimetype != "png"){
+                if(mimetype != "jpg" && mimetype != "png" && mimetype != "image/jpeg"){
                     console.log("bin ein video");
                 }else{
                     console.log("bin ein bild");
@@ -746,13 +746,18 @@ export class CoreFileUploaderProvider {
                     VideoEditor.getVideoInfo(function (success) {
 
                             let info = JSON.stringify(success, null, 2);
-                            console.log("info" +  info);
+                            console.log("info vom transcoder" +  info);
                             console.log("info duration" +  info['duration']);
 
-                            resolve (success)
-                        }, function (error) {
+                            let video = true;
 
-                            reject (error)
+                            resolve (video)
+                        }, function (error) {
+                            console.log("error bild" +  error);
+
+                            let video = false;
+                            
+                            reject (video)
                         },
                         {
                             fileUri: file.nativeURL,
@@ -760,36 +765,40 @@ export class CoreFileUploaderProvider {
                     )
                 });
 
+                let videoCheck = await checkIfVideo;
+
+                if(videoCheck){
+                    let modal = await CoreDomUtils.showModalLoading("Fortschritt: 0%", true);
+
+                    let promise = new Promise((resolve, reject) => {
+
+                        var name = Math.round(+new Date()/1000);
+
+                        VideoEditor.transcodeVideo(function (success) {
+                                resolve (success)
+                            }, function (error) {
+                                reject (error)
+                            },
+                            {
+                                fileUri: file.nativeURL,
+                                outputFileName: name.toString(),
+                                videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                                fps: 30, // optional (android only), defaults to 30
+
+                                progress: function(info) {
+                                    modal.updateText("Komprimierung: " + Math.round(info * 100) + "%");
+                                }
+                            },
+                        )
+                    });
+                    let result2 = await promise;
+
+                    modal.dismiss();
+
+                    fileEntry.nativeURL = result2 as string;
+                }
 
 
-                let modal = await CoreDomUtils.showModalLoading("Fortschritt: 0%", true);
-
-                let promise = new Promise((resolve, reject) => {
-
-                    var name = Math.round(+new Date()/1000);
-
-                    VideoEditor.transcodeVideo(function (success) {
-                            resolve (success)
-                        }, function (error) {
-                            reject (error)
-                        },
-                        {
-                            fileUri: file.nativeURL,
-                            outputFileName: name.toString(),
-                            videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
-                            fps: 30, // optional (android only), defaults to 30
-
-                            progress: function(info) {
-                                modal.updateText("Komprimierung: " + Math.round(info * 100) + "%");
-                            }
-                        },
-                    )
-                });
-                let result2 = await promise;
-
-                modal.dismiss();
-
-                fileEntry.nativeURL = result2 as string;
             }
 
 
