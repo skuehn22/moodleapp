@@ -730,6 +730,38 @@ export class CoreFileUploaderProvider {
 
             if (CoreApp.isAndroid()) {
 
+                const extension = CoreMimetypeUtils.getFileExtension(fileName!);
+                const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
+
+                console.log("mime: " + mimetype);
+
+                if(mimetype != "jpg" && mimetype != "png"){
+                    console.log("bin ein video");
+                }else{
+                    console.log("bin ein bild");
+                }
+
+                let checkIfVideo = new Promise((resolve, reject) => {
+
+                    VideoEditor.getVideoInfo(function (success) {
+
+                            let info = JSON.stringify(success, null, 2);
+                            console.log("info" +  info);
+                            console.log("info duration" +  info['duration']);
+
+                            resolve (success)
+                        }, function (error) {
+
+                            reject (error)
+                        },
+                        {
+                            fileUri: file.nativeURL,
+                        },
+                    )
+                });
+
+
+
                 let modal = await CoreDomUtils.showModalLoading("Fortschritt: 0%", true);
 
                 let promise = new Promise((resolve, reject) => {
