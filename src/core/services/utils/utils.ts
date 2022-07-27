@@ -962,6 +962,7 @@ export class CoreUtilsProvider {
                 throw new Error(Translate.instant('core.erroropenfilenoextension'));
             }
 
+            console.log("no app quatsch");
             throw new Error(Translate.instant('core.erroropenfilenoapp'));
         }
     }
@@ -1079,7 +1080,7 @@ export class CoreUtilsProvider {
             return WebIntent.startActivity(options).catch((error) => {
                 this.logger.error('Error opening online file ' + url + ' with mimetype ' + mimetype);
                 this.logger.error('Error: ', JSON.stringify(error));
-
+                console.log("no app quatsch");
                 throw new Error(Translate.instant('core.erroropenfilenoapp'));
             });
         }
