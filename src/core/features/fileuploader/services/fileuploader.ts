@@ -184,7 +184,7 @@ export class CoreFileUploaderProvider {
             return result.data[0];
         } else {
 
-            console.log("audio aufnehmen 8 " + result.data;
+            console.log("audio aufnehmen 8 " + result.data);
 
             throw result.data;
         }
@@ -745,26 +745,28 @@ export class CoreFileUploaderProvider {
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
 
-                console.log("mime: " + mimetype);
-
                 if(mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml"){
-                    console.log("bin ein video");
 
-                    let modal = await CoreDomUtils.showModalLoading("Fortschritt: 0%", true);
+                    console.log("error warnung 1");
+
+                    let modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
 
                         var name = Math.round(+new Date()/1000);
+                        console.log("error warnung 2");
 
                         VideoEditor.transcodeVideo(function (success) {
+                                console.log("error warnung 3");
                                 resolve (success)
                             }, function (error) {
+                                console.log("error warnung " + error);
                                 reject (error)
                             },
                             {
                                 fileUri: file.nativeURL,
                                 outputFileName: name.toString(),
-                                videoBitrate: 5000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                                videoBitrate: 3000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                                 fps: 30, // optional (android only), defaults to 30
 
                                 progress: function(info) {
