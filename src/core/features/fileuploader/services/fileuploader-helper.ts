@@ -474,6 +474,7 @@ export class CoreFileUploaderHelperProvider {
             if (error.code != 3) {
                 // Error, not cancelled.
                 this.logger.error('Error while recording audio/video', error);
+                console.log("no app qutasch 3");
 
                 const message = this.isNoAppError(error) ? Translate.instant('core.fileuploader.errornoapp') :
                     (error.message || Translate.instant(defaultMessage));
@@ -552,6 +553,8 @@ export class CoreFileUploaderHelperProvider {
 
             media = medias[0]; // We used limit 1, we only want 1 media.
         } catch (error) {
+
+            console.log("audio fehler");
 
             if (isAudio && this.isNoAppError(error) && CoreApp.isMobile() &&
                     (!Platform.is('android') || CoreApp.getPlatformMajorVersion() < 10)) {
