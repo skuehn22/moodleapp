@@ -745,9 +745,18 @@ export class CoreFileUploaderProvider {
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
 
-                if(mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml"){
+                if(mimetype == undefined){
+                    var checkAudio = false;
+                }else{
+                    var checkAudio = mimetype.includes("audio");
+                }
 
-                    console.log("error warnung 1");
+                console.log("mimetype " +mimetype);
+                console.log("checkAudio " +checkAudio);
+
+                if(!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml"){
+
+                    console.log("bin reingerannt");
 
                     let modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
