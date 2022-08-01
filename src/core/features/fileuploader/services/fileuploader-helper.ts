@@ -554,19 +554,30 @@ export class CoreFileUploaderHelperProvider {
             media = medias[0]; // We used limit 1, we only want 1 media.
         } catch (error) {
 
-            console.log("audio fehler");
+            console.log("audio aufnehmen 00 " + error);
+
+            console.log("audio aufnehmen 0");
 
             if (isAudio && this.isNoAppError(error) && CoreApp.isMobile() &&
                     (!Platform.is('android') || CoreApp.getPlatformMajorVersion() < 10)) {
                 // No app to record audio, fallback to capture it ourselves.
                 // In Android it will only be done in Android 9 or lower because there's a bug in the plugin.
                 try {
+
+                    console.log("audio aufnehmen 3");
+
                     media = await CoreFileUploader.captureAudioInApp();
                 } catch (error) {
+
+                    console.log("audio aufnehmen 4 " + error);
+
                     throw this.treatCaptureError(error, 'core.fileuploader.errorcapturingaudio'); // Throw the right error.
                 }
 
             } else {
+
+                console.log("audio aufnehmen 5");
+
                 const defaultError = isAudio ? 'core.fileuploader.errorcapturingaudio' : 'core.fileuploader.errorcapturingvideo';
 
                 throw this.treatCaptureError(error, defaultError); // Throw the right error.

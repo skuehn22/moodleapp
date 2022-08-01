@@ -159,6 +159,9 @@ export class CoreFileUploaderProvider {
      * @return Promise resolved with the file.
      */
     async captureAudioInApp(): Promise<MediaFile> {
+
+        console.log("audio aufnehmen");
+
         const params = {
             type: 'audio',
         };
@@ -175,8 +178,14 @@ export class CoreFileUploaderProvider {
         const result = await modal.onWillDismiss();
 
         if (result.role == 'success') {
+
+            console.log("audio aufnehmen 7 " + result.data[0]);
+
             return result.data[0];
         } else {
+
+            console.log("audio aufnehmen 8 " + result.data;
+
             throw result.data;
         }
     }
@@ -188,6 +197,9 @@ export class CoreFileUploaderProvider {
      * @return Promise resolved with the result.
      */
     async captureVideo(options: CaptureVideoOptions): Promise<MediaFile[] | CaptureError> {
+
+        console.log("audio aufnehmen 2");
+
         this.onVideoCapture.next(true);
 
         try {
