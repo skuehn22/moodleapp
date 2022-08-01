@@ -65,8 +65,8 @@
     "@ionic-native/ionic-webview": "5.33.0",
     "@ionic-native/keyboard": "5.33.0",
     "@ionic-native/local-notifications": "5.33.0",
-    "@ionic-native/media": "5.33.0",
-    "@ionic-native/media-capture": "5.33.0",
+    "@ionic-native/media": "5.36.0",
+    "@ionic-native/media-capture": "5.36.0",
     "@ionic-native/network": "5.33.0",
     "@ionic-native/push": "5.33.0",
     "@ionic-native/qr-scanner": "5.33.0",
@@ -104,7 +104,6 @@
     "cordova-plugin-globalization": "1.11.0",
     "cordova-plugin-ionic-keyboard": "2.2.0",
     "cordova-plugin-ionic-webview": "5.0.0",
-    "cordova-plugin-media": "5.0.3",
     "cordova-plugin-media-capture": "3.0.3",
     "cordova-plugin-network-information": "2.0.2",
     "cordova-plugin-screen-orientation": "3.0.2",
@@ -149,6 +148,7 @@
     "cordova-plugin-file-transfer": "git+https://github.com/moodlemobile/cordova-plugin-file-transfer.git",
     "cordova-plugin-inappbrowser": "git+https://github.com/moodlemobile/cordova-plugin-inappbrowser.git#moodle-ionic5",
     "cordova-plugin-local-notification": "git+https://github.com/moodlemobile/cordova-plugin-local-notification.git#moodle",
+    "cordova-plugin-media": "^6.0.0",
     "cordova-plugin-prevent-override": "git+https://github.com/moodlemobile/cordova-plugin-prevent-override.git",
     "cordova-plugin-qrscanner": "git+https://github.com/moodlemobile/cordova-plugin-qrscanner.git#dist",
     "cordova-plugin-video-editor-fixed": "^1.1.6",
@@ -217,9 +217,6 @@
         "ANDROID_SUPPORT_V4_VERSION": "26.+"
       },
       "cordova-plugin-media-capture": {},
-      "cordova-plugin-media": {
-        "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "NO"
-      },
       "cordova-plugin-network-information": {},
       "cordova-plugin-qrscanner": {},
       "cordova-plugin-screen-orientation": {},
@@ -246,7 +243,8 @@
       "cordova-plugin-file-transfer": {},
       "cordova-plugin-prevent-override": {},
       "cordova-plugin-file": {},
-      "cordova-plugin-video-editor-fixed": {}
+      "cordova-plugin-video-editor-fixed": {},
+      "cordova-plugin-media": {}
     }
   },
   "optionalDependencies": {
