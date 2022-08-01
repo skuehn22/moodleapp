@@ -558,8 +558,7 @@ export class CoreFileUploaderHelperProvider {
 
             console.log("audio aufnehmen 0");
 
-            if (isAudio && this.isNoAppError(error) && CoreApp.isMobile() &&
-                    (!Platform.is('android') || CoreApp.getPlatformMajorVersion() < 10)) {
+            if (isAudio && this.isNoAppError(error) && CoreApp.isMobile()) {
                 // No app to record audio, fallback to capture it ourselves.
                 // In Android it will only be done in Android 9 or lower because there's a bug in the plugin.
                 try {
