@@ -760,6 +760,8 @@ export class CoreFileUploaderProvider {
 
                     let modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
+
+
                     let promise = new Promise((resolve, reject) => {
 
                         var name = Math.round(+new Date()/1000);
@@ -784,11 +786,16 @@ export class CoreFileUploaderProvider {
                             },
                         )
                     });
-                    let result2 = await promise;
 
-                    modal.dismiss();
 
-                    fileEntry.nativeURL = result2 as string;
+                    try {
+                        var result2 = await promise;
+                        fileEntry.nativeURL = result2 as string;
+                        modal.dismiss();
+                    } catch (error) {
+                        modal.dismiss();
+                    }
+
                 }
 
                 }else{
