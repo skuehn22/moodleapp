@@ -148,7 +148,7 @@
     "cordova-plugin-file-transfer": "git+https://github.com/moodlemobile/cordova-plugin-file-transfer.git",
     "cordova-plugin-inappbrowser": "git+https://github.com/moodlemobile/cordova-plugin-inappbrowser.git#moodle-ionic5",
     "cordova-plugin-local-notification": "git+https://github.com/moodlemobile/cordova-plugin-local-notification.git#moodle",
-    "cordova-plugin-media": "5.0.4",
+    "cordova-plugin-media": "^6.0.0",
     "cordova-plugin-prevent-override": "git+https://github.com/moodlemobile/cordova-plugin-prevent-override.git",
     "cordova-plugin-qrscanner": "git+https://github.com/moodlemobile/cordova-plugin-qrscanner.git#dist",
     "cordova-plugin-video-editor-fixed": "^1.1.6",
@@ -244,9 +244,7 @@
       "cordova-plugin-prevent-override": {},
       "cordova-plugin-file": {},
       "cordova-plugin-video-editor-fixed": {},
-      "cordova-plugin-media": {
-        "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "NO"
-      }
+      "cordova-plugin-media": {}
     }
   },
   "optionalDependencies": {

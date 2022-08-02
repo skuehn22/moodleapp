@@ -21,12 +21,12 @@ import { CoreApp } from '@services/app';
 import { CoreFile, CoreFileProvider } from '@services/file';
 import { CoreDomUtils } from '@services/utils/dom';
 import { CoreMimetypeUtils } from '@services/utils/mimetype';
+import { CoreTextUtils } from '@services/utils/text';
 import { CoreTimeUtils } from '@services/utils/time';
 import { Platform, ModalController, Media, Translate } from '@singletons';
 import { CoreError } from '@classes/errors/error';
 import { CoreCaptureError } from '@classes/errors/captureerror';
 import { CoreCanceledError } from '@classes/errors/cancelederror';
-import { CoreText } from '@singletons/text';
 
 /**
  * Page to capture media in browser, or to capture audio in mobile devices.
@@ -130,49 +130,25 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
      * @return Promise resolved when ready.
      */
     protected async initCordovaMediaPlugin(): Promise<void> {
-
-        try {
-            await this.createFileAndMediaInstance();
-
-            this.readyToCapture = true;
-            this.previewMedia = this.previewAudio?.nativeElement;
-        } catch (error) {
-            this.dismissWithError(-1, error.message || error);
-        }
-    }
-
-    /**
-     * Create a file entry and the cordova media instance.
-     */
-    protected async createFileAndMediaInstance(): Promise<void> {
         this.filePath = this.getFilePath();
-
-        // First create the file.
-        this.fileEntry = await CoreFile.createFile(this.filePath);
-
-        // Now create the media instance.
-        let absolutePath = CoreText.concatenatePaths(CoreFile.getBasePathInstant(), this.filePath);
+        let absolutePath = CoreTextUtils.concatenatePaths(CoreFile.getBasePathInstant(), this.filePath);
 
         if (Platform.is('ios')) {
             // In iOS we need to remove the file:// part.
             absolutePath = absolutePath.replace(/^file:\/\//, '');
         }
 
-        this.mediaFile = Media.create(absolutePath);
-    }
+        try {
+            // First create the file.
+            this.fileEntry = await CoreFile.createFile(this.filePath);
 
-    /**
-     * Reset the file and the cordova media instance.
-     */
-    protected async resetCordovaMediaCapture(): Promise<void> {
-        if (this.filePath) {
-            // Remove old file, don't block the user for this.
-            CoreFile.removeFile(this.filePath);
+            // Now create the media instance.
+            this.mediaFile = Media.create(absolutePath);
+            this.readyToCapture = true;
+            this.previewMedia = this.previewAudio?.nativeElement;
+        } catch (error) {
+            this.dismissWithError(-1, error.message || error);
         }
-
-        this.mediaFile?.release();
-
-        await this.createFileAndMediaInstance();
     }
 
     /**
@@ -229,8 +205,7 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
                 return;
             }
 
-            const streamVideo = this.streamVideo;
-            if (!streamVideo) {
+            if (!this.streamVideo) {
                 throw new CoreError('Video element not found.');
             }
 
@@ -246,7 +221,7 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
             }, 10000);
 
             // Listen for stream ready to display the stream.
-            streamVideo.nativeElement.onloadedmetadata = (): void => {
+            this.streamVideo.nativeElement.onloadedmetadata = (): void => {
                 if (hasLoaded) {
                     // Already loaded or timeout triggered, stop.
                     return;
@@ -255,13 +230,19 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
                 hasLoaded = true;
                 clearTimeout(waitTimeout);
                 this.readyToCapture = true;
-                streamVideo.nativeElement.onloadedmetadata = null;
+                this.streamVideo!.nativeElement.onloadedmetadata = null;
                 // Force change detection. Angular doesn't detect these async operations.
                 this.changeDetectorRef.detectChanges();
             };
 
             // Set the stream as the source of the video.
-            streamVideo.nativeElement.srcObject = this.localMediaStream;
+            if ('srcObject' in this.streamVideo.nativeElement) {
+                this.streamVideo.nativeElement.srcObject = this.localMediaStream;
+            } else {
+                // Fallback for old browsers.
+                // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/srcObject#Examples
+                this.streamVideo.nativeElement.src = window.URL.createObjectURL(this.localMediaStream);
+            }
         } catch (error) {
             this.dismissWithError(-1, error.message || error);
         }
@@ -394,7 +375,7 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
             this.imgCanvas.nativeElement.getContext('2d').drawImage(this.streamVideo?.nativeElement, 0, 0, width, height);
 
             // Convert the image to blob and show it in an image element.
-            this.imgCanvas.nativeElement.toBlob((blob: Blob) => {
+            this.imgCanvas.nativeElement.toBlob((blob) => {
                 loadingModal.dismiss();
 
                 this.mediaBlob = blob;
@@ -429,14 +410,10 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
     /**
      * Discard the captured media.
      */
-    async discard(): Promise<void> {
+    discard(): void {
         this.previewMedia?.pause();
         this.streamVideo?.nativeElement.play();
         this.audioDrawer?.start();
-
-        if (this.isCordovaAudioCapture) {
-            await this.resetCordovaMediaCapture();
-        }
 
         this.hasCaptured = false;
         this.isCapturing = false;
@@ -557,7 +534,7 @@ export class CoreEmulatorCaptureMediaComponent implements OnInit, OnDestroy {
     protected getFilePath(): string {
         const fileName = this.type + '_' + CoreTimeUtils.readableTimestamp() + '.' + this.extension;
 
-        return CoreText.concatenatePaths(CoreFileProvider.TMPFOLDER, 'media/' + fileName);
+        return CoreTextUtils.concatenatePaths(CoreFileProvider.TMPFOLDER, 'media/' + fileName);
     }
 
     /**
