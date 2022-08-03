@@ -22,6 +22,7 @@ import { CoreFileUploaderAudioHandler } from './services/handlers/audio';
 import { CoreFileUploaderCameraHandler } from './services/handlers/camera';
 import { CoreFileUploaderFileHandler } from './services/handlers/file';
 import { CoreFileUploaderVideoHandler } from './services/handlers/video';
+import { CoreApp } from '@services/app';
 
 export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
     CoreFileUploaderProvider,
@@ -35,11 +36,15 @@ export const CORE_FILEUPLOADER_SERVICES: Type<unknown>[] = [
             provide: APP_INITIALIZER,
             multi: true,
             useValue: () => {
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAlbumHandler.instance);
                 CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAudioHandler.instance);
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderCameraHandler.instance);
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderVideoHandler.instance);
-                CoreFileUploaderDelegate.registerHandler(CoreFileUploaderFileHandler.instance);
+
+                if (CoreApp.isIOS()) {
+                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderAlbumHandler.instance);
+                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderCameraHandler.instance);
+                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderVideoHandler.instance);
+                }else{
+                    CoreFileUploaderDelegate.registerHandler(CoreFileUploaderFileHandler.instance);
+                }
             },
         },
     ],

@@ -21,20 +21,26 @@
         </ion-item>
 
         <!-- Status of the submission if user is blinded. -->
+
+        <!--
         <ion-item class="ion-text-wrap" *ngIf="blindMarking && !user">
             <ion-label>
                 <h2>{{ 'addon.mod_assign.hiddenuser' | translate }} {{blindId}}</h2>
                 <ng-container *ngTemplateOutlet="submissionStatus"></ng-container>
             </ion-label>
         </ion-item>
+        -->
 
         <!-- Status of the submission in the rest of cases. -->
+
+        <!--
         <ion-item class="ion-text-wrap" *ngIf="(blindMarking && user) || (!blindMarking && !user)">
             <ion-label>
                 <h2>{{ 'addon.mod_assign.submissionstatus' | translate }}</h2>
                 <ng-container *ngTemplateOutlet="submissionStatus"></ng-container>
             </ion-label>
         </ion-item>
+        -->
 
         <!-- Tabs: see the submission or grade it. -->
         <core-tabs [hideUntil]="loaded" parentScrollable="true" (ionChange)="tabSelected($event)">
@@ -347,6 +353,7 @@
                     </ion-item>
 
                     <!-- Attempt status. -->
+                    <!--
                     <ng-container *ngIf="isGrading && assign!.attemptreopenmethod != attemptReopenMethodNone">
                         <ion-item class="ion-text-wrap">
                             <ion-label>
@@ -370,6 +377,7 @@
                             <ion-toggle [(ngModel)]="grade.addAttempt"></ion-toggle>
                         </ion-item>
                     </ng-container>
+                    -->
 
                     <!-- Data about the grader (teacher who graded). -->
                     <ion-item class="ion-text-wrap" *ngIf="grader" core-user-link [userId]="grader!.id" [courseId]="courseId"

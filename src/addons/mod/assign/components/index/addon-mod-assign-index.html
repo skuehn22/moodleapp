@@ -88,6 +88,8 @@
             </ion-item>
 
             <!-- Summary of submissions with submitted status. -->
+
+            <!--
             <ion-item class="ion-text-wrap" *ngIf="summary && summary.submissionsenabled" [detail]="summary.submissionssubmittedcount"
                 [button]="summary.submissionssubmittedcount"
                 (click)="goToSubmissionList(submissionStatusSubmitted, !!summary.submissionssubmittedcount)">
@@ -102,6 +104,7 @@
                     </span>
                 </ion-badge>
             </ion-item>
+            -->
 
             <!-- Summary of submissions that need grading. -->
             <ion-item class="ion-text-wrap" *ngIf="summary && summary.submissionsenabled && !assign.teamsubmission"
