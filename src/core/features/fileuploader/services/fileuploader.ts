@@ -759,9 +759,6 @@ export class CoreFileUploaderProvider {
                     console.log("bin reingerannt");
 
                     let modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
-
-
-
                     let promise = new Promise((resolve, reject) => {
 
                         var name = Math.round(+new Date()/1000);
@@ -802,35 +799,6 @@ export class CoreFileUploaderProvider {
                     console.log("bin ein bild");
                 }
 
-                /*
-                let checkIfVideo = new Promise((resolve, reject) => {
-
-                    VideoEditor.getVideoInfo(function (success) {
-
-                            let info = JSON.stringify(success, null, 2);
-                            console.log("info vom transcoder" +  info);
-                            console.log("info duration" +  info['duration']);
-
-                            let video = true;
-
-                            resolve (video)
-                        }, function (error) {
-                            console.log("error bild" +  error);
-
-                            let video = false;
-
-                            reject (video)
-                        },
-                        {
-                            fileUri: file.nativeURL,
-                        },
-                    )
-                });
-
-                let videoCheck = await checkIfVideo;
-
-                console.log("Videocheck: " + videoCheck);
-                 */
         } else {
             // It's an online file. We need to download it and re-upload it.
             fileName = file.filename;
