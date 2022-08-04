@@ -19,7 +19,7 @@ import { CoreCourseActivitySyncBaseProvider } from '@features/course/classes/act
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
 import { CoreXAPIOffline } from '@features/xapi/services/offline';
 import { CoreXAPI } from '@features/xapi/services/xapi';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
 import { makeSingleton } from '@singletons';
@@ -103,14 +103,15 @@ export class AddonModH5PActivitySyncProvider extends CoreCourseActivitySyncBaseP
     syncActivity(contextId: number, siteId?: string): Promise<AddonModH5PActivitySyncResult> {
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }
 
-        if (this.isSyncing(contextId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(contextId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this discussion, return the promise.
-            return this.getOngoingSync(contextId, siteId)!;
+            return currentSyncPromise;
         }
 
         return this.addOngoingSync(contextId, this.syncActivityData(contextId, siteId), siteId);

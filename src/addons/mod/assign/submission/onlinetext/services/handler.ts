@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { AddonModAssignSubmissionPluginBaseComponent } from '@addons/mod/assign/classes/base-submission-plugin-component';
 import {
     AddonModAssignAssign,
     AddonModAssignSubmission,
@@ -24,7 +25,6 @@ import { AddonModAssignSubmissionHandler } from '@addons/mod/assign/services/sub
 import { Injectable, Type } from '@angular/core';
 import { CoreError } from '@classes/errors/error';
 import { CoreFileHelper } from '@services/file-helper';
-import { CoreSites } from '@services/sites';
 import { CoreTextUtils } from '@services/utils/text';
 import { CoreUtils } from '@services/utils/utils';
 import { CoreWSFile } from '@services/ws';
@@ -107,7 +107,7 @@ export class AddonModAssignSubmissionOnlineTextHandlerService implements AddonMo
      *
      * @return The component (or promise resolved with component) to use, undefined if not found.
      */
-    getComponent(): Type<unknown> {
+    getComponent(): Type<AddonModAssignSubmissionPluginBaseComponent> {
         return AddonModAssignSubmissionOnlineTextComponent;
     }
 
@@ -226,11 +226,7 @@ export class AddonModAssignSubmissionOnlineTextHandlerService implements AddonMo
      * @return Whether or not the handler is enabled for edit on a site level.
      */
     isEnabledForEdit(): boolean {
-        // There's a bug in Moodle 3.1.0 that doesn't allow submitting HTML, so we'll disable this plugin in that case.
-        // Bug was fixed in 3.1.1 minor release and in 3.2.
-        const currentSite = CoreSites.getCurrentSite();
-
-        return !!currentSite?.isVersionGreaterEqualThan('3.1.1') || !!currentSite?.checkIfAppUsesLocalMobile();
+        return true;
     }
 
     /**

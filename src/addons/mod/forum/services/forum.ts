@@ -13,13 +13,14 @@
 // limitations under the License.
 
 import { Injectable } from '@angular/core';
+import { CoreError } from '@classes/errors/error';
 import { CoreSite, CoreSiteWSPreSets } from '@classes/site';
 import { CoreCourseCommonModWSOptions } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
 import { CoreRatingInfo } from '@features/rating/services/rating';
 import { CoreTagItem } from '@features/tag/services/tag';
 import { CoreUser } from '@features/user/services/user';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreFileEntry } from '@services/file-helper';
 import { CoreGroups } from '@services/groups';
 import { CoreSitesCommonWSOptions, CoreSites, CoreSitesReadingStrategy } from '@services/sites';
@@ -159,17 +160,31 @@ export class AddonModForumProvider {
     }
 
     /**
+     * Get common cache key for forum discussions list WS calls.
+     *
+     * @param forumId Forum ID.
+     * @return Cache key.
+     */
+    protected getDiscussionsListCommonCacheKey(forumId: number): string {
+        return ROOT_CACHE_KEY + 'discussions:' + forumId;
+    }
+
+    /**
      * Get cache key for forum discussions list WS calls.
      *
      * @param forumId Forum ID.
      * @param sortOrder Sort order.
+     * @param groupId Group ID.
      * @return Cache key.
      */
-    protected getDiscussionsListCacheKey(forumId: number, sortOrder: number): string {
-        let key = ROOT_CACHE_KEY + 'discussions:' + forumId;
+    protected getDiscussionsListCacheKey(forumId: number, sortOrder: number, groupId?: number): string {
+        let key = this.getDiscussionsListCommonCacheKey(forumId);
 
         if (sortOrder != AddonModForumProvider.SORTORDER_LASTPOST_DESC) {
             key += ':' + sortOrder;
+        }
+        if (groupId) {
+            key += `:group${groupId}`;
         }
 
         return key;
@@ -252,11 +267,11 @@ export class AddonModForumProvider {
             throw new Error('Invalid response calling mod_forum_can_add_discussion');
         }
 
-        if (typeof result.canpindiscussions == 'undefined') {
+        if (result.canpindiscussions === undefined) {
             // WS doesn't support it yet, default it to false to prevent students from seeing the option.
             result.canpindiscussions = false;
         }
-        if (typeof result.cancreateattachment == 'undefined') {
+        if (result.cancreateattachment === undefined) {
             // WS doesn't support it yet, default it to true since usually the users will be able to create them.
             result.cancreateattachment = true;
         }
@@ -305,15 +320,6 @@ export class AddonModForumProvider {
         const index = posts.findIndex((post) => !post.parentid);
 
         return index >= 0 ? posts.splice(index, 1).pop() : undefined;
-    }
-
-    /**
-     * There was a bug adding new discussions to All Participants (see MDL-57962). Check if it's fixed.
-     *
-     * @return True if fixed, false otherwise.
-     */
-    isAllParticipantsFixed(): boolean {
-        return !!CoreSites.getCurrentSite()?.isVersionGreaterEqualThan(['3.1.5', '3.2.2']);
     }
 
     /**
@@ -480,7 +486,7 @@ export class AddonModForumProvider {
         const forum = forums.find(forum => forum.cmid == cmId);
 
         if (!forum) {
-            throw new Error('Forum not found');
+            throw new CoreError(Translate.instant('core.course.modulenotfound'));
         }
 
         return forum;
@@ -709,6 +715,26 @@ export class AddonModForumProvider {
     }
 
     /**
+     * Get sort order selected by the user.
+     *
+     * @return Promise resolved with sort order.
+     */
+    async getSelectedSortOrder(): Promise<AddonModForumSortOrder> {
+        const sortOrders = this.getAvailableSortOrders();
+        let sortOrderValue: number | null = null;
+
+        if (this.isDiscussionListSortingAvailable()) {
+            const preferenceValue = await CoreUtils.ignoreErrors(
+                CoreUser.getUserPreference(AddonModForumProvider.PREFERENCE_SORTORDER),
+            );
+
+            sortOrderValue = preferenceValue ? parseInt(preferenceValue, 10) : null;
+        }
+
+        return sortOrders.find(sortOrder => sortOrder.value === sortOrderValue) || sortOrders[0];
+    }
+
+    /**
      * Get forum discussions.
      *
      * @param forumId Forum ID.
@@ -737,6 +763,7 @@ export class AddonModForumProvider {
             // Since Moodle 3.7.
             method = 'mod_forum_get_forum_discussions';
             (params as AddonModForumGetForumDiscussionsWSParams).sortorder = options.sortOrder;
+            (params as AddonModForumGetForumDiscussionsWSParams).groupid = options.groupId;
         } else {
             if (options.sortOrder !== AddonModForumProvider.SORTORDER_LASTPOST_DESC) {
                 throw new Error('Sorting not supported with the old WS method.');
@@ -764,7 +791,7 @@ export class AddonModForumProvider {
         } catch (error) {
             // Try to get the data from cache stored with the old WS method.
             if (
-                CoreApp.isOnline() ||
+                CoreNetwork.isOnline() ||
                 method !== 'mod_forum_get_forum_discussions' ||
                 options.sortOrder !== AddonModForumProvider.SORTORDER_LASTPOST_DESC
             ) {
@@ -824,7 +851,7 @@ export class AddonModForumProvider {
             discussions: [] as AddonModForumDiscussion[],
             error: false,
         };
-        let numPages = typeof options.numPages == 'undefined' ? -1 : options.numPages;
+        let numPages = options.numPages === undefined ? -1 : options.numPages;
 
         if (!numPages) {
             return result;
@@ -953,10 +980,7 @@ export class AddonModForumProvider {
     async invalidateDiscussionsList(forumId: number, siteId?: string): Promise<void> {
         const site = await CoreSites.getSite(siteId);
 
-        await CoreUtils.allPromises(
-            this.getAvailableSortOrders()
-                .map(sortOrder => site.invalidateWsCacheForKey(this.getDiscussionsListCacheKey(forumId, sortOrder.value))),
-        );
+        await site.invalidateWsCacheForKeyStartingWith(this.getDiscussionsListCommonCacheKey(forumId));
     }
 
     /**
@@ -1073,7 +1097,7 @@ export class AddonModForumProvider {
             return false;
         };
 
-        if (!CoreApp.isOnline() && allowOffline) {
+        if (!CoreNetwork.isOnline() && allowOffline) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -1507,6 +1531,7 @@ export type AddonModForumLegacyPost = {
 export type AddonModForumGetDiscussionsOptions = CoreCourseCommonModWSOptions & {
     sortOrder?: number; // Sort order.
     page?: number; // Page. Defaults to 0.
+    groupId?: number; // Group ID.
 };
 
 /**
@@ -1558,9 +1583,9 @@ export type AddonModForumAccessInformation = {
 };
 
 /**
- * Reply info.
+ * Post creation or edition data.
  */
-export type AddonModForumReply = {
+export type AddonModForumPostFormData = {
     id: number;
     subject: string | null; // Null means original data is not set.
     message: string | null; // Null means empty or just white space.
@@ -2087,6 +2112,7 @@ export type AddonModForumNewDiscussionData = {
     cmId: number;
     discussionIds?: number[] | null;
     discTimecreated?: number;
+    groupId?: number; // The discussion group if it's created in a certain group, ALL_PARTICIPANTS for all participants.
 };
 
 /**

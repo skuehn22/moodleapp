@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites } from '@services/sites';
 import { CoreFilterDelegate } from './filter-delegate';
 import {
@@ -30,6 +30,7 @@ import { makeSingleton } from '@singletons';
 import { CoreEvents, CoreEventSiteData } from '@singletons/events';
 import { CoreLogger } from '@singletons/logger';
 import { CoreSite } from '@classes/site';
+import { CoreCourseHelper } from '@features/course/services/course-helper';
 
 /**
  * Helper service to provide filter functionalities.
@@ -159,7 +160,7 @@ export class CoreFilterHelperProvider {
         sections.forEach((section) => {
             if (section.modules) {
                 section.modules.forEach((module) => {
-                    if (module.uservisible) {
+                    if (CoreCourseHelper.canUserViewModule(module, section)) {
                         contexts.push({
                             contextlevel: 'module',
                             instanceid: module.id,
@@ -298,7 +299,7 @@ export class CoreFilterHelperProvider {
 
         const cachedData = this.moduleContextsCache[siteId][courseId][contextLevel];
 
-        if (!CoreApp.isOnline() || Date.now() <= cachedData.time + site.getExpirationDelay(CoreSite.FREQUENCY_RARELY)) {
+        if (!CoreNetwork.isOnline() || Date.now() <= cachedData.time + site.getExpirationDelay(CoreSite.FREQUENCY_RARELY)) {
             // We can use cache, return the filters if found.
             return cachedData.contexts[contextLevel] && cachedData.contexts[contextLevel][instanceId];
         }

@@ -14,7 +14,7 @@
 
 import { Injectable } from '@angular/core';
 
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreFilepool } from '@services/filepool';
 import { CoreSites } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
@@ -22,12 +22,11 @@ import { CoreUserOffline } from './user-offline';
 import { CoreLogger } from '@singletons/logger';
 import { CoreSite, CoreSiteWSPreSets } from '@classes/site';
 import { makeSingleton, Translate } from '@singletons';
-import { CoreEvents } from '@singletons/events';
+import { CoreEvents, CoreEventSiteData, CoreEventUserDeletedData, CoreEventUserSuspendedData } from '@singletons/events';
 import { CoreStatusWithWarningsWSResponse, CoreWSExternalWarning } from '@services/ws';
 import { CoreError } from '@classes/errors/error';
 import { USERS_TABLE_NAME, CoreUserDBRecord } from './database/user';
 import { CorePushNotifications } from '@features/pushnotifications/services/pushnotifications';
-import { CoreUserDelegateService, CoreUserUpdateHandlerData } from './user-delegate';
 
 const ROOT_CACHE_KEY = 'mmUser:';
 
@@ -39,12 +38,21 @@ declare module '@singletons/events' {
      * @see https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation
      */
     export interface CoreEventsData {
-        [CoreUserProvider.PROFILE_REFRESHED]: CoreUserProfileRefreshedData;
-        [CoreUserProvider.PROFILE_PICTURE_UPDATED]: CoreUserProfilePictureUpdatedData;
-        [CoreUserDelegateService.UPDATE_HANDLER_EVENT]: CoreUserUpdateHandlerData;
+        [USER_PROFILE_REFRESHED]: CoreUserProfileRefreshedData;
+        [USER_PROFILE_PICTURE_UPDATED]: CoreUserProfilePictureUpdatedData;
     }
 
 }
+
+/**
+ * Profile picture updated event.
+ */
+export const USER_PROFILE_REFRESHED = 'CoreUserProfileRefreshed';
+
+/**
+ * Profile picture updated event.
+ */
+export const USER_PROFILE_PICTURE_UPDATED = 'CoreUserProfilePictureUpdated';
 
 /**
  * Service to provide user functionalities.
@@ -53,32 +61,15 @@ declare module '@singletons/events' {
 export class CoreUserProvider {
 
     static readonly PARTICIPANTS_LIST_LIMIT = 50; // Max of participants to retrieve in each WS call.
-    static readonly PROFILE_REFRESHED = 'CoreUserProfileRefreshed';
-    static readonly PROFILE_PICTURE_UPDATED = 'CoreUserProfilePictureUpdated';
 
     protected logger: CoreLogger;
 
     constructor() {
         this.logger = CoreLogger.getInstance('CoreUserProvider');
 
-        CoreEvents.on(CoreEvents.USER_DELETED, (data) => {
-            // Search for userid in params.
-            let userId = 0;
-
-            if (data.params.userid) {
-                userId = data.params.userid;
-            } else if (data.params.userids) {
-                userId = data.params.userids[0];
-            } else if (data.params.field === 'id' && data.params.values && data.params.values.length) {
-                userId = data.params.values[0];
-            } else if (data.params.userlist && data.params.userlist.length) {
-                userId = data.params.userlist[0].userid;
-            }
-
-            if (userId > 0) {
-                this.deleteStoredUser(userId, data.siteId);
-            }
-        });
+        CoreEvents.on(CoreEvents.USER_DELETED, data => this.handleUserKickedOutEvent(data));
+        CoreEvents.on(CoreEvents.USER_SUSPENDED, data => this.handleUserKickedOutEvent(data));
+        CoreEvents.on(CoreEvents.USER_NO_LOGIN, data => this.handleUserKickedOutEvent(data));
     }
 
     /**
@@ -110,27 +101,21 @@ export class CoreUserProvider {
     /**
      * Check if WS to update profile picture is available in site.
      *
-     * @param siteId Site ID. If not defined, current site.
      * @return Promise resolved with boolean: whether it's available.
-     * @since 3.2
+     * @deprecated since app 4.0
      */
-    async canUpdatePicture(siteId?: string): Promise<boolean> {
-        const site = await CoreSites.getSite(siteId);
-
-        return this.canUpdatePictureInSite(site);
+    async canUpdatePicture(): Promise<boolean> {
+        return true;
     }
 
     /**
      * Check if WS to search participants is available in site.
      *
-     * @param site Site. If not defined, current site.
      * @return Whether it's available.
-     * @since 3.2
+     * @deprecated since app 4.0
      */
-    canUpdatePictureInSite(site?: CoreSite): boolean {
-        site = site || CoreSites.getCurrentSite();
-
-        return !!site?.wsAvailable('core_user_update_picture');
+    canUpdatePictureInSite(): boolean {
+        return true;
     }
 
     /**
@@ -157,6 +142,32 @@ export class CoreUserProvider {
         }
 
         return result.profileimageurl!;
+    }
+
+    /**
+     * Handle an event where a user was kicked out of the site.
+     *
+     * @param data Event data.
+     */
+    async handleUserKickedOutEvent(
+        data: CoreEventSiteData & (CoreEventUserDeletedData | CoreEventUserSuspendedData),
+    ): Promise<void> {
+        // Search for userid in params.
+        let userId = 0;
+
+        if (data.params.userid) {
+            userId = data.params.userid;
+        } else if (data.params.userids) {
+            userId = data.params.userids[0];
+        } else if (data.params.field === 'id' && data.params.values && data.params.values.length) {
+            userId = data.params.values[0];
+        } else if (data.params.userlist && data.params.userlist.length) {
+            userId = data.params.userlist[0].userid;
+        }
+
+        if (userId > 0) {
+            await this.deleteStoredUser(userId, data.siteId);
+        }
     }
 
     /**
@@ -396,7 +407,7 @@ export class CoreUserProvider {
 
         const preference = await CoreUtils.ignoreErrors(CoreUserOffline.getPreference(name, siteId));
 
-        if (preference && !CoreApp.isOnline()) {
+        if (preference && !CoreNetwork.isOnline()) {
             // Offline, return stored value.
             return preference.value;
         }
@@ -755,7 +766,7 @@ export class CoreUserProvider {
     async setUserPreference(name: string, value: string, siteId?: string): Promise<void> {
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Offline, just update the preference.
             return CoreUserOffline.setPreference(name, value);
         }
@@ -826,7 +837,7 @@ export class CoreUserProvider {
             responseExpected: false,
         };
 
-        if (typeof disableNotifications != 'undefined') {
+        if (disableNotifications !== undefined) {
             params.emailstop = disableNotifications ? 1 : 0;
         }
 
@@ -835,20 +846,6 @@ export class CoreUserProvider {
 
 }
 export const CoreUser = makeSingleton(CoreUserProvider);
-
-declare module '@singletons/events' {
-
-    /**
-     * Augment CoreEventsData interface with events specific to this service.
-     *
-     * @see https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation
-     */
-    export interface CoreEventsData {
-        [CoreUserProvider.PROFILE_REFRESHED]: CoreUserProfileRefreshedData;
-        [CoreUserProvider.PROFILE_PICTURE_UPDATED]: CoreUserProfilePictureUpdatedData;
-    }
-
-}
 
 /**
  * Data passed to PROFILE_REFRESHED event.
@@ -1109,7 +1106,7 @@ type CoreUserGetUserPreferencesWSParams = {
 type CoreUserGetUserPreferencesWSResponse = {
     preferences: { // User custom fields (also known as user profile fields).
         name: string; // The name of the preference.
-        value: string; // The value of the preference.
+        value: string | null; // The value of the preference.
     }[];
     warnings?: CoreWSExternalWarning[];
 };

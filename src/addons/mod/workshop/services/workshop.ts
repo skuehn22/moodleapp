@@ -18,12 +18,12 @@ import { CoreSite, CoreSiteWSPreSets } from '@classes/site';
 import { CoreCourseCommonModWSOptions } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
 import { CoreGradesMenuItem } from '@features/grades/services/grades-helper';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites, CoreSitesCommonWSOptions, CoreSitesReadingStrategy } from '@services/sites';
 import { CoreTextFormat, defaultTextFormat } from '@services/utils/text';
 import { CoreUtils } from '@services/utils/utils';
 import { CoreStatusWithWarningsWSResponse, CoreWS, CoreWSExternalFile, CoreWSExternalWarning } from '@services/ws';
-import { makeSingleton } from '@singletons';
+import { makeSingleton, Translate } from '@singletons';
 import { CoreFormFields } from '@singletons/form';
 import { AddonModWorkshopOffline } from './workshop-offline';
 import { AddonModWorkshopAutoSyncData, AddonModWorkshopSyncProvider } from './workshop-sync';
@@ -225,19 +225,6 @@ export class AddonModWorkshopProvider {
     }
 
     /**
-     * Return whether or not the plugin is enabled in a certain site. Plugin is enabled if the workshop WS are available.
-     *
-     * @param siteId Site ID. If not defined, current site.
-     * @return Promise resolved with true if plugin is enabled, rejected or resolved with false otherwise.
-     */
-    async isPluginEnabled(siteId?: string): Promise<boolean> {
-        const site = await CoreSites.getSite(siteId);
-
-        return site.wsAvailable('mod_workshop_get_workshops_by_courses') &&
-            site.wsAvailable('mod_workshop_get_workshop_access_information');
-    }
-
-    /**
      * Get a workshop with key=value. If more than one is found, only the first will be returned.
      *
      * @param courseId Course ID.
@@ -272,12 +259,12 @@ export class AddonModWorkshopProvider {
 
         const workshop = response.workshops.find((workshop) => workshop[key] == value);
         if (!workshop) {
-            throw new CoreError('Activity not found');
+            throw new CoreError(Translate.instant('core.course.modulenotfound'));
         }
 
-        // Set submission types for Moodle 3.5 and older.
-        if (typeof workshop.submissiontypetext == 'undefined') {
-            if (typeof workshop.nattachments != 'undefined' && workshop.nattachments > 0) {
+        // Set submission types for Moodle 3.5.
+        if (workshop.submissiontypetext === undefined) {
+            if (workshop.nattachments !== undefined && workshop.nattachments > 0) {
                 workshop.submissiontypetext = AddonModWorkshopSubmissionType.SUBMISSION_TYPE_AVAILABLE;
                 workshop.submissiontypefile = AddonModWorkshopSubmissionType.SUBMISSION_TYPE_AVAILABLE;
             } else {
@@ -742,7 +729,7 @@ export class AddonModWorkshopProvider {
         // If we are editing an offline submission, discard previous first.
         await AddonModWorkshopOffline.deleteSubmissionAction(workshopId, AddonModWorkshopAction.ADD, siteId);
 
-        if (!CoreApp.isOnline() && allowOffline) {
+        if (!CoreNetwork.isOnline() && allowOffline) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -838,7 +825,7 @@ export class AddonModWorkshopProvider {
         // If we are editing an offline discussion, discard previous first.
         await AddonModWorkshopOffline.deleteSubmissionAction(workshopId, AddonModWorkshopAction.UPDATE, siteId);
 
-        if (!CoreApp.isOnline() && allowOffline) {
+        if (!CoreNetwork.isOnline() && allowOffline) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -917,7 +904,7 @@ export class AddonModWorkshopProvider {
         // If we are editing an offline discussion, discard previous first.
         await AddonModWorkshopOffline.deleteSubmissionAction(workshopId, AddonModWorkshopAction.DELETE, siteId);
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -1186,7 +1173,7 @@ export class AddonModWorkshopProvider {
 
         // If we are editing an offline discussion, discard previous first.
         await AddonModWorkshopOffline.deleteAssessment(workshopId, assessmentId, siteId);
-        if (!CoreApp.isOnline() && allowOffline) {
+        if (!CoreNetwork.isOnline() && allowOffline) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -1264,7 +1251,7 @@ export class AddonModWorkshopProvider {
 
         // If we are editing an offline discussion, discard previous first.
         await AddonModWorkshopOffline.deleteEvaluateSubmission(workshopId, submissionId, siteId);
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -1355,7 +1342,7 @@ export class AddonModWorkshopProvider {
 
         // If we are editing an offline discussion, discard previous first.
         await AddonModWorkshopOffline.deleteEvaluateAssessment(workshopId, assessmentId, siteId);
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // App is offline, store the action.
             return storeOffline();
         }

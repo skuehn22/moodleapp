@@ -18,7 +18,7 @@ import { CoreNetworkError } from '@classes/errors/network-error';
 import { CoreCourseActivitySyncBaseProvider } from '@features/course/classes/activity-sync';
 import { CoreCourse, CoreCourseAnyModuleData } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites, CoreSitesReadingStrategy } from '@services/sites';
 import { CoreSync } from '@services/sync';
 import { CoreUtils } from '@services/utils/utils';
@@ -51,7 +51,7 @@ export class AddonModFeedbackSyncProvider extends CoreCourseActivitySyncBaseProv
         courseId: number,
         regex?: RegExp,
         siteId?: string,
-    ): Promise<void> {
+    ): Promise<boolean> {
         regex = regex || /^.*files$|^timers/;
 
         return super.prefetchAfterUpdate(prefetchHandler, module, courseId, regex, siteId);
@@ -130,9 +130,10 @@ export class AddonModFeedbackSyncProvider extends CoreCourseActivitySyncBaseProv
     syncFeedback(feedbackId: number, siteId?: string): Promise<AddonModFeedbackSyncResult> {
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        if (this.isSyncing(feedbackId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(feedbackId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this feedback, return the promise.
-            return this.getOngoingSync(feedbackId, siteId)!;
+            return currentSyncPromise;
         }
 
         // Verify that feedback isn't blocked.
@@ -173,7 +174,7 @@ export class AddonModFeedbackSyncProvider extends CoreCourseActivitySyncBaseProv
             return result;
         }
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }
@@ -222,7 +223,7 @@ export class AddonModFeedbackSyncProvider extends CoreCourseActivitySyncBaseProv
         if (result.updated) {
             // Data has been sent to server, update data.
             try {
-                const module = await CoreCourse.getModuleBasicInfoByInstance(feedbackId, 'feedback', siteId);
+                const module = await CoreCourse.getModuleBasicInfoByInstance(feedbackId, 'feedback', { siteId });
 
                 await this.prefetchAfterUpdate(AddonModFeedbackPrefetchHandler.instance, module, courseId, undefined, siteId);
             } catch {

@@ -19,6 +19,12 @@ import { CoreConstants } from '@/core/constants';
 import { CoreLogger } from '@singletons/logger';
 import { makeSingleton } from '@singletons';
 import { CoreH5P } from '@features/h5p/services/h5p';
+import { CoreLoginHelper } from '@features/login/services/login-helper';
+import { CoreSites } from './sites';
+import { CoreUtils } from './utils/utils';
+import { CoreApp } from './app';
+import { CoreZoomLevel } from '@features/settings/services/settings-helper';
+import { CorePromisedValue } from '@classes/promised-value';
 
 const VERSION_APPLIED = 'version_applied';
 
@@ -31,9 +37,20 @@ const VERSION_APPLIED = 'version_applied';
 export class CoreUpdateManagerProvider {
 
     protected logger: CoreLogger;
+    protected doneDeferred: CorePromisedValue<void>;
 
     constructor() {
         this.logger = CoreLogger.getInstance('CoreUpdateManagerProvider');
+        this.doneDeferred = new CorePromisedValue();
+    }
+
+    /**
+     * Returns a promise resolved when the load function is done.
+     *
+     * @return Promise resolved when the load function is done.
+     */
+    get donePromise(): Promise<void> {
+        return this.doneDeferred;
     }
 
     /**
@@ -42,14 +59,22 @@ export class CoreUpdateManagerProvider {
      *
      * @return Promise resolved when the update process finishes.
      */
-    async load(): Promise<void> {
+    async initialize(): Promise<void> {
         const promises: Promise<unknown>[] = [];
         const versionCode = CoreConstants.CONFIG.versioncode;
 
         const versionApplied = await CoreConfig.get<number>(VERSION_APPLIED, 0);
 
+        if (versionCode > versionApplied) {
+            promises.push(this.checkCurrentSiteAllowed());
+        }
+
         if (versionCode >= 3950 && versionApplied < 3950 && versionApplied > 0) {
             promises.push(CoreH5P.h5pPlayer.deleteAllContentIndexes());
+        }
+
+        if (versionCode >= 41000 && versionApplied < 41000 && versionApplied > 0) {
+            promises.push(this.upgradeFontSizeNames());
         }
 
         try {
@@ -58,6 +83,60 @@ export class CoreUpdateManagerProvider {
             await CoreConfig.set(VERSION_APPLIED, versionCode);
         } catch (error) {
             this.logger.error(`Error applying update from ${versionApplied} to ${versionCode}`, error);
+        } finally {
+            this.doneDeferred.resolve();
+        }
+    }
+
+    /**
+     * If there is a current site, check if it's still supported in the new app.
+     *
+     * @return Promise resolved when done.
+     */
+    protected async checkCurrentSiteAllowed(): Promise<void> {
+        if (!CoreLoginHelper.getFixedSites()) {
+            return;
+        }
+
+        const currentSiteId = await CoreUtils.ignoreErrors(CoreSites.getStoredCurrentSiteId());
+        if (!currentSiteId) {
+            return;
+        }
+
+        const site = await CoreUtils.ignoreErrors(CoreSites.getSite(currentSiteId));
+        if (!site) {
+            return;
+        }
+
+        const isUrlAllowed = await CoreLoginHelper.isSiteUrlAllowed(site.getURL(), false);
+        if (isUrlAllowed) {
+            return;
+        }
+
+        // Site no longer supported, remove it as current site.
+        await CoreSites.removeStoredCurrentSite();
+
+        // Tell the app to open add site so the user can add the new site.
+        CoreApp.storeRedirect(CoreConstants.NO_SITE_ID, {
+            redirectPath: '/login/sites',
+            redirectOptions: {
+                params: {
+                    openAddSite: true,
+                },
+            },
+        });
+    }
+
+    protected async upgradeFontSizeNames(): Promise<void> {
+        const storedFontSizeName = await CoreConfig.get<string>(CoreConstants.SETTINGS_ZOOM_LEVEL, CoreZoomLevel.NONE);
+        switch (storedFontSizeName) {
+            case 'low':
+                await CoreConfig.set(CoreConstants.SETTINGS_ZOOM_LEVEL, CoreZoomLevel.NONE);
+                break;
+
+            case 'normal':
+                await CoreConfig.set(CoreConstants.SETTINGS_ZOOM_LEVEL, CoreZoomLevel.MEDIUM);
+                break;
         }
     }
 

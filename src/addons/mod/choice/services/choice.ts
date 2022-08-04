@@ -18,12 +18,12 @@ import { CoreWSError } from '@classes/errors/wserror';
 import { CoreSite, CoreSiteWSPreSets } from '@classes/site';
 import { CoreCourseCommonModWSOptions } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreFilepool } from '@services/filepool';
 import { CoreSites, CoreSitesCommonWSOptions } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
 import { CoreStatusWithWarningsWSResponse, CoreWSExternalFile, CoreWSExternalWarning } from '@services/ws';
-import { makeSingleton } from '@singletons';
+import { makeSingleton, Translate } from '@singletons';
 import { AddonModChoiceOffline } from './choice-offline';
 import { AddonModChoiceAutoSyncData, AddonModChoiceSyncProvider } from './choice-sync';
 
@@ -90,7 +90,7 @@ export class AddonModChoiceProvider {
             return false;
         };
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -215,7 +215,7 @@ export class AddonModChoiceProvider {
             return currentChoice;
         }
 
-        throw new CoreError('Choice not found.');
+        throw new CoreError(Translate.instant('core.course.modulenotfound'));
     }
 
     /**
@@ -407,7 +407,7 @@ export class AddonModChoiceProvider {
             return false;
         };
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // App is offline, store the action.
             return storeOffline();
         }
@@ -484,7 +484,7 @@ export type AddonModChoiceChoice = {
     name: string; // Choice name.
     intro: string; // The choice intro.
     introformat: number; // Intro format (1 = HTML, 0 = MOODLE, 2 = PLAIN or 4 = MARKDOWN).
-    introfiles?: CoreWSExternalFile[]; // @since 3.2.
+    introfiles?: CoreWSExternalFile[];
     publish?: boolean; // If choice is published.
     showresults?: number; // 0 never, 1 after answer, 2 after close, 3 always.
     display?: number; // Display mode (vertical, horizontal).

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { IAddonModAssignFeedbackPluginComponent } from '@addons/mod/assign/classes/base-feedback-plugin-component';
 import {
     AddonModAssignPlugin,
     AddonModAssignAssign,
@@ -69,7 +70,7 @@ export class AddonModAssignFeedbackCommentsHandlerService implements AddonModAss
      */
     discardDraft(assignId: number, userId: number, siteId?: string): void {
         const id = this.getDraftId(assignId, userId, siteId);
-        if (typeof this.drafts[id] != 'undefined') {
+        if (this.drafts[id] !== undefined) {
             delete this.drafts[id];
         }
     }
@@ -80,7 +81,7 @@ export class AddonModAssignFeedbackCommentsHandlerService implements AddonModAss
      *
      * @return The component (or promise resolved with component) to use, undefined if not found.
      */
-    getComponent(): Type<unknown> {
+    getComponent(): Type<IAddonModAssignFeedbackPluginComponent> {
         return AddonModAssignFeedbackCommentsComponent;
     }
 
@@ -95,7 +96,7 @@ export class AddonModAssignFeedbackCommentsHandlerService implements AddonModAss
     getDraft(assignId: number, userId: number, siteId?: string): AddonModAssignFeedbackCommentsDraftData | undefined {
         const id = this.getDraftId(assignId, userId, siteId);
 
-        if (typeof this.drafts[id] != 'undefined') {
+        if (this.drafts[id] !== undefined) {
             return this.drafts[id];
         }
     }
@@ -164,7 +165,7 @@ export class AddonModAssignFeedbackCommentsHandlerService implements AddonModAss
         const initialText = AddonModAssign.getSubmissionPluginText(plugin);
         const newText = AddonModAssignFeedbackCommentsHandler.getTextFromInputData(plugin, inputData);
 
-        if (typeof newText == 'undefined') {
+        if (newText === undefined) {
             return false;
         }
 

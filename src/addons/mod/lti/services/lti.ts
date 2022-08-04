@@ -17,8 +17,8 @@ import { Injectable } from '@angular/core';
 import { CoreError } from '@classes/errors/error';
 import { CoreSite, CoreSiteWSPreSets } from '@classes/site';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
-import { CoreApp } from '@services/app';
 import { CoreFile } from '@services/file';
+import { CorePlatform } from '@services/platform';
 import { CoreSites, CoreSitesCommonWSOptions } from '@services/sites';
 import { CoreTextUtils } from '@services/utils/text';
 import { CoreUrlUtils } from '@services/utils/url';
@@ -110,7 +110,7 @@ export class AddonModLtiProvider {
             return currentLti;
         }
 
-        throw new CoreError('Activity not found.');
+        throw new CoreError(Translate.instant('core.course.modulenotfound'));
     }
 
     /**
@@ -251,7 +251,7 @@ export class AddonModLtiProvider {
         // Generate launcher and open it.
         const launcherUrl = await this.generateLauncher(url, params);
 
-        if (CoreApp.isMobile()) {
+        if (CorePlatform.isMobile()) {
             CoreUtils.openInApp(launcherUrl);
         } else {
             // In desktop open in browser, we found some cases where inapp caused JS issues.
@@ -331,7 +331,7 @@ export type AddonModLtiLti = {
     name: string; // LTI name.
     intro?: string; // The LTI intro.
     introformat?: number; // Intro format (1 = HTML, 0 = MOODLE, 2 = PLAIN or 4 = MARKDOWN).
-    introfiles?: CoreWSExternalFile[]; // @since 3.2.
+    introfiles?: CoreWSExternalFile[];
     timecreated?: number; // Time of creation.
     timemodified?: number; // Time of last modification.
     typeid?: number; // Type id.

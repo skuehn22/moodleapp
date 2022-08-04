@@ -16,7 +16,7 @@ import { Injectable } from '@angular/core';
 import { CoreSyncBaseProvider } from '@classes/base-sync';
 import { CoreNetworkError } from '@classes/errors/network-error';
 import { CoreCourses } from '@features/courses/services/courses';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
 import { Translate, makeSingleton } from '@singletons';
@@ -75,7 +75,7 @@ export class AddonNotesSyncProvider extends CoreSyncBaseProvider<AddonNotesSyncR
                 ? this.syncNotes(courseId, siteId)
                 : this.syncNotesIfNeeded(courseId, siteId));
 
-            if (typeof result != 'undefined') {
+            if (result !== undefined) {
                 // Sync successful, send event.
                 CoreEvents.trigger(AddonNotesSyncProvider.AUTO_SYNCED, {
                     courseId,
@@ -112,9 +112,10 @@ export class AddonNotesSyncProvider extends CoreSyncBaseProvider<AddonNotesSyncR
     syncNotes(courseId: number, siteId?: string): Promise<AddonNotesSyncResult> {
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        if (this.isSyncing(courseId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(courseId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for notes, return the promise.
-            return this.getOngoingSync(courseId, siteId)!;
+            return currentSyncPromise;
         }
 
         this.logger.debug('Try to sync notes for course ' + courseId);
@@ -147,7 +148,7 @@ export class AddonNotesSyncProvider extends CoreSyncBaseProvider<AddonNotesSyncR
             return result;
         }
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }

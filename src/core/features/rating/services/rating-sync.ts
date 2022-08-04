@@ -16,7 +16,7 @@ import { ContextLevel } from '@/core/constants';
 import { Injectable } from '@angular/core';
 import { CoreSyncBaseProvider } from '@classes/base-sync';
 import { CoreNetworkError } from '@classes/errors/network-error';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites } from '@services/sites';
 import { CoreTextUtils } from '@services/utils/text';
 import { CoreUtils } from '@services/utils/utils';
@@ -157,9 +157,10 @@ export class CoreRatingSyncProvider extends CoreSyncBaseProvider<CoreRatingSyncI
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         const syncId = this.getItemSetSyncId(component, ratingArea, contextLevel, instanceId, itemSetId);
-        if (this.isSyncing(syncId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this item set, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         this.logger.debug(`Try to sync ratings of component '${component}' rating area '${ratingArea}'` +
@@ -201,7 +202,7 @@ export class CoreRatingSyncProvider extends CoreSyncBaseProvider<CoreRatingSyncI
             // Nothing to sync.
             return result;
         }
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { AddonModAssignSubmissionPluginBaseComponent } from '@addons/mod/assign/classes/base-submission-plugin-component';
 import { AddonModAssignAssign, AddonModAssignSubmission, AddonModAssignPlugin } from '@addons/mod/assign/services/assign';
 import { AddonModAssignSubmissionHandler } from '@addons/mod/assign/services/submission-delegate';
 import { Injectable, Type } from '@angular/core';
 import { CoreComments } from '@features/comments/services/comments';
-import { CoreUtils } from '@services/utils/utils';
 import { makeSingleton } from '@singletons';
 import { AddonModAssignSubmissionCommentsComponent } from '../component/comments';
 
@@ -49,7 +49,7 @@ export class AddonModAssignSubmissionCommentsHandlerService implements AddonModA
      * @param edit Whether the user is editing.
      * @return The component (or promise resolved with component) to use, undefined if not found.
      */
-    getComponent(plugin: AddonModAssignPlugin, edit = false): Type<unknown> | undefined {
+    getComponent(plugin: AddonModAssignPlugin, edit = false): Type<AddonModAssignSubmissionPluginBaseComponent> | undefined {
         return edit ? undefined : AddonModAssignSubmissionCommentsComponent;
     }
 
@@ -87,18 +87,14 @@ export class AddonModAssignSubmissionCommentsHandlerService implements AddonModA
         plugin: AddonModAssignPlugin,
         siteId?: string,
     ): Promise<void> {
-
-        // Fail silently (Moodle < 3.1.1, 3.2)
-        await CoreUtils.ignoreErrors(
-            CoreComments.getComments(
-                'module',
-                assign.cmid,
-                'assignsubmission_comments',
-                submission.id,
-                'submission_comments',
-                0,
-                siteId,
-            ),
+        await CoreComments.getComments(
+            'module',
+            assign.cmid,
+            'assignsubmission_comments',
+            submission.id,
+            'submission_comments',
+            0,
+            siteId,
         );
     }
 

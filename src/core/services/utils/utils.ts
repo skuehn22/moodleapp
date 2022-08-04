@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { InAppBrowserObject, InAppBrowserOptions } from '@ionic-native/in-app-browser';
 import { FileEntry } from '@ionic-native/file/ngx';
 import { Subscription } from 'rxjs';
@@ -21,18 +21,21 @@ import { CoreApp } from '@services/app';
 import { CoreEvents } from '@singletons/events';
 import { CoreFile } from '@services/file';
 import { CoreLang } from '@services/lang';
-import { CoreWS, CoreWSFile } from '@services/ws';
+import { CoreWS } from '@services/ws';
 import { CoreDomUtils } from '@services/utils/dom';
 import { CoreMimetypeUtils } from '@services/utils/mimetype';
 import { CoreTextUtils } from '@services/utils/text';
 import { CoreWSError } from '@classes/errors/wserror';
-import { makeSingleton, Clipboard, InAppBrowser, FileOpener, WebIntent, QRScanner, Translate } from '@singletons';
+import { makeSingleton, Clipboard, InAppBrowser, FileOpener, WebIntent, QRScanner, Translate, NgZone } from '@singletons';
 import { CoreLogger } from '@singletons/logger';
-import { CoreFileSizeSum } from '@services/plugin-file-delegate';
 import { CoreViewerQRScannerComponent } from '@features/viewer/components/qr-scanner/qr-scanner';
 import { CoreCanceledError } from '@classes/errors/cancelederror';
 import { CoreFileEntry } from '@services/file-helper';
 import { CoreConstants } from '@/core/constants';
+import { CoreWindow } from '@singletons/window';
+import { CoreColors } from '@singletons/colors';
+import { CorePromisedValue } from '@classes/promised-value';
+import { CorePlatform } from '@services/platform';
 
 type TreeNode<T> = T & { children: TreeNode<T>[] };
 
@@ -47,9 +50,10 @@ export class CoreUtilsProvider {
     protected logger: CoreLogger;
     protected iabInstance?: InAppBrowserObject;
     protected uniqueIds: {[name: string]: number} = {};
-    protected qrScanData?: {deferred: PromiseDefer<string>; observable: Subscription};
+    protected qrScanData?: {deferred: CorePromisedValue<string>; observable: Subscription};
+    protected initialColorSchemeContent = 'light dark';
 
-    constructor(protected zone: NgZone) {
+    constructor() {
         this.logger = CoreLogger.getInstance('CoreUtilsProvider');
     }
 
@@ -77,12 +81,12 @@ export class CoreUtilsProvider {
      * @param promises Promises.
      * @return Promise resolved if all promises are resolved and rejected if at least 1 promise fails.
      */
-    async allPromises(promises: Promise<unknown>[]): Promise<void> {
+    async allPromises(promises: unknown[]): Promise<void> {
         if (!promises || !promises.length) {
-            return Promise.resolve();
+            return;
         }
 
-        const getPromiseError = async (promise): Promise<Error | void> => {
+        const getPromiseError = async (promise: unknown): Promise<Error | void> => {
             try {
                 await promise;
             } catch (error) {
@@ -149,7 +153,7 @@ export class CoreUtilsProvider {
     ): Record<string, T[]> {
         for (const entry of array) {
             const key = propertyName ? entry[propertyName] : entry;
-            if (typeof result[key] == 'undefined') {
+            if (result[key] === undefined) {
                 result[key] = [];
             }
 
@@ -201,7 +205,7 @@ export class CoreUtilsProvider {
             return equal;
         } else {
             if (undefinedIsNull && (
-                (typeof itemA == 'undefined' && itemB === null) || (itemA === null && typeof itemB == 'undefined'))) {
+                (itemA === undefined && itemB === null) || (itemA === null && itemB === undefined))) {
                 return true;
             }
 
@@ -523,7 +527,7 @@ export class CoreUtilsProvider {
      * @return Locale float.
      */
     formatFloat(float: unknown): string {
-        if (typeof float == 'undefined' || float === null || typeof float == 'boolean') {
+        if (float === undefined || float === null || typeof float == 'boolean') {
             return '';
         }
 
@@ -835,7 +839,7 @@ export class CoreUtilsProvider {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isFalseOrZero(value: any): boolean {
-        return typeof value != 'undefined' && (value === false || value === 'false' || parseInt(value, 10) === 0);
+        return value !== undefined && (value === false || value === 'false' || parseInt(value, 10) === 0);
     }
 
     /**
@@ -846,22 +850,40 @@ export class CoreUtilsProvider {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isTrueOrOne(value: any): boolean {
-        return typeof value != 'undefined' && (value === true || value === 'true' || parseInt(value, 10) === 1);
+        return value !== undefined && (value === true || value === 'true' || parseInt(value, 10) === 1);
     }
 
     /**
-     * Given an error returned by a WS call, check if the error is generated by the app or it has been returned by the WebSwervice.
+     * Given an error returned by a WS call, check if the error is generated by the app or it has been returned by the WebService.
      *
      * @param error Error to check.
      * @return Whether the error was returned by the WebService.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     isWebServiceError(error: any): boolean {
-        return error && (typeof error.warningcode != 'undefined' || (typeof error.errorcode != 'undefined' &&
-                error.errorcode != 'invalidtoken' && error.errorcode != 'userdeleted' && error.errorcode != 'upgraderunning' &&
+        return error && (
+            error.warningcode !== undefined ||
+            (
+                error.errorcode !== undefined && error.errorcode != 'userdeleted' && error.errorcode != 'upgraderunning' &&
                 error.errorcode != 'forcepasswordchangenotice' && error.errorcode != 'usernotfullysetup' &&
                 error.errorcode != 'sitepolicynotagreed' && error.errorcode != 'sitemaintenance' &&
-                (error.errorcode != 'accessexception' || error.message.indexOf('Invalid token - token expired') == -1)));
+                error.errorcode != 'wsaccessusersuspended' && error.errorcode != 'wsaccessuserdeleted' &&
+                !this.isExpiredTokenError(error)
+            ) ||
+            error.status && error.status >= 400 // CoreHttpError, assume status 400 and above are like WebService errors.
+        );
+    }
+
+    /**
+     * Given an error returned by a WS call, check if the error is a token expired error.
+     *
+     * @param error Error to check.
+     * @return Whether the error is a token expired error.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    isExpiredTokenError(error: any): boolean {
+        return error.errorcode === 'invalidtoken' ||
+            (error.errorcode === 'accessexception' && error.message.includes('Invalid token - token expired'));
     }
 
     /**
@@ -916,7 +938,7 @@ export class CoreUtilsProvider {
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     notNullOrUndefined(value: any): boolean {
-        return typeof value != 'undefined' && value !== null;
+        return value !== undefined && value !== null;
     }
 
     /**
@@ -982,14 +1004,8 @@ export class CoreUtilsProvider {
 
         options = options || {};
         options.usewkwebview = 'yes'; // Force WKWebView in iOS.
-
-        if (!options.enableViewPortScale) {
-            options.enableViewPortScale = 'yes'; // Enable zoom on iOS.
-        }
-
-        if (!options.allowInlineMediaPlayback) {
-            options.allowInlineMediaPlayback = 'yes'; // Allow playing inline videos in iOS.
-        }
+        options.enableViewPortScale = options.enableViewPortScale ?? 'yes'; // Enable zoom on iOS by default.
+        options.allowInlineMediaPlayback = options.allowInlineMediaPlayback ?? 'yes'; // Allow playing inline videos in iOS.
 
         if (!options.location && CoreApp.isIOS() && url.indexOf('file://') === 0) {
             // The URL uses file protocol, don't show it on iOS.
@@ -997,16 +1013,18 @@ export class CoreUtilsProvider {
             options.location = 'no';
         }
 
+        this.setInAppBrowserToolbarColors(options);
+
         this.iabInstance = InAppBrowser.create(url, '_blank', options);
 
-        if (CoreApp.isMobile()) {
+        if (CorePlatform.isMobile()) {
             let loadStopSubscription;
             const loadStartUrls: string[] = [];
 
             // Trigger global events when a url is loaded or the window is closed. This is to make it work like in Ionic 1.
             const loadStartSubscription = this.iabInstance.on('loadstart').subscribe((event) => {
                 // Execute the callback in the Angular zone, so change detection doesn't stop working.
-                this.zone.run(() => {
+                NgZone.run(() => {
                     // Store the last loaded URLs (max 10).
                     loadStartUrls.push(event.url);
                     if (loadStartUrls.length > 10) {
@@ -1021,7 +1039,7 @@ export class CoreUtilsProvider {
                 // Load stop is needed with InAppBrowser v3. Custom URL schemes no longer trigger load start, simulate it.
                 loadStopSubscription = this.iabInstance.on('loadstop').subscribe((event) => {
                     // Execute the callback in the Angular zone, so change detection doesn't stop working.
-                    this.zone.run(() => {
+                    NgZone.run(() => {
                         if (loadStartUrls.indexOf(event.url) == -1) {
                             // The URL was stopped but not started, probably a custom URL scheme.
                             CoreEvents.trigger(CoreEvents.IAB_LOAD_START, event);
@@ -1032,7 +1050,7 @@ export class CoreUtilsProvider {
 
             const exitSubscription = this.iabInstance.on('exit').subscribe((event) => {
                 // Execute the callback in the Angular zone, so change detection doesn't stop working.
-                this.zone.run(() => {
+                NgZone.run(() => {
                     loadStartSubscription.unsubscribe();
                     loadStopSubscription && loadStopSubscription.unsubscribe();
                     exitSubscription.unsubscribe();
@@ -1045,12 +1063,64 @@ export class CoreUtilsProvider {
     }
 
     /**
+     * Given some IAB options, set the toolbar colors properties to the right values.
+     *
+     * @param options Options to change.
+     * @return Changed options.
+     */
+    protected setInAppBrowserToolbarColors(options: InAppBrowserOptions): InAppBrowserOptions {
+        if (options.toolbarcolor) {
+            // Color already set.
+            return options;
+        }
+
+        // Color not set. Check if it needs to be changed automatically.
+        let bgColor: string | undefined;
+        let textColor: string | undefined;
+
+        if (CoreConstants.CONFIG.iabToolbarColors === 'auto') {
+            bgColor = CoreColors.getToolbarBackgroundColor();
+        } else if (CoreConstants.CONFIG.iabToolbarColors && typeof CoreConstants.CONFIG.iabToolbarColors === 'object') {
+            bgColor = CoreConstants.CONFIG.iabToolbarColors.background;
+            textColor = CoreConstants.CONFIG.iabToolbarColors.text;
+        }
+
+        if (!bgColor) {
+            // Use default color. In iOS, use black background color since the default is transparent and doesn't look good.
+            options.locationcolor = '#000000';
+
+            return options;
+        }
+
+        if (!textColor) {
+            textColor = CoreColors.isWhiteContrastingBetter(bgColor) ? '#ffffff' : '#000000';
+        }
+
+        options.toolbarcolor = bgColor;
+        options.closebuttoncolor = textColor;
+        options.navigationbuttoncolor = textColor;
+        options.locationcolor = bgColor;
+        options.locationtextcolor = textColor;
+
+        return options;
+    }
+
+    /**
      * Open a URL using a browser.
      * Do not use for files, refer to {@link openFile}.
      *
      * @param url The URL to open.
+     * @param options Options.
      */
-    openInBrowser(url: string): void {
+    async openInBrowser(url: string, options: CoreUtilsOpenInBrowserOptions = {}): Promise<void> {
+        if (options.showBrowserWarning || options.showBrowserWarning === undefined) {
+            try {
+                await CoreWindow.confirmOpenBrowserIfNeeded(options.browserWarningUrl ?? url);
+            } catch (error) {
+                return; // Cancelled, stop.
+            }
+        }
+
         window.open(url, '_system');
     }
 
@@ -1123,7 +1193,7 @@ export class CoreUtilsProvider {
     ): A[] {
         // Get the entries from an object or primitive value.
         const getEntries = (elKey: string, value: unknown): Record<string, unknown>[] | unknown => {
-            if (typeof value == 'undefined' || value == null) {
+            if (value === undefined || value == null) {
                 // Filter undefined and null values.
                 return;
             } else if (this.isObject(value)) {
@@ -1194,7 +1264,7 @@ export class CoreUtilsProvider {
         const mapped = {};
         objects.forEach((item) => {
             const keyValue = item[keyName] as string;
-            const key = prefixSubstr > 0 ? keyValue.substr(prefixSubstr) : keyValue;
+            const key = prefixSubstr > 0 ? keyValue.substring(prefixSubstr) : keyValue;
             mapped[key] = item[valueName];
         });
 
@@ -1217,7 +1287,7 @@ export class CoreUtilsProvider {
         for (const name in flattened) {
             let value = flattened[name];
 
-            if (removeEmpty && (value === null || typeof value == 'undefined')) {
+            if (removeEmpty && (value === null || value === undefined)) {
                 continue;
             }
 
@@ -1258,18 +1328,13 @@ export class CoreUtilsProvider {
     }
 
     /**
-     * Similar to AngularJS $q.defer().
+     * Create a deferred promise that can be resolved or rejected explicitly.
      *
      * @return The deferred promise.
+     * @deprecated since app 4.1. Use CorePromisedValue instead.
      */
-    promiseDefer<T>(): PromiseDefer<T> {
-        const deferred: Partial<PromiseDefer<T>> = {};
-        deferred.promise = new Promise((resolve, reject): void => {
-            deferred.resolve = resolve as (value?: T | undefined) => void;
-            deferred.reject = reject;
-        });
-
-        return deferred as PromiseDefer<T>;
+    promiseDefer<T>(): CorePromisedValue<T> {
+        return new CorePromisedValue<T>();
     }
 
     /**
@@ -1319,8 +1384,8 @@ export class CoreUtilsProvider {
         obj2: Record<string, unknown> | unknown[],
         key: string,
     ): boolean {
-        let value1 = typeof obj1[key] != 'undefined' ? obj1[key] : '';
-        let value2 = typeof obj2[key] != 'undefined' ? obj2[key] : '';
+        let value1 = obj1[key] !== undefined ? obj1[key] : '';
+        let value2 = obj2[key] !== undefined ? obj2[key] : '';
 
         if (typeof value1 == 'number' || typeof value1 == 'boolean') {
             value1 = '' + value1;
@@ -1381,31 +1446,6 @@ export class CoreUtilsProvider {
     }
 
     /**
-     * Sum the filesizes from a list of files checking if the size will be partial or totally calculated.
-     *
-     * @param files List of files to sum its filesize.
-     * @return File size and a boolean to indicate if it is the total size or only partial.
-     * @deprecated since 3.8.0. Use CorePluginFileDelegate.getFilesSize instead.
-     */
-    sumFileSizes(files: CoreWSFile[]): CoreFileSizeSum {
-        const result = {
-            size: 0,
-            total: true,
-        };
-
-        files.forEach((file) => {
-            if (typeof file.filesize == 'undefined') {
-                // We don't have the file size, cannot calculate its total size.
-                result.total = false;
-            } else {
-                result.size += file.filesize;
-            }
-        });
-
-        return result;
-    }
-
-    /**
      * Set a timeout to a Promise. If the time passes before the Promise is resolved or rejected, it will be automatically
      * rejected.
      *
@@ -1449,7 +1489,7 @@ export class CoreUtilsProvider {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     unformatFloat(localeFloat: any, strict?: boolean): false | '' | number {
         // Bad format on input type number.
-        if (typeof localeFloat == 'undefined') {
+        if (localeFloat === undefined) {
             return false;
         }
 
@@ -1505,7 +1545,6 @@ export class CoreUtilsProvider {
     /**
      * Debounce a function so consecutive calls are ignored until a certain time has passed since the last call.
      *
-     * @param context The context to apply to the function.
      * @param fn Function to debounce.
      * @param delay Time that must pass until the function is called.
      * @return Debounced function.
@@ -1523,12 +1562,37 @@ export class CoreUtilsProvider {
     }
 
     /**
+     * Throttle a function so consecutive calls are ignored until a certain time has passed since the last executed call.
+     *
+     * @param fn Function to throttle.
+     * @param duration Time that must pass until the function is called.
+     * @return Throttled function.
+     */
+    throttle<T extends unknown[]>(fn: (...args: T) => unknown, duration: number): (...args: T) => void {
+        let shouldWait = false;
+
+        const throttled = (...args: T): void => {
+            if (!shouldWait) {
+                fn.apply(null, args);
+
+                shouldWait = true;
+
+                setTimeout(() => {
+                    shouldWait = false;
+                }, duration);
+            }
+        };
+
+        return throttled;
+    }
+
+    /**
      * Check whether the app can scan QR codes.
      *
      * @return Whether the app can scan QR codes.
      */
     canScanQR(): boolean {
-        return CoreApp.isMobile();
+        return CorePlatform.isMobile();
     }
 
     /**
@@ -1553,7 +1617,7 @@ export class CoreUtilsProvider {
      * @return Promise resolved with the QR string, rejected if error or cancelled.
      */
     async startScanQR(): Promise<string | undefined> {
-        if (!CoreApp.isMobile()) {
+        if (!CorePlatform.isMobile()) {
             return Promise.reject('QRScanner isn\'t available in browser.');
         }
 
@@ -1569,12 +1633,12 @@ export class CoreUtilsProvider {
 
             if (this.qrScanData && this.qrScanData.deferred) {
                 // Already scanning.
-                return this.qrScanData.deferred.promise;
+                return this.qrScanData.deferred;
             }
 
             // Start scanning.
             this.qrScanData = {
-                deferred: this.promiseDefer(),
+                deferred: new CorePromisedValue(),
 
                 // When text is received, stop scanning and return the text.
                 observable: QRScanner.scan().subscribe(text => this.stopScanQR(text, false)),
@@ -1586,7 +1650,14 @@ export class CoreUtilsProvider {
 
                 document.body.classList.add('core-scanning-qr');
 
-                return this.qrScanData.deferred.promise;
+                // Set color-scheme to 'normal', otherwise the camera isn't seen in Android.
+                const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+                if (colorSchemeMeta) {
+                    this.initialColorSchemeContent = colorSchemeMeta.getAttribute('content') || this.initialColorSchemeContent;
+                    colorSchemeMeta.setAttribute('content', 'normal');
+                }
+
+                return this.qrScanData.deferred;
             } catch (e) {
                 this.stopScanQR(e, true);
 
@@ -1614,14 +1685,18 @@ export class CoreUtilsProvider {
 
         // Hide camera preview.
         document.body.classList.remove('core-scanning-qr');
+
+        // Set color-scheme to the initial value.
+        document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', this.initialColorSchemeContent);
+
         QRScanner.hide();
         QRScanner.destroy();
 
         this.qrScanData.observable.unsubscribe(); // Stop scanning.
 
         if (error) {
-            this.qrScanData.deferred.reject(data);
-        } else if (typeof data != 'undefined') {
+            this.qrScanData.deferred.reject(typeof data === 'string' ? new Error(data) : data);
+        } else if (data !== undefined) {
             this.qrScanData.deferred.resolve(data as string);
         } else {
             this.qrScanData.deferred.reject(new CoreCanceledError());
@@ -1693,30 +1768,6 @@ export class CoreUtilsProvider {
 export const CoreUtils = makeSingleton(CoreUtilsProvider);
 
 /**
- * Deferred promise. It's similar to the result of $q.defer() in AngularJS.
- */
-export type PromiseDefer<T> = {
-    /**
-     * The promise.
-     */
-    promise: Promise<T>;
-
-    /**
-     * Function to resolve the promise.
-     *
-     * @param value The resolve value.
-     */
-    resolve: (value?: T) => void; // Function to resolve the promise.
-
-    /**
-     * Function to reject the promise.
-     *
-     * @param reason The reject param.
-     */
-    reject: (reason?: unknown) => void;
-};
-
-/**
  * Data for each entry of executeOrderedPromises.
  */
 export type OrderedPromiseData = {
@@ -1752,6 +1803,14 @@ export type CoreMenuItem<T = number> = {
  */
 export type CoreUtilsOpenFileOptions = {
     iOSOpenFileAction?: OpenFileAction; // Action to do when opening a file.
+};
+
+/**
+ * Options for opening in browser.
+ */
+export type CoreUtilsOpenInBrowserOptions = {
+    showBrowserWarning?: boolean; // Whether to display a warning before opening in browser. Defaults to true.
+    browserWarningUrl?: string; // The URL to display in the warning message. Use it to hide sensitive information.
 };
 
 /**

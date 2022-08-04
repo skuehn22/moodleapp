@@ -19,7 +19,7 @@ import { CoreNetworkError } from '@classes/errors/network-error';
 import { CoreCourseActivitySyncBaseProvider } from '@features/course/classes/activity-sync';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
 import { CoreRatingSync } from '@features/rating/services/rating-sync';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites } from '@services/sites';
 import { CoreSync } from '@services/sync';
 import { CoreUtils } from '@services/utils/utils';
@@ -144,9 +144,10 @@ export class AddonModGlossarySyncProvider extends CoreCourseActivitySyncBaseProv
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         const syncId = this.getGlossarySyncId(glossaryId, userId);
-        if (this.isSyncing(syncId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this glossary, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         // Verify that glossary isn't blocked.
@@ -188,7 +189,7 @@ export class AddonModGlossarySyncProvider extends CoreCourseActivitySyncBaseProv
             await CoreUtils.ignoreErrors(this.setSyncTime(syncId, siteId));
 
             return result;
-        } else if (!CoreApp.isOnline()) {
+        } else if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }

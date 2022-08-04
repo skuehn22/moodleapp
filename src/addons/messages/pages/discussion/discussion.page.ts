@@ -36,8 +36,7 @@ import { CoreLogger } from '@singletons/logger';
 import { CoreApp } from '@services/app';
 import { CoreInfiniteLoadingComponent } from '@components/infinite-loading/infinite-loading';
 import { Md5 } from 'ts-md5/dist/md5';
-import moment from 'moment';
-import { CoreAnimations } from '@components/animations';
+import moment from 'moment-timezone';
 import { CoreError } from '@classes/errors/error';
 import { Translate } from '@singletons';
 import { CoreNavigator } from '@services/navigator';
@@ -45,6 +44,7 @@ import { CoreIonLoadingElement } from '@classes/ion-loading';
 import { ActivatedRoute } from '@angular/router';
 import { AddonMessagesConversationInfoComponent } from '../../components/conversation-info/conversation-info';
 import { CoreConstants } from '@/core/constants';
+import { CoreDom } from '@singletons/dom';
 
 /**
  * Page that displays a message discussion page.
@@ -52,7 +52,6 @@ import { CoreConstants } from '@/core/constants';
 @Component({
     selector: 'page-addon-messages-discussion',
     templateUrl: 'discussion.html',
-    animations: [CoreAnimations.SLIDE_IN_OUT],
     styleUrls: ['discussion.scss'],
 })
 export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterViewInit {
@@ -71,7 +70,6 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
     protected keepMessageMap: {[hash: string]: boolean} = {};
     protected syncObserver: CoreEventObserver;
     protected oldContentHeight = 0;
-    protected keyboardObserver: CoreEventObserver;
     protected scrollBottom = true;
     protected viewDestroyed = false;
     protected memberInfoObserver: CoreEventObserver;
@@ -148,12 +146,6 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
             },
             this.siteId,
         );
-
-        // Recalculate footer position when keyboard is shown or hidden.
-        this.keyboardObserver = CoreEvents.on(CoreEvents.KEYBOARD_CHANGE, () => {
-            // @todo probably not needed.
-            // this.content.resize();
-        });
     }
 
     /**
@@ -212,7 +204,7 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
                 message.useridfrom;
 
         let added = false;
-        if (typeof this.keepMessageMap[message.hash] === 'undefined') {
+        if (this.keepMessageMap[message.hash] === undefined) {
             // Message not added to the list. Add it now.
             this.messages.push(message);
             added = message.useridfrom != this.currentUserId;
@@ -311,7 +303,7 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
             } else {
                 if (this.userId) {
                     // Fake the user member info.
-                    promises.push(CoreUser.getProfile(this.userId!).then(async (user) => {
+                    promises.push(CoreUser.getProfile(this.userId).then(async (user) => {
                         this.otherMember = {
                             id: user.id,
                             fullname: user.fullname,
@@ -451,13 +443,9 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
             return;
         }
 
-        // Don't use domUtils.getScrollHeight because it gives an outdated value after receiving a new message.
-        const scrollHeight = this.scrollElement ? this.scrollElement.scrollHeight : 0;
-
         // Check if we are at the bottom to scroll it after render.
         // Use a 5px error margin because in iOS there is 1px difference for some reason.
-        this.scrollBottom = Math.abs(scrollHeight - (this.scrollElement?.scrollTop || 0) -
-            (this.scrollElement?.clientHeight || 0)) < 5;
+        this.scrollBottom = CoreDom.scrollIsBottom(this.scrollElement, 5);
 
         if (this.messagesBeingSent > 0) {
             // Ignore polling due to a race condition.
@@ -502,17 +490,11 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
     /**
      * Set the new message badge number and set scroll listener if needed.
      *
-     * @param addMessages NUmber of messages still to be read.
+     * @param addMessages Number of messages still to be read.
      */
     protected setNewMessagesBadge(addMessages: number): void {
         if (this.newMessages == 0 && addMessages > 0) {
-            // Setup scrolling.
-            this.content!.scrollEvents = true;
-
             this.scrollFunction();
-        } else if (this.newMessages > 0 && addMessages == 0) {
-            // Remove scrolling.
-            this.content!.scrollEvents = false;
         }
 
         this.newMessages = addMessages;
@@ -522,39 +504,39 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
      * The scroll was moved. Update new messages count.
      */
     scrollFunction(): void {
-        if (this.newMessages > 0) {
-            const scrollBottom = (this.scrollElement?.scrollTop || 0) + (this.scrollElement?.clientHeight || 0);
-            const scrollHeight = (this.scrollElement?.scrollHeight || 0);
-            if (scrollBottom > scrollHeight - 40) {
-                // At the bottom, reset.
-                this.setNewMessagesBadge(0);
+        if (this.newMessages == 0) {
+            return;
+        }
 
-                return;
+        if (CoreDom.scrollIsBottom(this.scrollElement, 40)) {
+            // At the bottom, reset.
+            this.setNewMessagesBadge(0);
+
+            return;
+        }
+
+        const scrollElRect = this.scrollElement?.getBoundingClientRect();
+        const scrollBottomPos = (scrollElRect && scrollElRect.bottom) || 0;
+
+        if (scrollBottomPos == 0) {
+            return;
+        }
+
+        const messages = Array.from(this.hostElement.querySelectorAll('core-message:not(.is-mine)'))
+            .slice(-this.newMessages)
+            .reverse();
+
+        const newMessagesUnread = messages.findIndex((message) => {
+            const elementRect = message.getBoundingClientRect();
+            if (!elementRect) {
+                return false;
             }
 
-            const scrollElRect = this.scrollElement?.getBoundingClientRect();
-            const scrollBottomPos = (scrollElRect && scrollElRect.bottom) || 0;
+            return elementRect.bottom <= scrollBottomPos;
+        });
 
-            if (scrollBottomPos == 0) {
-                return;
-            }
-
-            const messages = Array.from(this.hostElement.querySelectorAll('.addon-message-not-mine'))
-                .slice(-this.newMessages)
-                .reverse();
-
-            const newMessagesUnread = messages.findIndex((message) => {
-                const elementRect = message.getBoundingClientRect();
-                if (!elementRect) {
-                    return false;
-                }
-
-                return elementRect.bottom <= scrollBottomPos;
-            });
-
-            if (newMessagesUnread > 0 && newMessagesUnread < this.newMessages) {
-                this.setNewMessagesBadge(newMessagesUnread);
-            }
+        if (newMessagesUnread > 0 && newMessagesUnread < this.newMessages) {
+            this.setNewMessagesBadge(newMessagesUnread);
         }
     }
 
@@ -571,7 +553,7 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
         // Try to get the conversationId if we don't have it.
         if (!conversationId && userId) {
             try {
-                if (userId == this.currentUserId && AddonMessages.isSelfConversationEnabled()) {
+                if (userId === this.currentUserId && AddonMessages.isSelfConversationEnabled()) {
                     fallbackConversation = await AddonMessages.getSelfConversation();
                 } else {
                     fallbackConversation = await AddonMessages.getConversationBetweenUsers(userId, undefined, true);
@@ -579,7 +561,7 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
                 conversationId = fallbackConversation.id;
             } catch (error) {
                 // Probably conversation does not exist or user is offline. Try to load offline messages.
-                this.isSelf = userId == this.currentUserId;
+                this.isSelf = userId === this.currentUserId;
 
                 const messages = await AddonMessagesOffline.getMessages(userId);
 
@@ -600,11 +582,15 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
             }
         }
 
+        if (!conversationId) {
+            return false;
+        }
+
         // Retrieve the conversation. Invalidate data first to get the right unreadcount.
-        await AddonMessages.invalidateConversation(conversationId!);
+        await AddonMessages.invalidateConversation(conversationId);
 
         try {
-            this.conversation = await AddonMessages.getConversation(conversationId!, undefined, true);
+            this.conversation = await AddonMessages.getConversation(conversationId, undefined, true);
         } catch (error) {
             // Get conversation failed, use the fallback one if we have it.
             if (fallbackConversation) {
@@ -754,58 +740,37 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
      */
     protected async markMessagesAsRead(forceMark: boolean): Promise<void> {
         let readChanged = false;
+        let messageUnreadFound = false;
 
-        if (AddonMessages.isMarkAllMessagesReadEnabled()) {
-            let messageUnreadFound = false;
-
-            // Mark all messages at a time if there is any unread message.
-            if (forceMark) {
-                messageUnreadFound = true;
-            } else if (this.groupMessagingEnabled) {
-                messageUnreadFound = !!((this.conversation?.unreadcount && this.conversation?.unreadcount > 0) &&
-                    (this.conversationId && this.conversationId > 0));
-            } else {
-                // If an unread message is found, mark all messages as read.
-                messageUnreadFound = this.messages.some((message) =>
-                    message.useridfrom != this.currentUserId && ('read' in message && !message.read));
-            }
-
-            if (messageUnreadFound) {
-                this.setUnreadLabelPosition();
-
-                if (this.groupMessagingEnabled) {
-                    await AddonMessages.markAllConversationMessagesRead(this.conversationId!);
-                } else {
-                    await AddonMessages.markAllMessagesRead(this.userId);
-
-                    // Mark all messages as read.
-                    this.messages.forEach((message) => {
-                        if ('read' in message) {
-                            message.read = true;
-                        }
-                    });
-                }
-
-                readChanged = true;
-            }
+        // Mark all messages at a time if there is any unread message.
+        if (forceMark) {
+            messageUnreadFound = true;
+        } else if (this.groupMessagingEnabled) {
+            messageUnreadFound = !!((this.conversation?.unreadcount && this.conversation?.unreadcount > 0) &&
+                (this.conversationId && this.conversationId > 0));
         } else {
+            // If an unread message is found, mark all messages as read.
+            messageUnreadFound = this.messages.some((message) =>
+                message.useridfrom != this.currentUserId && ('read' in message && !message.read));
+        }
+
+        if (messageUnreadFound) {
             this.setUnreadLabelPosition();
-            const promises: Promise<void>[] = [];
 
-            // Mark each message as read one by one.
-            this.messages.forEach((message) => {
-                // If the message is unread, call AddonMessages.markMessageRead.
-                if (message.useridfrom != this.currentUserId && 'read' in message && !message.read) {
-                    promises.push(AddonMessages.markMessageRead(message.id).then(() => {
-                        readChanged = true;
+            if (this.groupMessagingEnabled) {
+                await AddonMessages.markAllConversationMessagesRead(this.conversationId!);
+            } else {
+                await AddonMessages.markAllMessagesRead(this.userId);
+
+                // Mark all messages as read.
+                this.messages.forEach((message) => {
+                    if ('read' in message) {
                         message.read = true;
+                    }
+                });
+            }
 
-                        return;
-                    }));
-                }
-            });
-
-            await Promise.all(promises);
+            readChanged = true;
         }
 
         if (readChanged) {
@@ -925,18 +890,13 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
      *
      * @return Resolved when done.
      */
-    protected waitForFetch(): Promise<void> {
+    protected async waitForFetch(): Promise<void> {
         if (!this.fetching) {
-            return Promise.resolve();
+            return;
         }
 
-        const deferred = CoreUtils.promiseDefer<void>();
-
-        setTimeout(() => this.waitForFetch().finally(() => {
-            deferred.resolve();
-        }), 400);
-
-        return deferred.promise;
+        await CoreUtils.wait(400);
+        await CoreUtils.ignoreErrors(this.waitForFetch());
     }
 
     /**
@@ -989,7 +949,6 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
         message: AddonMessagesConversationMessageFormatted,
         index: number,
     ): Promise<void> {
-
         const canDeleteAll = this.conversation && this.conversation.candeletemessagesforallusers;
         const langKey = message.pending || canDeleteAll || this.isSelf ? 'core.areyousure' :
             'addon.messages.deletemessageconfirmation';
@@ -1126,8 +1085,8 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
             // Leave time for the view to be rendered.
             await CoreUtils.nextTicks(5);
 
-            if (!this.viewDestroyed) {
-                this.content!.scrollToBottom(0);
+            if (!this.viewDestroyed && this.content) {
+                this.content.scrollToBottom(0);
             }
 
             if (force) {
@@ -1141,9 +1100,9 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
      */
     scrollToFirstUnreadMessage(): void {
         if (this.newMessages > 0) {
-            const messages = Array.from(this.hostElement.querySelectorAll('.addon-message-not-mine'));
+            const messages = Array.from(this.hostElement.querySelectorAll<HTMLElement>('core-message:not(.is-mine)'));
 
-            CoreDomUtils.scrollToElement(this.content!, <HTMLElement> messages[messages.length - this.newMessages]);
+            CoreDom.scrollToElement(messages[messages.length - this.newMessages]);
         }
     }
 
@@ -1166,7 +1125,7 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
             useridfrom: this.currentUserId,
             smallmessage: text,
             text: text,
-            timecreated: new Date().getTime(),
+            timecreated: Date.now(),
         };
         message.showDate = this.showDate(message, this.messages[this.messages.length - 1]);
         this.addMessage(message, false);
@@ -1292,13 +1251,6 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
     }
 
     /**
-     * Toggles delete state.
-     */
-    toggleDelete(): void {
-        this.showDelete = !this.showDelete;
-    }
-
-    /**
      * View info. If it's an individual conversation, go to the user profile.
      * If it's a group conversation, view info about the group.
      */
@@ -1312,7 +1264,7 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
                 },
             });
 
-            if (typeof userId != 'undefined') {
+            if (userId !== undefined) {
                 const splitViewLoaded = CoreNavigator.isCurrentPathInTablet('**/messages/**/discussion');
 
                 // Open user conversation.
@@ -1701,7 +1653,6 @@ export class AddonMessagesDiscussionPage implements OnInit, OnDestroy, AfterView
         // Unset again, just in case.
         this.unsetPolling();
         this.syncObserver?.off();
-        this.keyboardObserver?.off();
         this.memberInfoObserver?.off();
         this.viewDestroyed = true;
     }

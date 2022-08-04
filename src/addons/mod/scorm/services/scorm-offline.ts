@@ -484,7 +484,7 @@ export class AddonModScormOfflineProvider {
                 response[scoId] = {
                     scoid: scoId,
                     userdata: {
-                        userid: userId!,
+                        userid: userId ?? site.getUserId(),
                         scoid: scoId,
                         timemodified: 0,
                     },
@@ -492,7 +492,7 @@ export class AddonModScormOfflineProvider {
                 };
             }
 
-            response[scoId].userdata[entry.element] = entry.value!;
+            response[scoId].userdata[entry.element] = entry.value ?? '';
             if (entry.timemodified > Number(response[scoId].userdata.timemodified)) {
                 response[scoId].userdata.timemodified = entry.timemodified;
             }
@@ -682,7 +682,7 @@ export class AddonModScormOfflineProvider {
             scoid: scoId,
             attempt,
             element: element,
-            value: typeof value == 'undefined' ? null : JSON.stringify(value),
+            value: value === undefined ? null : JSON.stringify(value),
             timemodified: CoreTimeUtils.timestamp(),
             synced: 0,
         };
@@ -730,7 +730,7 @@ export class AddonModScormOfflineProvider {
         }
 
         const scoUserData = scoData?.userdata || {};
-        const db = CoreSites.getCurrentSite()!.getDb();
+        const db = CoreSites.getRequiredCurrentSite().getDb();
         let lessonStatusInserted = false;
 
         if (forceCompleted) {
@@ -937,7 +937,7 @@ export class AddonModScormOfflineProvider {
         param: string,
         ifEmpty: AddonModScormDataValue = '',
     ): AddonModScormDataValue {
-        if (typeof userData[param] != 'undefined') {
+        if (userData[param] !== undefined) {
             return userData[param];
         }
 

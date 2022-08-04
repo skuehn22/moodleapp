@@ -17,7 +17,7 @@ import { CoreSyncBaseProvider, CoreSyncBlockedError } from '@classes/base-sync';
 import { CoreNetworkError } from '@classes/errors/network-error';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
 import { CoreFileUploaderStoreFilesResult } from '@features/fileuploader/services/fileuploader';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreFileEntry } from '@services/file-helper';
 import { CoreSites } from '@services/sites';
 import { CoreSync } from '@services/sync';
@@ -129,9 +129,10 @@ export class AddonModWorkshopSyncProvider extends CoreSyncBaseProvider<AddonModW
     syncWorkshop(workshopId: number, siteId?: string): Promise<AddonModWorkshopSyncResult> {
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        if (this.isSyncing(workshopId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(workshopId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this discussion, return the promise.
-            return this.getOngoingSync(workshopId, siteId)!;
+            return currentSyncPromise;
         }
 
         // Verify that workshop isn't blocked.
@@ -194,7 +195,7 @@ export class AddonModWorkshopSyncProvider extends CoreSyncBaseProvider<AddonModW
             return result;
         }
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }

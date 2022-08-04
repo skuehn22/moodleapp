@@ -17,7 +17,7 @@ import { CoreNetworkError } from '@classes/errors/network-error';
 import { CoreCourseActivitySyncBaseProvider } from '@features/course/classes/activity-sync';
 import { CoreCourse } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreSites } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
 import { makeSingleton } from '@singletons';
@@ -124,10 +124,11 @@ export class AddonModSurveySyncProvider extends CoreCourseActivitySyncBaseProvid
         userId = userId || site.getUserId();
 
         const syncId = this.getSyncId(surveyId, userId);
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
 
-        if (this.isSyncing(syncId, siteId)) {
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this site, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         this.logger.debug(`Try to sync survey '${surveyId}' for user '${userId}'`);
@@ -167,7 +168,7 @@ export class AddonModSurveySyncProvider extends CoreCourseActivitySyncBaseProvid
         }
 
         if (answersNumber > 0 && data) {
-            if (!CoreApp.isOnline()) {
+            if (!CoreNetwork.isOnline()) {
                 // Cannot sync in offline.
                 throw new CoreNetworkError();
             }
@@ -201,7 +202,7 @@ export class AddonModSurveySyncProvider extends CoreCourseActivitySyncBaseProvid
                 await AddonModSurvey.invalidateSurveyData(result.courseId, siteId);
 
                 // Data has been sent to server, update survey data.
-                const module = await CoreCourse.getModuleBasicInfoByInstance(surveyId, 'survey', siteId);
+                const module = await CoreCourse.getModuleBasicInfoByInstance(surveyId, 'survey', { siteId });
 
                 CoreUtils.ignoreErrors(
                     this.prefetchAfterUpdate(AddonModSurveyPrefetchHandler.instance, module, result.courseId, undefined, siteId),

@@ -19,7 +19,7 @@ import { CoreEvents } from '@singletons/events';
 import { makeSingleton, Translate } from '@singletons';
 import { CoreCommentsOffline } from './comments-offline';
 import { CoreSites } from '@services/sites';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreUtils } from '@services/utils/utils';
 import { CoreNetworkError } from '@classes/errors/network-error';
 import { CoreCommentsDBRecord, CoreCommentsDeletedDBRecord } from './database/comments';
@@ -92,7 +92,7 @@ export class CoreCommentsSyncProvider extends CoreSyncBaseProvider<CoreCommentsS
                     siteId,
                 ));
 
-            if (typeof result != 'undefined') {
+            if (result !== undefined) {
                 // Sync successful, send event.
                 CoreEvents.trigger(CoreCommentsSyncProvider.AUTO_SYNCED, {
                     contextLevel: comment.contextlevel,
@@ -158,10 +158,11 @@ export class CoreCommentsSyncProvider extends CoreSyncBaseProvider<CoreCommentsS
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         const syncId = this.getSyncId(contextLevel, instanceId, component, itemId, area);
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
 
-        if (this.isSyncing(syncId, siteId)) {
+        if (currentSyncPromise) {
             // There's already a sync ongoing for comments, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         this.logger.debug('Try to sync comments ' + syncId + ' in site ' + siteId);
@@ -203,7 +204,7 @@ export class CoreCommentsSyncProvider extends CoreSyncBaseProvider<CoreCommentsS
             return result;
         }
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             throw new CoreNetworkError();
         }

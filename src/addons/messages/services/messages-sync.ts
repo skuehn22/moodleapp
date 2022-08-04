@@ -26,7 +26,7 @@ import { CoreEvents } from '@singletons/events';
 import { CoreUtils } from '@services/utils/utils';
 import { makeSingleton, Translate } from '@singletons';
 import { CoreSites } from '@services/sites';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreConstants } from '@/core/constants';
 import { CoreUser } from '@features/user/services/user';
 import { CoreError } from '@classes/errors/error';
@@ -107,7 +107,7 @@ export class AddonMessagesSyncProvider extends CoreSyncBaseProvider<AddonMessage
         // Sync all conversations.
         conversationIds.forEach((conversationId) => {
             promises.push(this.syncDiscussion(conversationId, undefined, siteId).then((result) => {
-                if (typeof result == 'undefined') {
+                if (result === undefined) {
                     return;
                 }
 
@@ -120,7 +120,7 @@ export class AddonMessagesSyncProvider extends CoreSyncBaseProvider<AddonMessage
 
         userIds.forEach((userId) => {
             promises.push(this.syncDiscussion(undefined, userId, siteId).then((result) => {
-                if (typeof result == 'undefined') {
+                if (result === undefined) {
                     return;
                 }
 
@@ -147,9 +147,10 @@ export class AddonMessagesSyncProvider extends CoreSyncBaseProvider<AddonMessage
 
         const syncId = this.getSyncId(conversationId, userId);
 
-        if (this.isSyncing(syncId, siteId)) {
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this conversation, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         return this.addOngoingSync(syncId, this.performSyncDiscussion(conversationId, userId, siteId), siteId);
@@ -192,7 +193,7 @@ export class AddonMessagesSyncProvider extends CoreSyncBaseProvider<AddonMessage
         if (!messages.length) {
             // Nothing to sync.
             return result;
-        } else if (!CoreApp.isOnline()) {
+        } else if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline. Mark messages as device offline.
             AddonMessagesOffline.setMessagesDeviceOffline(messages, true);
 
@@ -227,7 +228,7 @@ export class AddonMessagesSyncProvider extends CoreSyncBaseProvider<AddonMessage
             } catch (error) {
                 if (!CoreUtils.isWebServiceError(error)) {
                     // Error sending, stop execution.
-                    if (CoreApp.isOnline()) {
+                    if (CoreNetwork.isOnline()) {
                         // App is online, unmark deviceoffline if marked.
                         AddonMessagesOffline.setMessagesDeviceOffline(messages, false);
                     }

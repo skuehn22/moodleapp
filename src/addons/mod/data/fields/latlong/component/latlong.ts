@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AddonModDataFieldPluginComponent } from '@addons/mod/data/classes/field-plugin-component';
+import { AddonModDataFieldPluginBaseComponent } from '@addons/mod/data/classes/base-field-plugin-component';
 import { AddonModDataEntryField } from '@addons/mod/data/services/data';
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
@@ -30,7 +30,7 @@ import { DomSanitizer } from '@singletons';
     selector: 'addon-mod-data-field-latlong',
     templateUrl: 'addon-mod-data-field-latlong.html',
 })
-export class AddonModDataFieldLatlongComponent extends AddonModDataFieldPluginComponent {
+export class AddonModDataFieldLatlongComponent extends AddonModDataFieldPluginBaseComponent {
 
     north?: number;
     east?: number;
@@ -48,7 +48,7 @@ export class AddonModDataFieldLatlongComponent extends AddonModDataFieldPluginCo
      * @return Readable Latitude and logitude.
      */
     formatLatLong(north?: number, east?: number): string {
-        if (typeof north !== 'undefined' || typeof east !== 'undefined') {
+        if (north !== undefined || east !== undefined) {
             north = north || 0;
             east = east || 0;
             const northFixed = Math.abs(north).toFixed(4);
@@ -69,7 +69,7 @@ export class AddonModDataFieldLatlongComponent extends AddonModDataFieldPluginCo
      */
     getLatLongLink(north?: number, east?: number): SafeUrl {
         let url = '';
-        if (typeof north !== 'undefined' || typeof east !== 'undefined') {
+        if (north !== undefined || east !== undefined) {
             const northFixed = north ? north.toFixed(4) : '0.0000';
             const eastFixed = east ? east.toFixed(4) : '0.0000';
 

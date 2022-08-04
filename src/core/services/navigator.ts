@@ -13,14 +13,13 @@
 // limitations under the License.
 
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Params } from '@angular/router';
 
 import { NavigationOptions } from '@ionic/angular/providers/nav-controller';
 
 import { CoreConstants } from '@/core/constants';
 import { CoreDomUtils } from '@services/utils/dom';
 import { CoreMainMenu } from '@features/mainmenu/services/mainmenu';
-import { CoreMainMenuHomeHandlerService } from '@features/mainmenu/services/handlers/mainmenu';
 import { CoreObject } from '@singletons/object';
 import { CoreSites } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
@@ -28,17 +27,19 @@ import { CoreUrlUtils } from '@services/utils/url';
 import { CoreTextUtils } from '@services/utils/text';
 import { makeSingleton, NavController, Router } from '@singletons';
 import { CoreScreen } from './screen';
-import { CoreApp } from './app';
-import { CoreSitePlugins } from '@features/siteplugins/services/siteplugins';
-
-const DEFAULT_MAIN_MENU_TAB = CoreMainMenuHomeHandlerService.PAGE_NAME;
+import { CoreError } from '@classes/errors/error';
+import { CoreMainMenuDelegate } from '@features/mainmenu/services/mainmenu-delegate';
+import { CorePlatform } from '@services/platform';
+import { filter } from 'rxjs/operators';
+import { CorePromisedValue } from '@classes/promised-value';
 
 /**
  * Redirect payload.
  */
 export type CoreRedirectPayload = {
-    redirectPath: string;
-    redirectOptions?: CoreNavigationOptions;
+    redirectPath?: string; // Path of the page to redirect to.
+    redirectOptions?: CoreNavigationOptions; // Options of the navigation using redirectPath.
+    urlToOpen?: string; // URL to open instead of a page + options.
 };
 
 /**
@@ -47,6 +48,7 @@ export type CoreRedirectPayload = {
 export type CoreNavigationOptions = Pick<NavigationOptions, 'animated'|'animation'|'animationDirection'> & {
     params?: Params;
     reset?: boolean;
+    replace?: boolean;
     preferCurrentTab?: boolean; // Default true.
     nextNavigation?: {
         path: string;
@@ -136,6 +138,7 @@ export class CoreNavigatorService {
             animationDirection: options.animationDirection,
             queryParams: CoreObject.isEmpty(options.params ?? {}) ? null : CoreObject.withoutEmpty(options.params),
             relativeTo: path.startsWith('/') ? null : this.getCurrentRoute(),
+            replaceUrl: options.replace,
         });
 
         // Remove objects from queryParams and replace them with an ID.
@@ -181,9 +184,14 @@ export class CoreNavigatorService {
      * @return Whether navigation suceeded.
      */
     async navigateToSiteHome(options: Omit<CoreNavigationOptions, 'reset'> & { siteId?: string } = {}): Promise<boolean> {
-        return this.navigateToSitePath(DEFAULT_MAIN_MENU_TAB, {
+        const siteId = options.siteId ?? CoreSites.getCurrentSiteId();
+        const landingPagePath = CoreSites.isLoggedIn() && CoreSites.getCurrentSiteId() === siteId ?
+            this.getLandingTabPage() : 'main';
+
+        return this.navigateToSitePath(landingPagePath, {
             ...options,
             reset: true,
+            preferCurrentTab: false,
         });
     }
 
@@ -201,6 +209,18 @@ export class CoreNavigatorService {
         const siteId = options.siteId ?? CoreSites.getCurrentSiteId();
         const navigationOptions: CoreNavigationOptions = CoreObject.without(options, ['siteId']);
 
+        // If we are logged into a different site, log out first.
+        if (CoreSites.isLoggedIn() && CoreSites.getCurrentSiteId() !== siteId) {
+            const willReload = await CoreSites.logoutForRedirect(siteId, {
+                redirectPath: path,
+                redirectOptions: options || {},
+            });
+
+            if (willReload) {
+                return true;
+            }
+        }
+
         // If the path doesn't belong to a site, call standard navigation.
         if (siteId === CoreConstants.NO_SITE_ID) {
             return this.navigate(path, {
@@ -209,26 +229,15 @@ export class CoreNavigatorService {
             });
         }
 
-        // If we are logged into a different site, log out first.
-        if (CoreSites.isLoggedIn() && CoreSites.getCurrentSiteId() !== siteId) {
-            if (CoreSitePlugins.hasSitePluginsLoaded) {
-                // The site has site plugins so the app will be restarted. Store the data and logout.
-                CoreApp.storeRedirect(siteId, path, options || {});
-
-                await CoreSites.logout();
-
-                return true;
-            }
-
-            await CoreSites.logout();
-        }
-
         // If we are not logged into the site, load the site.
         if (!CoreSites.isLoggedIn()) {
             const modal = await CoreDomUtils.showModalLoading();
 
             try {
-                const loggedIn = await CoreSites.loadSite(siteId, path, options.params);
+                const loggedIn = await CoreSites.loadSite(siteId, {
+                    redirectPath: path,
+                    redirectOptions: options,
+                });
 
                 if (!loggedIn) {
                     // User has been redirected to the login page and will be redirected to the site path after login.
@@ -263,14 +272,16 @@ export class CoreNavigatorService {
      * @return Value of the parameter, undefined if not found.
      */
     protected getRouteSnapshotParam<T = unknown>(name: string, route?: ActivatedRoute): T | undefined {
-        if (!route?.snapshot) {
+        if (!route) {
             return;
         }
 
-        const value = route.snapshot.queryParams[name] ?? route.snapshot.params[name];
+        if (route.snapshot) {
+            const value = route.snapshot.queryParams[name] ?? route.snapshot.params[name];
 
-        if (typeof value != 'undefined') {
-            return value;
+            if (value !== undefined) {
+                return value;
+            }
         }
 
         return this.getRouteSnapshotParam(name, route.parent || undefined);
@@ -285,7 +296,7 @@ export class CoreNavigatorService {
      * @param routeOptions Optional routeOptions to get the params or route value from. If missing, it will autodetect.
      * @return Value of the parameter, undefined if not found.
      */
-    getRouteParam<T = unknown>(name: string, routeOptions: CoreNavigatorCurrentRouteOptions = {}): T | undefined {
+    getRouteParam<T = string>(name: string, routeOptions: CoreNavigatorCurrentRouteOptions = {}): T | undefined {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let value: any;
 
@@ -300,7 +311,7 @@ export class CoreNavigatorService {
             value = routeOptions.params[name];
         }
 
-        if (typeof value == 'undefined') {
+        if (value === undefined) {
             return;
         }
 
@@ -309,7 +320,7 @@ export class CoreNavigatorService {
         // Remove the parameter from our map if it's in there.
         delete this.storedParams[value];
 
-        if (!CoreApp.isMobile() && !storedParam) {
+        if (!CorePlatform.isMobile() && !storedParam) {
             // Try to retrieve the param from local storage in browser.
             const storageParam = localStorage.getItem(value);
             if (storageParam) {
@@ -345,7 +356,7 @@ export class CoreNavigatorService {
     getRouteBooleanParam(name: string, routeOptions: CoreNavigatorCurrentRouteOptions = {}): boolean | undefined {
         const value = this.getRouteParam<string>(name, routeOptions);
 
-        if (typeof value == 'undefined') {
+        if (value === undefined) {
             return value;
         }
 
@@ -358,6 +369,67 @@ export class CoreNavigatorService {
         }
 
         return Boolean(value);
+    }
+
+    /**
+     * Get a parameter for the current route.
+     * Please notice that objects can only be retrieved once. You must call this function only once per page and parameter,
+     * unless there's a new navigation to the page.
+     *
+     * This function will fail if parameter is not found.
+     *
+     * @param name Name of the parameter.
+     * @param routeOptions Optional routeOptions to get the params or route value from. If missing, it will autodetect.
+     * @return Value of the parameter, undefined if not found.
+     */
+    getRequiredRouteParam<T = unknown>(name: string, routeOptions: CoreNavigatorCurrentRouteOptions = {}): T {
+        const value = this.getRouteParam<T>(name, routeOptions);
+
+        if (value === undefined) {
+            throw new CoreError(`Required param '${name}' not found.`);
+        }
+
+        return value;
+    }
+
+    /**
+     * Get a number route param.
+     * Angular router automatically converts numbers to string, this function automatically converts it back to number.
+     *
+     * This function will fail if parameter is not found.
+     *
+     * @param name Name of the parameter.
+     * @param routeOptions Optional routeOptions to get the params or route value from. If missing, it will autodetect.
+     * @return Value of the parameter, undefined if not found.
+     */
+    getRequiredRouteNumberParam(name: string, routeOptions: CoreNavigatorCurrentRouteOptions = {}): number {
+        const value = this.getRouteNumberParam(name, routeOptions);
+
+        if (value === undefined) {
+            throw new CoreError(`Required number param '${name}' not found.`);
+        }
+
+        return value;
+    }
+
+    /**
+     * Get a boolean route param.
+     * Angular router automatically converts booleans to string, this function automatically converts it back to boolean.
+     *
+     * This function will fail if parameter is not found.
+     *
+     * @param name Name of the parameter.
+     * @param routeOptions Optional routeOptions to get the params or route value from. If missing, it will autodetect.
+     * @return Value of the parameter, undefined if not found.
+     */
+    getRequiredRouteBooleanParam(name: string, routeOptions: CoreNavigatorCurrentRouteOptions = {}): boolean {
+        const value = this.getRouteBooleanParam(name, routeOptions);
+
+        if (value === undefined) {
+            throw new CoreError(`Required boolean param '${name}' not found.`);
+        }
+
+        return value;
     }
 
     /**
@@ -469,11 +541,14 @@ export class CoreNavigatorService {
         path = path.replace(/^(\.|\/main)?\//, '');
 
         const pathRoot = /^[^/]+/.exec(path)?.[0] ?? '';
+        if (!pathRoot) {
+            // No path root, going to the site home.
+            return this.navigate('/main', options);
+        }
+
         const currentMainMenuTab = this.getCurrentMainMenuTab();
-        const isMainMenuTab = await CoreUtils.ignoreErrors(
-            CoreMainMenu.isMainMenuTab(pathRoot),
-            false,
-        );
+        const isMainMenuTab = pathRoot === currentMainMenuTab || (!currentMainMenuTab && path === this.getLandingTabPage()) ||
+            await CoreUtils.ignoreErrors(CoreMainMenu.isMainMenuTab(pathRoot), false);
 
         if (!options.preferCurrentTab && isMainMenuTab) {
             return this.navigate(`/main/${path}`, options);
@@ -489,14 +564,37 @@ export class CoreNavigatorService {
             return this.navigate(`/main/${path}`, options);
         }
 
-        // Open the path within the default main tab.
-        return this.navigate(`/main/${DEFAULT_MAIN_MENU_TAB}`, {
+        if (this.isCurrent('/main')) {
+            // Main menu is loaded, but no tab selected yet. Wait for a tab to be loaded.
+            await this.waitForMainMenuTab();
+
+            return this.navigate(`/main/${this.getCurrentMainMenuTab()}/${path}`, options);
+        }
+
+        // Open the path within in main menu.
+        return this.navigate('/main', {
             ...options,
             params: {
-                redirectPath: `/main/${DEFAULT_MAIN_MENU_TAB}/${path}`,
+                redirectPath: path,
                 redirectOptions: options.params || options.nextNavigation ? options : undefined,
             } as CoreRedirectPayload,
         });
+    }
+
+    /**
+     * Get the first page path using priority.
+     *
+     * @return Landing page path.
+     */
+    protected getLandingTabPage(): string {
+        if (!CoreMainMenuDelegate.areHandlersLoaded()) {
+            // Handlers not loaded yet, landing page is the root page.
+            return '';
+        }
+
+        const handlers = CoreMainMenuDelegate.getHandlers().filter((handler) => !handler.onlyInMore);
+
+        return handlers[0]?.page || '';
     }
 
     /**
@@ -515,7 +613,7 @@ export class CoreNavigatorService {
             this.storedParams[id] = value;
             queryParams[name] = id;
 
-            if (!CoreApp.isMobile()) {
+            if (!CorePlatform.isMobile()) {
                 // In browser, save the param in local storage to be able to retrieve it if the app is refreshed.
                 localStorage.setItem(id, JSON.stringify(value));
             }
@@ -567,6 +665,39 @@ export class CoreNavigatorService {
         } else {
             return parentPath + '/' + routePath;
         }
+    }
+
+    /**
+     * Check if the current route page can block leaving the route.
+     *
+     * @return Whether the current route page can block leaving the route.
+     */
+    currentRouteCanBlockLeave(): boolean {
+        return !!this.getCurrentRoute().snapshot.routeConfig?.canDeactivate?.length;
+    }
+
+    /**
+     * Wait for a main menu tab route to be loaded.
+     *
+     * @return Promise resolved when the route is loaded.
+     */
+    protected waitForMainMenuTab(): Promise<void> {
+        if (this.getCurrentMainMenuTab()) {
+            return Promise.resolve();
+        }
+
+        const promise = new CorePromisedValue<void>();
+
+        const navSubscription = Router.events
+            .pipe(filter(event => event instanceof NavigationEnd))
+            .subscribe(() => {
+                if (this.getCurrentMainMenuTab()) {
+                    navSubscription?.unsubscribe();
+                    promise.resolve();
+                }
+            });
+
+        return promise;
     }
 
 }

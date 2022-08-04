@@ -17,7 +17,7 @@ import { CoreBlockDelegate } from '../../services/block-delegate';
 import { CoreDynamicComponent } from '@components/dynamic-component/dynamic-component';
 import { Subscription } from 'rxjs';
 import { CoreCourseBlock } from '@/core/features/course/services/course';
-import { IonRefresher } from '@ionic/angular';
+import type { ICoreBlockComponent } from '@features/block/classes/base-block-component';
 
 /**
  * Component to render a block.
@@ -29,14 +29,14 @@ import { IonRefresher } from '@ionic/angular';
 })
 export class CoreBlockComponent implements OnInit, OnDestroy, DoCheck {
 
-    @ViewChild(CoreDynamicComponent) dynamicComponent?: CoreDynamicComponent;
+    @ViewChild(CoreDynamicComponent) dynamicComponent?: CoreDynamicComponent<ICoreBlockComponent>;
 
     @Input() block!: CoreCourseBlock; // The block to render.
     @Input() contextLevel!: string; // The context where the block will be used.
     @Input() instanceId!: number; // The instance ID associated with the context level.
     @Input() extraData!: Record<string, unknown>; // Any extra data to be passed to the block.
 
-    componentClass?: Type<unknown>; // The class of the component to render.
+    componentClass?: Type<ICoreBlockComponent>; // The class of the component to render.
     data: Record<string, unknown> = {}; // Data to pass to the component.
     class?: string; // CSS class to apply to the block.
     loaded = false;
@@ -133,31 +133,13 @@ export class CoreBlockComponent implements OnInit, OnDestroy, DoCheck {
     }
 
     /**
-     * Refresh the data.
-     *
-     * @param refresher Refresher. Please pass this only if the refresher should finish when this function finishes.
-     * @param done Function to call when done.
-     * @param showErrors If show errors to the user of hide them.
-     * @return Promise resolved when done.
-     */
-    async doRefresh(
-        refresher?: IonRefresher,
-        done?: () => void,
-        showErrors: boolean = false,
-    ): Promise<void> {
-        if (this.dynamicComponent) {
-            await this.dynamicComponent.callComponentFunction('doRefresh', [refresher, done, showErrors]);
-        }
-    }
-
-    /**
      * Invalidate some data.
      *
      * @return Promise resolved when done.
      */
     async invalidate(): Promise<void> {
         if (this.dynamicComponent) {
-            await this.dynamicComponent.callComponentFunction('invalidateContent');
+            await this.dynamicComponent.callComponentMethod('invalidateContent');
         }
     }
 

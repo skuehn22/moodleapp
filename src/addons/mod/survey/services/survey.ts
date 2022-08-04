@@ -17,12 +17,12 @@ import { CoreError } from '@classes/errors/error';
 import { CoreSite, CoreSiteWSPreSets } from '@classes/site';
 import { CoreCourseCommonModWSOptions } from '@features/course/services/course';
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreFilepool } from '@services/filepool';
 import { CoreSites, CoreSitesCommonWSOptions } from '@services/sites';
 import { CoreUtils } from '@services/utils/utils';
 import { CoreStatusWithWarningsWSResponse, CoreWSExternalFile, CoreWSExternalWarning } from '@services/ws';
-import { makeSingleton } from '@singletons';
+import { makeSingleton, Translate } from '@singletons';
 import { AddonModSurveyOffline } from './survey-offline';
 
 const ROOT_CACHE_KEY = 'mmaModSurvey:';
@@ -121,7 +121,7 @@ export class AddonModSurveyProvider {
             return currentSurvey;
         }
 
-        throw new CoreError('Activity not found.');
+        throw new CoreError(Translate.instant('core.course.modulenotfound'));
     }
 
     /**
@@ -257,7 +257,7 @@ export class AddonModSurveyProvider {
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        if (!CoreApp.isOnline()) {
+        if (!CoreNetwork.isOnline()) {
             // App is offline, store the message.
             return storeOffline();
         }
@@ -322,7 +322,7 @@ export type AddonModSurveySurvey = {
     name: string; // Survey name.
     intro?: string; // The Survey intro.
     introformat?: number; // Intro format (1 = HTML, 0 = MOODLE, 2 = PLAIN or 4 = MARKDOWN).
-    introfiles?: CoreWSExternalFile[]; // @since 3.2.
+    introfiles?: CoreWSExternalFile[];
     template?: number; // Survey type.
     days?: number; // Days.
     questions?: string; // Question ids.

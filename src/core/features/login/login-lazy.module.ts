@@ -16,9 +16,9 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { CoreSharedModule } from '@/core/shared.module';
-import { CoreLoginSiteHelpComponent } from './components/site-help/site-help';
-import { CoreLoginSiteOnboardingComponent } from './components/site-onboarding/site-onboarding';
 import { CoreLoginHasSitesGuard } from './guards/has-sites';
+import { CoreLoginComponentsModule } from './components/components.module';
+import { CoreLoginHelper } from './services/login-helper';
 
 const routes: Routes = [
     {
@@ -32,7 +32,7 @@ const routes: Routes = [
     },
     {
         path: 'credentials',
-        loadChildren: () => import('./pages/credentials/credentials.module').then( m => m.CoreLoginCredentialsPageModule),
+        loadChildren: () => CoreLoginHelper.getCredentialsRouteModule(),
     },
     {
         path: 'sites',
@@ -60,18 +60,15 @@ const routes: Routes = [
     },
     {
         path: 'reconnect',
-        loadChildren: () => import('./pages/reconnect/reconnect.module').then( m => m.CoreLoginReconnectPageModule),
+        loadChildren: () => CoreLoginHelper.getReconnectRouteModule(),
     },
 ];
 
 @NgModule({
     imports: [
         CoreSharedModule,
+        CoreLoginComponentsModule,
         RouterModule.forChild(routes),
-    ],
-    declarations: [
-        CoreLoginSiteHelpComponent,
-        CoreLoginSiteOnboardingComponent,
     ],
 })
 export class CoreLoginLazyModule {}

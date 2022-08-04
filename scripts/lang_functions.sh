@@ -3,10 +3,10 @@
 # Functions to fetch languages.
 #
 
-LANGPACKSFOLDER='../../moodle-langpacks'
+LANGPACKSFOLDER='../../moodle-langpacks' # Langpacks will be downloaded here.
 BUCKET='moodle-lang-prod'
 MOODLEORG_URL='https://download.moodle.org/download.php/direct/langpack'
-DEFAULT_LASTVERSION='4.0'
+DEFAULT_LASTVERSION='4.1' # Update it every version.
 
 # Checks if AWS is available and configured.
 function check_aws {
@@ -102,6 +102,15 @@ function get_language {
     pushd $LANGPACKSFOLDER > /dev/null
 
     curl -s $MOODLEORG_URL/$lastversion/$lang.zip --output $lang.zip > /dev/null
+    size=$(du -k "$lang.zip" | cut -f 1)
+    if [ ! -n $lang.zip ] || [ $size -le 1 ]; then
+        echo "Wrong language name or corrupt file for $lang"
+        rm $lang.zip
+
+        popd > /dev/null
+        return
+    fi
+
     rm -R $lang > /dev/null 2>&1> /dev/null
     unzip -o -u $lang.zip > /dev/null
 
@@ -114,6 +123,11 @@ function get_language {
 
 # Entry function to get all language files.
 function get_languages {
+    suffix=$1
+    if [ -z $suffix ]; then
+        suffix=''
+    fi
+
     get_last_version
 
     if [ -d $LANGPACKSFOLDER ]; then
@@ -131,6 +145,7 @@ function get_languages {
 
     if [ $AWS_SERVICE -eq 1 ]; then
         get_all_languages_aws
+        suffix=''
     else
         echo "Fallback language list will only get current installation languages"
         get_installed_languages
@@ -138,5 +153,9 @@ function get_languages {
 
     for lang in $langs; do
         get_language "$lang"
+
+        if [ ! -z $suffix ]; then
+            get_language "$lang$suffix"
+        fi
     done
 }

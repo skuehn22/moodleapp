@@ -18,8 +18,8 @@ import { CoreCourse } from '@features/course/services/course';
 import { CoreFileUploader, CoreFileUploaderStoreFilesResult } from '@features/fileuploader/services/fileuploader';
 import { CoreRatingOffline } from '@features/rating/services/rating-offline';
 import { FileEntry } from '@ionic-native/file/ngx';
-import { CoreSites } from '@services/sites';
-import { CoreDomUtils } from '@services/utils/dom';
+import { CoreSites, CoreSitesReadingStrategy } from '@services/sites';
+import { CoreDomUtils, ToastDuration } from '@services/utils/dom';
 import { CoreFormFields } from '@singletons/form';
 import { CoreTextUtils } from '@services/utils/text';
 import { CoreUtils } from '@services/utils/utils';
@@ -86,7 +86,7 @@ export class AddonModDataHelperProvider {
                     record.groupid = action.groupid;
 
                     action.fields.forEach((offlineContent) => {
-                        if (typeof offlineContents[offlineContent.fieldid] == 'undefined') {
+                        if (offlineContents[offlineContent.fieldid] === undefined) {
                             offlineContents[offlineContent.fieldid] = {};
                         }
 
@@ -173,7 +173,11 @@ export class AddonModDataHelperProvider {
 
             CoreEvents.trigger(AddonModDataProvider.ENTRY_CHANGED, { dataId: dataId, entryId: entryId }, siteId);
 
-            CoreDomUtils.showToast(approve ? 'addon.mod_data.recordapproved' : 'addon.mod_data.recorddisapproved', true, 3000);
+            CoreDomUtils.showToast(
+                approve ? 'addon.mod_data.recordapproved' : 'addon.mod_data.recorddisapproved',
+                true,
+                ToastDuration.LONG,
+            );
         } catch {
             // Ignore error, it was already displayed.
         } finally {
@@ -213,8 +217,8 @@ export class AddonModDataHelperProvider {
 
             // Replace field by a generic directive.
             const render = '<addon-mod-data-field-plugin [field]="fields[' + field.id + ']" [value]="entries[' + entry.id +
-                    '].contents[' + field.id + ']" mode="' + mode + '" [database]="database" (gotoEntry)="gotoEntry(' + entry.id +
-                    ')"></addon-mod-data-field-plugin>';
+                    '].contents[' + field.id + ']" mode="' + mode + '" [database]="database" (gotoEntry)="gotoEntry($event)">' +
+                    '</addon-mod-data-field-plugin>';
             template = template.replace(replaceRegex, render);
         });
 
@@ -225,12 +229,12 @@ export class AddonModDataHelperProvider {
                 let render = '';
                 if (action == AddonModDataAction.MOREURL) {
                     // Render more url directly because it can be part of an HTML attribute.
-                    render = CoreSites.getCurrentSite()!.getURL() + '/mod/data/view.php?d={{database.id}}&rid=' + entry.id;
+                    render = CoreSites.getRequiredCurrentSite().getURL() + '/mod/data/view.php?d={{database.id}}&rid=' + entry.id;
                 } else if (action == 'approvalstatus') {
                     render = Translate.instant('addon.mod_data.' + (entry.approved ? 'approved' : 'notapproved'));
                 } else {
                     render = '<addon-mod-data-action action="' + action + '" [entry]="entries[' + entry.id + ']" mode="' + mode +
-                    '" [database]="database" [module]="module" [offset]="' + offset + '" [group]="group" ></addon-mod-data-action>';
+                    '" [database]="database" [title]="title" [offset]="' + offset + '" [group]="group" ></addon-mod-data-action>';
                 }
                 template = template.replace(replaceRegex, render);
             } else {
@@ -270,7 +274,7 @@ export class AddonModDataHelperProvider {
             result.hasOfflineActions = !!actions.length;
 
             actions.forEach((action) => {
-                if (typeof offlineActions[action.entryid] == 'undefined') {
+                if (offlineActions[action.entryid] === undefined) {
                     offlineActions[action.entryid] = [];
                 }
                 offlineActions[action.entryid].push(action);
@@ -437,7 +441,11 @@ export class AddonModDataHelperProvider {
             return courseId;
         }
 
-        const module = await CoreCourse.getModuleBasicInfoByInstance(dataId, 'data', siteId);
+        const module = await CoreCourse.getModuleBasicInfoByInstance(
+            dataId,
+            'data',
+            { siteId, readingStrategy: CoreSitesReadingStrategy.PREFER_CACHE },
+        );
 
         return module.course;
     }
@@ -721,7 +729,7 @@ export class AddonModDataHelperProvider {
 
             CoreEvents.trigger(AddonModDataProvider.ENTRY_CHANGED, { dataId, entryId, deleted: true }, siteId);
 
-            CoreDomUtils.showToast('addon.mod_data.recorddeleted', true, 3000);
+            CoreDomUtils.showToast('addon.mod_data.recorddeleted', true, ToastDuration.LONG);
 
             modal.dismiss();
         } catch {

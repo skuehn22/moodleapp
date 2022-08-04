@@ -20,12 +20,11 @@ import { CoreApp } from '@services/app';
 import { CoreConfig } from '@services/config';
 import { CoreEventObserver, CoreEvents } from '@singletons/events';
 import { CoreTextUtils } from '@services/utils/text';
-import { CoreUtils } from '@services/utils/utils';
 import { SQLiteDB } from '@classes/sqlitedb';
 import { CoreQueueRunner } from '@classes/queue-runner';
 import { CoreError } from '@classes/errors/error';
 import { CoreConstants } from '@/core/constants';
-import { makeSingleton, NgZone, Platform, Translate, LocalNotifications, Push } from '@singletons';
+import { makeSingleton, NgZone, Translate, LocalNotifications, Push } from '@singletons';
 import { CoreLogger } from '@singletons/logger';
 import {
     APP_SCHEMA,
@@ -34,6 +33,8 @@ import {
     SITES_TABLE_NAME,
     CodeRequestsQueueItem,
 } from '@services/database/local-notifications';
+import { CorePromisedValue } from '@classes/promised-value';
+import { CorePlatform } from '@services/platform';
 
 /**
  * Service to handle local notifications.
@@ -62,28 +63,13 @@ export class CoreLocalNotificationsProvider {
         this.appDB = new Promise(resolve => this.resolveAppDB = resolve);
         this.logger = CoreLogger.getInstance('CoreLocalNotificationsProvider');
         this.queueRunner = new CoreQueueRunner(10);
-
-        this.init();
-    }
-
-    /**
-     * Initialize database.
-     */
-    async initializeDatabase(): Promise<void> {
-        try {
-            await CoreApp.createTablesFromSchema(APP_SCHEMA);
-        } catch (e) {
-            // Ignore errors.
-        }
-
-        this.resolveAppDB(CoreApp.getDB());
     }
 
     /**
      * Init some properties.
      */
-    protected async init(): Promise<void> {
-        await Platform.ready();
+    async initialize(): Promise<void> {
+        await CorePlatform.ready();
 
         if (!this.isAvailable()) {
             return;
@@ -129,6 +115,19 @@ export class CoreLocalNotificationsProvider {
                 this.cancelSiteNotifications(site.id!);
             }
         });
+    }
+
+    /**
+     * Initialize database.
+     */
+    async initializeDatabase(): Promise<void> {
+        try {
+            await CoreApp.createTablesFromSchema(APP_SCHEMA);
+        } catch (e) {
+            // Ignore errors.
+        }
+
+        this.resolveAppDB(CoreApp.getDB());
     }
 
     /**
@@ -229,7 +228,7 @@ export class CoreLocalNotificationsProvider {
         const key = table + '#' + id;
 
         // Check if the code is already in memory.
-        if (typeof this.codes[key] != 'undefined') {
+        if (this.codes[key] !== undefined) {
             return this.codes[key];
         }
 
@@ -415,7 +414,7 @@ export class CoreLocalNotificationsProvider {
     protected async processNextRequest(): Promise<void> {
         const nextKey = Object.keys(this.codeRequestsQueue)[0];
 
-        if (typeof nextKey == 'undefined') {
+        if (nextKey === undefined) {
             // No more requests in queue, stop.
             return;
         }
@@ -471,11 +470,11 @@ export class CoreLocalNotificationsProvider {
     ): CoreEventObserver {
         this.logger.debug(`Register observer '${component}' for event '${eventName}'.`);
 
-        if (typeof this.observables[eventName] == 'undefined') {
+        if (this.observables[eventName] === undefined) {
             this.observables[eventName] = {};
         }
 
-        if (typeof this.observables[eventName][component] == 'undefined') {
+        if (this.observables[eventName][component] === undefined) {
             // No observable for this component, create a new one.
             this.observables[eventName][component] = new Subject<T>();
         }
@@ -509,11 +508,11 @@ export class CoreLocalNotificationsProvider {
      * @return Promise resolved when the code is retrieved.
      */
     protected requestCode(table: string, id: string): Promise<number> {
-        const deferred = CoreUtils.promiseDefer<number>();
+        const deferred = new CorePromisedValue<number>();
         const key = table + '#' + id;
         const isQueueEmpty = Object.keys(this.codeRequestsQueue).length == 0;
 
-        if (typeof this.codeRequestsQueue[key] != 'undefined') {
+        if (this.codeRequestsQueue[key] !== undefined) {
             // There's already a pending request for this store and ID, add the promise to it.
             this.codeRequestsQueue[key].deferreds.push(deferred);
         } else {
@@ -529,7 +528,7 @@ export class CoreLocalNotificationsProvider {
             this.processNextRequest();
         }
 
-        return deferred.promise;
+        return deferred;
     }
 
     /**
@@ -655,9 +654,19 @@ export class CoreLocalNotificationsProvider {
      */
     async trigger(notification: ILocalNotification): Promise<number> {
         const db = await this.appDB;
+        let time = Date.now();
+        if (notification.trigger?.at) {
+            // The type says "at" is a Date, but in Android we can receive timestamps instead.
+            if (typeof notification.trigger.at === 'number') {
+                time = <number> notification.trigger.at;
+            } else {
+                time = notification.trigger.at.getTime();
+            }
+        }
+
         const entry = {
             id: notification.id,
-            at: notification.trigger && notification.trigger.at ? notification.trigger.at.getTime() : Date.now(),
+            at: time,
         };
 
         return db.insertRecord(TRIGGERED_TABLE_NAME, entry);

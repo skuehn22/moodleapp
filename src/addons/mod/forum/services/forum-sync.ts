@@ -18,13 +18,12 @@ import { CoreCourseActivitySyncBaseProvider } from '@features/course/classes/act
 import { CoreCourseLogHelper } from '@features/course/services/log-helper';
 import { CoreFileUploader } from '@features/fileuploader/services/fileuploader';
 import { CoreRatingSync } from '@features/rating/services/rating-sync';
-import { CoreApp } from '@services/app';
+import { CoreNetwork } from '@services/network';
 import { CoreGroups } from '@services/groups';
 import { CoreSites } from '@services/sites';
 import { CoreSync } from '@services/sync';
 import { CoreUtils } from '@services/utils/utils';
 import { makeSingleton, Translate } from '@singletons';
-import { CoreArray } from '@singletons/array';
 import { CoreEvents } from '@singletons/events';
 import {
     AddonModForum,
@@ -90,7 +89,7 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
             // Do not sync same forum twice.
             const syncedForumIds: number[] = [];
             const promises = discussions.map(async discussion => {
-                if (CoreArray.contains(syncedForumIds, discussion.forumid)) {
+                if (syncedForumIds.includes(discussion.forumid)) {
                     return;
                 }
 
@@ -123,7 +122,7 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
             // Do not sync same discussion twice.
             const syncedDiscussionIds: number[] = [];
             const promises = replies.map(async reply => {
-                if (CoreArray.contains(syncedDiscussionIds, reply.discussionid)) {
+                if (syncedDiscussionIds.includes(reply.discussionid)) {
                     return;
                 }
 
@@ -198,10 +197,11 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         const syncId = this.getForumSyncId(forumId, userId);
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
 
-        if (this.isSyncing(syncId, siteId)) {
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this discussion, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         // Verify that forum isn't blocked.
@@ -230,7 +230,7 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
                 [] as AddonModForumOfflineDiscussion[],
             );
 
-            if (discussions.length !== 0 && !CoreApp.isOnline()) {
+            if (discussions.length !== 0 && !CoreNetwork.isOnline()) {
                 throw new Error('cannot sync in offline');
             }
 
@@ -369,7 +369,7 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
         if (!replies.length) {
             // Nothing to sync.
             return { warnings: [], updated: false };
-        } else if (!CoreApp.isOnline()) {
+        } else if (!CoreNetwork.isOnline()) {
             // Cannot sync in offline.
             return Promise.reject(null);
         }
@@ -378,7 +378,7 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
 
         // Do not sync same discussion twice.
         replies.forEach((reply) => {
-            if (typeof promises[reply.discussionid] != 'undefined') {
+            if (promises[reply.discussionid] !== undefined) {
                 return;
             }
             promises[reply.discussionid] = this.syncDiscussionReplies(reply.discussionid, userId, siteId);
@@ -429,10 +429,11 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         const syncId = this.getDiscussionSyncId(discussionId, userId);
+        const currentSyncPromise = this.getOngoingSync(syncId, siteId);
 
-        if (this.isSyncing(syncId, siteId)) {
+        if (currentSyncPromise) {
             // There's already a sync ongoing for this discussion, return the promise.
-            return this.getOngoingSync(syncId, siteId)!;
+            return currentSyncPromise;
         }
 
         // Verify that forum isn't blocked.
@@ -457,7 +458,7 @@ export class AddonModForumSyncProvider extends CoreCourseActivitySyncBaseProvide
                 [] as AddonModForumOfflineReply[],
             );
 
-            if (replies.length !== 0 && !CoreApp.isOnline()) {
+            if (replies.length !== 0 && !CoreNetwork.isOnline()) {
                 throw new Error('Cannot sync in offline');
             }
 

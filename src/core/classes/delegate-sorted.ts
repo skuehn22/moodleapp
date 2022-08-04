@@ -15,7 +15,8 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { CoreEvents } from '@singletons/events';
 import { CoreDelegate, CoreDelegateDisplayHandler, CoreDelegateToDisplay } from './delegate';
-import { CoreUtils } from '@services/utils/utils';
+import { CoreSites } from '@services/sites';
+import { CorePromisedValue } from '@classes/promised-value';
 
 /**
  * Superclass to help creating sorted delegates.
@@ -39,6 +40,14 @@ export class CoreSortedDelegate<
         super(delegateName, true);
 
         CoreEvents.on(CoreEvents.LOGOUT, this.clearSortedHandlers.bind(this));
+        CoreEvents.on(CoreEvents.SITE_POLICY_AGREED, (data) => {
+            if (data.siteId === CoreSites.getCurrentSiteId()) {
+                // Clear loaded handlers when policy is agreed. The CoreDelegate class will load them again.
+                this.clearSortedHandlers();
+            }
+        });
+        // Clear loaded handlers on login, there could be an invalid list loaded when user reconnects after token expired.
+        CoreEvents.on(CoreEvents.LOGIN, this.clearSortedHandlers.bind(this));
     }
 
     /**
@@ -87,18 +96,17 @@ export class CoreSortedDelegate<
             return this.sortedHandlers;
         }
 
-        const deferred = CoreUtils.promiseDefer<DisplayType[]>();
-
+        const promisedHandlers = new CorePromisedValue<DisplayType[]>();
         const subscription = this.getHandlersObservable().subscribe((handlers) => {
             if (this.loaded) {
                 subscription?.unsubscribe();
 
                 // Return main handlers.
-                deferred.resolve(handlers);
+                promisedHandlers.resolve(handlers);
             }
         });
 
-        return deferred.promise;
+        return promisedHandlers;
     }
 
     /**
@@ -111,14 +119,14 @@ export class CoreSortedDelegate<
             const handler = this.enabledHandlers[name];
             const data = <DisplayType> handler.getDisplayData();
 
-            data.priority = handler.priority || 0;
+            data.priority = data.priority ?? handler.priority ?? 0;
             data.name = handler.name;
 
             displayData.push(data);
         }
 
         // Sort them by priority.
-        displayData.sort((a, b) => b.priority! - a.priority!);
+        displayData.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
         this.loaded = true;
         this.sortedHandlersRxJs.next(displayData);

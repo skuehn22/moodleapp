@@ -28,10 +28,12 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { CorePushNotificationsNotificationBasicData } from '@features/pushnotifications/services/pushnotifications';
 import { CorePushNotificationsDelegate } from '@features/pushnotifications/services/push-delegate';
 import { Subscription } from 'rxjs';
-import { Translate, Platform } from '@singletons';
+import { Translate } from '@singletons';
 import { IonRefresher } from '@ionic/angular';
 import { CoreNavigator } from '@services/navigator';
 import { CoreScreen } from '@services/screen';
+import { CoreMainMenuDeepLinkManager } from '@features/mainmenu/classes/deep-link-manager';
+import { CorePlatform } from '@services/platform';
 
 /**
  * Page that displays the list of discussions.
@@ -56,7 +58,6 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
     discussionUserId?: number;
 
     search = {
-        enabled: false,
         showResults: false,
         results: <AddonMessagesMessageAreaContact[]> [],
         loading: '',
@@ -78,7 +79,7 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
                 if (data.userId && this.discussions) {
                     const discussion = this.discussions.find((disc) => disc.message!.user == data.userId);
 
-                    if (typeof discussion == 'undefined') {
+                    if (discussion === undefined) {
                         this.loaded = false;
                         this.refreshData().finally(() => {
                             this.loaded = true;
@@ -100,7 +101,7 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
                 if (data.userId && this.discussions) {
                     const discussion = this.discussions.find((disc) => disc.message!.user == data.userId);
 
-                    if (typeof discussion != 'undefined') {
+                    if (discussion !== undefined) {
                     // A discussion has been read reset counter.
                         discussion.unread = false;
 
@@ -114,7 +115,7 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
         );
 
         // Refresh the view when the app is resumed.
-        this.appResumeSubscription = Platform.resume.subscribe(() => {
+        this.appResumeSubscription = CorePlatform.resume.subscribe(() => {
             if (!this.loaded) {
                 return;
             }
@@ -142,12 +143,17 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
             this.discussionUserId = CoreNavigator.getRouteNumberParam('userId', { params }) ?? this.discussionUserId;
         });
 
+        const deepLinkManager = new CoreMainMenuDeepLinkManager();
+
         await this.fetchData();
 
         if (!this.discussionUserId && this.discussions.length > 0 && CoreScreen.isTablet) {
             // Take first and load it.
-            this.gotoDiscussion(this.discussions[0].message!.user);
+            await this.gotoDiscussion(this.discussions[0].message!.user);
         }
+
+        // Treat deep link now that the conversation route has been loaded if needed.
+        deepLinkManager.treatLink();
     }
 
     /**
@@ -179,7 +185,6 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
      */
     protected async fetchData(): Promise<void> {
         this.loadingMessage = this.loadingMessages;
-        this.search.enabled = AddonMessages.isSearchMessagesEnabled();
 
         const promises: Promise<unknown>[] = [];
 
@@ -249,7 +254,7 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
      * @param messageId Message to scroll after loading the discussion. Used when searching.
      * @param onlyWithSplitView Only go to Discussion if split view is on.
      */
-    gotoDiscussion(discussionUserId: number, messageId?: number): void {
+    async gotoDiscussion(discussionUserId: number, messageId?: number): Promise<void> {
         this.discussionUserId = discussionUserId;
 
         const params: Params = {
@@ -263,7 +268,7 @@ export class AddonMessagesDiscussions35Page implements OnInit, OnDestroy {
         const splitViewLoaded = CoreNavigator.isCurrentPathInTablet('**/messages/index/discussion');
         const path = (splitViewLoaded ? '../' : '') + 'discussion';
 
-        CoreNavigator.navigate(path, { params });
+        await CoreNavigator.navigate(path, { params });
     }
 
     /**
