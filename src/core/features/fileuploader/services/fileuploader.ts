@@ -766,6 +766,7 @@ export class CoreFileUploaderProvider {
 
                         var name = Math.round(+new Date()/1000);
                         console.log("error warnung 2");
+                        console.log("name name " + name);
 
                         VideoEditor.transcodeVideo(function (success) {
                                 console.log("error warnung 3");
@@ -802,35 +803,6 @@ export class CoreFileUploaderProvider {
                     console.log("bin ein bild");
                 }
 
-                /*
-                let checkIfVideo = new Promise((resolve, reject) => {
-
-                    VideoEditor.getVideoInfo(function (success) {
-
-                            let info = JSON.stringify(success, null, 2);
-                            console.log("info vom transcoder" +  info);
-                            console.log("info duration" +  info['duration']);
-
-                            let video = true;
-
-                            resolve (video)
-                        }, function (error) {
-                            console.log("error bild" +  error);
-
-                            let video = false;
-
-                            reject (video)
-                        },
-                        {
-                            fileUri: file.nativeURL,
-                        },
-                    )
-                });
-
-                let videoCheck = await checkIfVideo;
-
-                console.log("Videocheck: " + videoCheck);
-                 */
         } else {
             // It's an online file. We need to download it and re-upload it.
             fileName = file.filename;
@@ -855,6 +827,9 @@ export class CoreFileUploaderProvider {
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
         const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
+
+        console.log("name name name");
+
         const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
 
         return result.itemid;
