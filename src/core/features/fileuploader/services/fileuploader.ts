@@ -26,7 +26,7 @@ import { CoreMimetypeUtils } from '@services/utils/mimetype';
 import { CoreTextUtils } from '@services/utils/text';
 import { CoreTimeUtils } from '@services/utils/time';
 import { CoreUtils } from '@services/utils/utils';
-import { CoreWSFile, CoreWSFileUploadOptions, CoreWSUploadFileResult } from '@services/ws';
+import {CoreWS, CoreWSFile, CoreWSFileUploadOptions, CoreWSUploadFileResult} from '@services/ws';
 import { makeSingleton, Translate, MediaCapture, ModalController, Camera } from '@singletons';
 import { CoreLogger } from '@singletons/logger';
 import { CoreEmulatorCaptureMediaComponent } from '@features/emulator/components/capture-media/capture-media';
@@ -728,6 +728,8 @@ export class CoreFileUploaderProvider {
         siteId?: string,
     ): Promise<number> {
 
+
+
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         let fileName: string | undefined;
@@ -738,9 +740,11 @@ export class CoreFileUploaderProvider {
         if (CoreUtils.isFileEntry(file)) {
             // Local file, we already have the file entry.
             fileName = file.name;
+            let size = await CoreWS.getRemoteFileSize(file.nativeURL);
+            console.log("size: " + size);
             fileEntry = file;
 
-            if (CoreApp.isAndroid()) {
+            if (CoreApp.isAndroid() && size > 10000) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
@@ -758,9 +762,7 @@ export class CoreFileUploaderProvider {
 
                     console.log("bin reingerannt");
 
-                    let modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
-
-
+                    var modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
 
@@ -792,14 +794,21 @@ export class CoreFileUploaderProvider {
                     try {
                         var result2 = await promise;
                         fileEntry.nativeURL = result2 as string;
+
+                        console.log("name name name name");
+
                         modal.dismiss();
                     } catch (error) {
+
+                        console.log("name name name name 5");
                         modal.dismiss();
                     }
 
+                    modal.dismiss();
                 }
 
                 }else{
+                    console.log("name name name name 6");
                     console.log("bin ein bild");
                 }
 
@@ -828,10 +837,9 @@ export class CoreFileUploaderProvider {
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
         const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
 
-        console.log("name name name");
+        console.log("name name name name 7");
 
         const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
-
         return result.itemid;
     }
 
