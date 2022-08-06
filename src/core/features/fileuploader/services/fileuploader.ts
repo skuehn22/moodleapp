@@ -745,24 +745,25 @@ export class CoreFileUploaderProvider {
             //var check = this.file.filessize;
             // Local file, we already have the file entry.
             fileName = file.name;
-            let size = await CoreWS.getRemoteFileSize(file.nativeURL);
+            //let size = await CoreWS.getRemoteFileSize(file.nativeURL);
 
-            let test = CoreFile.getFileSize(file.nativeURL)
+            const test = CoreFile.getFileSize(file.nativeURL)
                 .then((user) => {
+
+                   const sizeFile =  user.toFixed();
+
                     console.log("size cal0: " + user.toString()); //3
                     console.log("size cal4: " + user.toFixed()); //3
+
+                    return user.toFixed();
                 });
 
-            console.log("size cal5: " + test);
 
-
-            console.log("size cal: " + size);
-            console.log("size cal2: " + test);
-
+            console.log("size cal9: " + test); //3
 
             fileEntry = file;
 
-            if (CoreApp.isAndroid() && size > 10000) {
+            if (CoreApp.isAndroid()) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
