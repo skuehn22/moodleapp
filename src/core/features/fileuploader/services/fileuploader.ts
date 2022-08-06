@@ -737,11 +737,20 @@ export class CoreFileUploaderProvider {
 
         const isOnline = !CoreUtils.isFileEntry(file);
 
+        //const test = CoreUtils.sumFileSizes(file);
+
+        //var check = this.file.filessize;
         if (CoreUtils.isFileEntry(file)) {
+
+            //var check = this.file.filessize;
             // Local file, we already have the file entry.
             fileName = file.name;
             let size = await CoreWS.getRemoteFileSize(file.nativeURL);
-            console.log("size: " + size);
+            let test = CoreFile.getFileSize(file.nativeURL);
+            console.log("size cal: " + size);
+            console.log("size cal2: " + test);
+
+
             fileEntry = file;
 
             if (CoreApp.isAndroid() && size > 10000) {
