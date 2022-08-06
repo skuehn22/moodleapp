@@ -746,7 +746,16 @@ export class CoreFileUploaderProvider {
             // Local file, we already have the file entry.
             fileName = file.name;
             let size = await CoreWS.getRemoteFileSize(file.nativeURL);
-            let test = CoreFile.getFileSize(file.nativeURL);
+
+            let test = CoreFile.getFileSize(file.nativeURL)
+                .then((user) => {
+                    console.log("size cal0: " + user.toString()); //3
+                    console.log("size cal4: " + user.toFixed()); //3
+                });
+
+            console.log("size cal5: " + test);
+
+
             console.log("size cal: " + size);
             console.log("size cal2: " + test);
 
