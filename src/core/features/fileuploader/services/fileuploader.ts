@@ -727,9 +727,7 @@ export class CoreFileUploaderProvider {
         componentId?: string | number,
         siteId?: string,
     ): Promise<number> {
-
-
-
+        
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         let fileName: string | undefined;
@@ -747,6 +745,8 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             //let size = await CoreWS.getRemoteFileSize(file.nativeURL);
 
+
+            /*
             const test = CoreFile.getFileSize(file.nativeURL)
                 .then((user) => {
 
@@ -761,6 +761,9 @@ export class CoreFileUploaderProvider {
 
             console.log("size cal9: " + test); //3
 
+             */
+
+
             fileEntry = file;
 
             if (CoreApp.isAndroid()) {
@@ -774,20 +777,16 @@ export class CoreFileUploaderProvider {
                     var checkAudio = mimetype.includes("audio");
                 }
 
-                console.log("mimetype " +mimetype);
-                console.log("checkAudio " +checkAudio);
 
                 if(!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml"){
 
-                    console.log("bin reingerannt");
 
                     var modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
 
                         var name = Math.round(+new Date()/1000);
-                        console.log("error warnung 2");
-                        console.log("name name " + name);
+
 
                         VideoEditor.transcodeVideo(function (success) {
                                 console.log("error warnung 3");
