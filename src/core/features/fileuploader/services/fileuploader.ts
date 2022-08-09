@@ -742,16 +742,21 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             fileEntry = file;
 
-            var test = CoreFileHelper.getFileSize(fileEntry)
+            var test = await CoreFileHelper.getFileSize(fileEntry)
             console.log("Test 0 : " + test);
 
-            var test1  = CoreFile.getFileSize(file.fullPath);
+            var test1  = await CoreFile.getFileSize(file.fullPath);
             console.log("Test 1 : " + test1);
 
-            if (CoreApp.isAndroid() && CoreFileHelper.getFileSize(fileEntry) ) {
+            if (CoreApp.isAndroid()) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
+
+                const filesize = await CoreFile.getFileSize(file.nativeURL);
+                console.log("Test 2 : " + filesize);
+
+
 
                 if(mimetype == undefined){
                     var checkAudio = false;
