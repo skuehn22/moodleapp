@@ -769,7 +769,7 @@ export class CoreFileUploaderProvider {
 
                     let promise = new Promise((resolve, reject) => {
 
-                        
+
                         var rand = Math.floor(Math.random() * 100);
                         var name = Math.round(+new Date() / 1000) + rand;
                         console.log("log den namen0: " + name);
@@ -790,6 +790,12 @@ export class CoreFileUploaderProvider {
 
                                 progress: function (info) {
                                     modal.updateText("Komprimierung: " + Math.round(info * 100) + "%");
+
+                                    if(info * 100 >= 99){
+                                        modal.dismiss();
+                                        resolve(success)
+                                    }
+
                                 }
                             },
                         )
