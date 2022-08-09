@@ -766,7 +766,7 @@ export class CoreFileUploaderProvider {
 
                 if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml" && filesize > 15000000) {
 
-                    var modal = await CoreDomUtils.showModalLoading("Komprimiere Datei: "+ fileNumber +"0%", true);
+                    var modal = await CoreDomUtils.showModalLoading("Komprimiere Datei "+ fileNumber +": 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
 
@@ -790,7 +790,7 @@ export class CoreFileUploaderProvider {
                                 fps: 30, // optional (android only), defaults to 30
 
                                 progress: function (info) {
-                                    modal.updateText("Komprimiere Datei: "+ fileNumber + " " +  + Math.round(info * 100) + "%");
+                                    modal.updateText("Komprimiere Datei "+ fileNumber + ": " +  + Math.round(info * 100) + "%");
                                 }
                             },
                         )
@@ -807,8 +807,24 @@ export class CoreFileUploaderProvider {
 
         } else {
 
-            return 123;
+            console.log("log den namen6: isFileEntry");
 
+            // It's an online file. We need to download it and re-upload it.
+            fileName = file.filename;
+
+            const path = await CoreFilepool.downloadUrl(
+                siteId,
+                CoreFileHelper.getFileUrl(file),
+                false,
+                component,
+                componentId,
+                file.timemodified,
+                undefined,
+                undefined,
+                file,
+            )
+
+            fileEntry = await CoreFile.getExternalFile(path);
 
 
         }
@@ -861,14 +877,14 @@ export class CoreFileUploaderProvider {
         }
 
         // Upload only the first file first to get a draft id.
-        const itemId = await this.uploadOrReuploadFile(files[0], 0, component, componentId, siteId, 0);
+        const itemId = await this.uploadOrReuploadFile(files[0], 0, component, componentId, siteId, 1);
 
         const promises: Promise<number>[] = [];
 
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
             console.log("log den namen: " + i);
-            var test = await this.uploadOrReuploadFile(file, itemId, component, componentId, siteId, i);
+            var test = await this.uploadOrReuploadFile(file, itemId, component, componentId, siteId, i+1);
         }
 
         await Promise.all(promises);
