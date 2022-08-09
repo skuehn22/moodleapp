@@ -731,8 +731,12 @@ export class CoreFileUploaderProvider {
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 
+        console.log("log den namen0: ich starte");
+
         let fileName: string | undefined;
         let fileEntry: FileEntry | undefined;
+
+        var uploaded = 0;
 
         const isOnline = !CoreUtils.isFileEntry(file);
 
@@ -759,7 +763,7 @@ export class CoreFileUploaderProvider {
                 }
 
 
-                if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml" && filesize > 10000000) {
+                if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml" && filesize > 15000000) {
 
                     var modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
@@ -767,8 +771,10 @@ export class CoreFileUploaderProvider {
 
                         var name = Math.round(+new Date() / 1000);
                         console.log("log den namen0: " + name);
+                        console.log("log den namen0.1: " +  file.nativeURL);
 
-                        VideoEditor.transcodeVideo(function (success) {
+
+                       VideoEditor.transcodeVideo(function (success) {
                                 console.log("log den namen1: " + name);
                                 resolve(success)
                             }, function (error) {
@@ -792,6 +798,8 @@ export class CoreFileUploaderProvider {
                     try {
                         var result2 = await promise;
                         fileEntry.nativeURL = result2 as string;
+
+
 
                         console.log("log den namen3: " + fileEntry.nativeURL);
 
@@ -839,9 +847,13 @@ export class CoreFileUploaderProvider {
 
         console.log("log den namen8: got options");
 
-        const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
 
-        console.log("log den namen9: uploaded");
+        console.log("log den namen8.1.: " + fileEntry.nativeURL);
+
+        const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
+        uploaded = uploaded + 1;
+
+        console.log("log den namen9: uploaded" + uploaded);
         return result.itemid;
     }
 
