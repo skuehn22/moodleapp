@@ -19,7 +19,7 @@ import { MediaFile, CaptureError, CaptureAudioOptions, CaptureVideoOptions } fro
 import { Subject } from 'rxjs';
 
 import { CoreApp } from '@services/app';
-import { CoreFile, CoreFileProvider } from '@services/file';
+import {CoreFile, CoreFileFormat, CoreFileProvider} from '@services/file';
 import { CoreFilepool } from '@services/filepool';
 import { CoreSites } from '@services/sites';
 import { CoreMimetypeUtils } from '@services/utils/mimetype';
@@ -742,7 +742,13 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             fileEntry = file;
 
-            if (CoreApp.isAndroid()) {
+            var test = CoreFileHelper.getFileSize(fileEntry)
+            console.log("Test 0 : " + test);
+
+            var test1  = CoreFile.getFileSize(file.fullPath);
+            console.log("Test 1 : " + test1);
+
+            if (CoreApp.isAndroid() && CoreFileHelper.getFileSize(fileEntry) ) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
