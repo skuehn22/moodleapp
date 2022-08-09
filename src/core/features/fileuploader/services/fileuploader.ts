@@ -39,7 +39,6 @@ import { CoreDomUtils } from '@services/utils/dom';
 
 //import { VideoEditor } from '@awesome-cordova-plugins/video-editor';
 
-import file_size_url from 'file_size_url';
 
 declare var VideoEditor: any;
 
