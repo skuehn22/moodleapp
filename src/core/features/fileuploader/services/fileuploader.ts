@@ -745,8 +745,8 @@ export class CoreFileUploaderProvider {
             var test = await CoreFileHelper.getFileSize(fileEntry)
             console.log("Test 0 : " + test);
 
-            var test1  = await CoreFile.getFileSize(file.fullPath);
-            console.log("Test 1 : " + test1);
+            //var test1  = await CoreFile.getFileSize(file.fullPath);
+           // console.log("Test 1 : " + test1);
 
             if (CoreApp.isAndroid()) {
 
