@@ -751,36 +751,32 @@ export class CoreFileUploaderProvider {
             if (CoreApp.isAndroid()) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
-                const mimetype = extension? CoreMimetypeUtils.getMimeType(extension) : undefined;
+                const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
 
                 const filesize = await CoreFile.getFileSize(file.nativeURL);
                 console.log("Test 2 : " + filesize);
 
-
-
-                if(mimetype == undefined){
+                if (mimetype == undefined) {
                     var checkAudio = false;
-                }else{
+                } else {
                     var checkAudio = mimetype.includes("audio");
                 }
 
 
-                if(!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml"){
-
+                if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml") {
 
                     var modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
 
-                        var name = Math.round(+new Date()/1000);
-
+                        var name = Math.round(+new Date() / 1000);
 
                         VideoEditor.transcodeVideo(function (success) {
                                 console.log("error warnung 3");
-                                resolve (success)
+                                resolve(success)
                             }, function (error) {
                                 console.log("error warnung " + error);
-                                reject (error)
+                                reject(error)
                             },
                             {
                                 fileUri: file.nativeURL,
@@ -788,7 +784,7 @@ export class CoreFileUploaderProvider {
                                 videoBitrate: 3000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
                                 fps: 30, // optional (android only), defaults to 30
 
-                                progress: function(info) {
+                                progress: function (info) {
                                     modal.updateText("Komprimierung: " + Math.round(info * 100) + "%");
                                 }
                             },
@@ -800,22 +796,21 @@ export class CoreFileUploaderProvider {
                         var result2 = await promise;
                         fileEntry.nativeURL = result2 as string;
 
-                        console.log("name name name name");
+                        console.log("name name 55");
 
                         modal.dismiss();
                     } catch (error) {
 
-                        console.log("name name name name 5");
+                        console.log("name name 66");
                         modal.dismiss();
                     }
 
                     modal.dismiss();
-                }
-
-                }else{
-                    console.log("name name name name 6");
+                } else {
+                    console.log("name name 77");
                     console.log("bin ein bild");
                 }
+            }
 
         } else {
             // It's an online file. We need to download it and re-upload it.
@@ -842,7 +837,7 @@ export class CoreFileUploaderProvider {
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
         const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
 
-        console.log("name name name name 7");
+        console.log("name name 99");
 
         const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
         return result.itemid;
