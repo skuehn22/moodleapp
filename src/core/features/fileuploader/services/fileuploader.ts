@@ -769,15 +769,16 @@ export class CoreFileUploaderProvider {
 
                     let promise = new Promise((resolve, reject) => {
 
-                        var name = Math.round(+new Date() / 1000);
+                        
+                        var rand = Math.floor(Math.random() * 100);
+                        var name = Math.round(+new Date() / 1000) + rand;
                         console.log("log den namen0: " + name);
                         console.log("log den namen0.1: " +  file.nativeURL);
 
-
-                       VideoEditor.transcodeVideo(function (success) {
+                       VideoEditor.transcodeVideo(function (success = null) {
                                 console.log("log den namen1: " + name);
                                 resolve(success)
-                            }, function (error) {
+                            }, function (error = null) {
                                 console.log("log den namen2: " + name);
                                 reject(error)
                             },
