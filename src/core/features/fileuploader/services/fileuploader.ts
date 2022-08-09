@@ -742,17 +742,13 @@ export class CoreFileUploaderProvider {
             fileName = file.name;
             fileEntry = file;
 
-            var test = await CoreFileHelper.getFileSize(fileEntry)
-            console.log("Test 0 : " + test);
-
-            //var test1  = await CoreFile.getFileSize(file.fullPath);
-           // console.log("Test 1 : " + test1);
 
             if (CoreApp.isAndroid()) {
 
                 const extension = CoreMimetypeUtils.getFileExtension(fileName!);
                 const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
 
+                //transcode only videos bigger than 10MB
                 const filesize = await CoreFile.getFileSize(file.nativeURL);
                 console.log("Test 2 : " + filesize);
 
@@ -763,19 +759,20 @@ export class CoreFileUploaderProvider {
                 }
 
 
-                if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml") {
+                if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml" && filesize > 10000000) {
 
                     var modal = await CoreDomUtils.showModalLoading("Komprimierung: 0%", true);
 
                     let promise = new Promise((resolve, reject) => {
 
                         var name = Math.round(+new Date() / 1000);
+                        console.log("log den namen0: " + name);
 
                         VideoEditor.transcodeVideo(function (success) {
-                                console.log("error warnung 3");
+                                console.log("log den namen1: " + name);
                                 resolve(success)
                             }, function (error) {
-                                console.log("error warnung " + error);
+                                console.log("log den namen2: " + name);
                                 reject(error)
                             },
                             {
@@ -796,23 +793,24 @@ export class CoreFileUploaderProvider {
                         var result2 = await promise;
                         fileEntry.nativeURL = result2 as string;
 
-                        console.log("name name 55");
+                        console.log("log den namen3: " + fileEntry.nativeURL);
 
                         modal.dismiss();
                     } catch (error) {
 
-                        console.log("name name 66");
+                        console.log("log den namen4: " + error);
                         modal.dismiss();
                     }
 
                     modal.dismiss();
                 } else {
-                    console.log("name name 77");
-                    console.log("bin ein bild");
+                    console.log("log den namen5: kein transloadit");
                 }
             }
 
         } else {
+
+            console.log("log den namen6: isFileEntry");
             // It's an online file. We need to download it and re-upload it.
             fileName = file.filename;
 
@@ -832,14 +830,18 @@ export class CoreFileUploaderProvider {
 
         }
 
+        console.log("log den namen7: ready to connect");
+
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
         const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
 
-        console.log("name name 99");
+        console.log("log den namen8: got options");
 
         const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
+
+        console.log("log den namen9: uploaded");
         return result.itemid;
     }
 
