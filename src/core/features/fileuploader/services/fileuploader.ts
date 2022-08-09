@@ -777,9 +777,11 @@ export class CoreFileUploaderProvider {
 
                        VideoEditor.transcodeVideo(function (success = null) {
                                 console.log("log den namen1: " + name);
+                                modal.dismiss();
                                 resolve(success)
                             }, function (error = null) {
                                 console.log("log den namen2: " + name);
+                                modal.dismiss();
                                 reject(error)
                             },
                             {
