@@ -777,11 +777,9 @@ export class CoreFileUploaderProvider {
 
                        VideoEditor.transcodeVideo(function (success = null) {
                                 console.log("log den namen1: " + name);
-                                modal.dismiss();
                                 resolve(success)
                             }, function (error = null) {
                                 console.log("log den namen2: " + name);
-                                modal.dismiss();
                                 reject(error)
                             },
                             {
@@ -792,32 +790,13 @@ export class CoreFileUploaderProvider {
 
                                 progress: function (info) {
                                     modal.updateText("Komprimierung: " + Math.round(info * 100) + "%");
-
-                                    if(info * 100 >= 99){
-                                        modal.dismiss();
-                                        resolve(success)
-                                    }
-
                                 }
                             },
                         )
                     });
 
-
-                    try {
-                        var result2 = await promise;
-                        fileEntry.nativeURL = result2 as string;
-
-
-
-                        console.log("log den namen3: " + fileEntry.nativeURL);
-
-                        modal.dismiss();
-                    } catch (error) {
-
-                        console.log("log den namen4: " + error);
-                        modal.dismiss();
-                    }
+                    var result2 = await promise;
+                    fileEntry.nativeURL = result2 as string;
 
                     modal.dismiss();
                 } else {
@@ -900,7 +879,8 @@ export class CoreFileUploaderProvider {
 
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
-            promises.push(this.uploadOrReuploadFile(file, itemId, component, componentId, siteId));
+
+            var test = await promises.push(this.uploadOrReuploadFile(file, itemId, component, componentId, siteId));
         }
 
         await Promise.all(promises);
