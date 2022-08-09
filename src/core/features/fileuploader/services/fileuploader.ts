@@ -39,6 +39,8 @@ import { CoreDomUtils } from '@services/utils/dom';
 
 //import { VideoEditor } from '@awesome-cordova-plugins/video-editor';
 
+import file_size_url from 'file_size_url';
+
 declare var VideoEditor: any;
 
 
@@ -727,7 +729,7 @@ export class CoreFileUploaderProvider {
         componentId?: string | number,
         siteId?: string,
     ): Promise<number> {
-        
+
         siteId = siteId || CoreSites.getCurrentSiteId();
 
         let fileName: string | undefined;
@@ -735,33 +737,36 @@ export class CoreFileUploaderProvider {
 
         const isOnline = !CoreUtils.isFileEntry(file);
 
-        //const test = CoreUtils.sumFileSizes(file);
+        let size = await CoreFile.getFileSize(file['fileurl'])
+            .catch((error) => console.log(error))
+
+        console.log("SIZZZZE " + file['fileurl']);
+
+        //console.log(size.toString());
+
+
+        const test = await CoreFile.getFileSize(file['fileurl'])
+            .then((test) => console.log(test.toFixed()))
+            .catch((error) => console.log(error))
+
+        console.log("BURGER KING " + test);
 
         //var check = this.file.filessize;
         if (CoreUtils.isFileEntry(file)) {
 
-            //var check = this.file.filessize;
             // Local file, we already have the file entry.
             fileName = file.name;
             //let size = await CoreWS.getRemoteFileSize(file.nativeURL);
 
 
-            /*
-            const test = CoreFile.getFileSize(file.nativeURL)
-                .then((user) => {
+            const size = await CoreFile.getFileSize(file.nativeURL)
+            .catch((error) => console.log(error))
 
-                   const sizeFile =  user.toFixed();
+            console.log("mc donals " + size) // 968.27 KB
 
-                    console.log("size cal0: " + user.toString()); //3
-                    console.log("size cal4: " + user.toFixed()); //3
+            const test = await CoreFile.getFileSize(file.nativeURL)
 
-                    return user.toFixed();
-                });
-
-
-            console.log("size cal9: " + test); //3
-
-             */
+            console.log("BURGER KING " + test.toFixed());
 
 
             fileEntry = file;
