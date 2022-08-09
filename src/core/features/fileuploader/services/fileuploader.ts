@@ -826,6 +826,7 @@ export class CoreFileUploaderProvider {
 
         }
 
+
         console.log("log den namen7: ready to connect");
 
         // Now upload the file.
@@ -879,8 +880,8 @@ export class CoreFileUploaderProvider {
 
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
-
-            var test = await promises.push(this.uploadOrReuploadFile(file, itemId, component, componentId, siteId));
+            console.log("log den namen: " + i);
+            var test = await this.uploadOrReuploadFile(file, itemId, component, componentId, siteId);
         }
 
         await Promise.all(promises);
