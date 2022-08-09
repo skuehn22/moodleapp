@@ -736,47 +736,10 @@ export class CoreFileUploaderProvider {
 
         const isOnline = !CoreUtils.isFileEntry(file);
 
-        if(fileEntry != undefined){
-            const fileData = await CoreFile.getFileObjectFromFileEntry(fileEntry);
-            console.log("KOLWSKIS AUTOBAHN" + fileData.size);
-        }
-
-        let size = await CoreFile.getFileSize(file['fileurl'])
-            .catch((error) => console.log(error))
-
-        console.log("BURGER KING 2 " + file['fileurl']);
-
-        //console.log(size.toString());
-
-
-        const test = await CoreFile.getFileSize(file['fileurl'])
-            .then((test) => console.log(test.toFixed()))
-            .catch((error) => console.log(error))
-
-        console.log("BURGER KING " + test);
-
-        const fileSize = await CoreFile.getFileSize(file['fileurl']);
-
-        console.log("BURGER KING1 " + fileSize);
-
-        //var check = this.file.filessize;
         if (CoreUtils.isFileEntry(file)) {
 
             // Local file, we already have the file entry.
             fileName = file.name;
-            //let size = await CoreWS.getRemoteFileSize(file.nativeURL);
-
-
-            const size = await CoreFile.getFileSize(file.nativeURL)
-            .catch((error) => console.log(error))
-
-            console.log("BURGER KING 3 " + size) // 968.27 KB
-
-            const test = await CoreFile.getFileSize(file.nativeURL)
-
-            console.log("BURGER KING 4 " + test.toFixed());
-
-
             fileEntry = file;
 
             if (CoreApp.isAndroid()) {
