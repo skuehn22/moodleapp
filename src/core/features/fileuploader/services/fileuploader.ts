@@ -161,8 +161,6 @@ export class CoreFileUploaderProvider {
      */
     async captureAudioInApp(): Promise<MediaFile> {
 
-        console.log("audio aufnehmen");
-
         const params = {
             type: 'audio',
         };
@@ -179,14 +177,8 @@ export class CoreFileUploaderProvider {
         const result = await modal.onWillDismiss();
 
         if (result.role == 'success') {
-
-            console.log("audio aufnehmen 7 " + result.data[0]);
-
             return result.data[0];
         } else {
-
-            console.log("audio aufnehmen 8 " + result.data);
-
             throw result.data;
         }
     }
@@ -198,8 +190,6 @@ export class CoreFileUploaderProvider {
      * @return Promise resolved with the result.
      */
     async captureVideo(options: CaptureVideoOptions): Promise<MediaFile[] | CaptureError> {
-
-        console.log("audio aufnehmen 2");
 
         this.onVideoCapture.next(true);
 
@@ -286,9 +276,6 @@ export class CoreFileUploaderProvider {
             }
         }
 
-        console.log(" options.fileName :" + options.fileName);
-
-
         return options;
     }
 
@@ -364,9 +351,6 @@ export class CoreFileUploaderProvider {
         const options: CoreFileUploaderOptions = {};
         let filename = mediaFile.name;
 
-        console.log("mediafile"+ filename);
-
-
         if (!filename.match(/_\d{14}(\..*)?$/)) {
             // Add a timestamp to the filename to make it unique.
             const split = filename.split('.');
@@ -408,7 +392,6 @@ export class CoreFileUploaderProvider {
      * @return Promise resolved with the list of files.
      */
     async getStoredFiles(folderPath: string): Promise<FileEntry[]> {
-        console.log("folderpath"+ folderPath);
 
         return <FileEntry[]> await CoreFile.getDirectoryContents(folderPath);
     }
@@ -585,8 +568,6 @@ export class CoreFileUploaderProvider {
         files: CoreFileEntry[],
     ): Promise<CoreFileUploaderStoreFilesResult> {
 
-        console.log("folderPath 2: "+ folderPath);
-
         const result: CoreFileUploaderStoreFilesResult = {
             online: [],
             offline: 0,
@@ -604,8 +585,6 @@ export class CoreFileUploaderProvider {
 
 
             if (!CoreUtils.isFileEntry(file)) {
-
-                console.log("filename: "+file.filename);
 
                 // It's an online file, add it to the result and ignore it.
                 result.online.push({
@@ -732,8 +711,6 @@ export class CoreFileUploaderProvider {
 
         siteId = siteId || CoreSites.getCurrentSiteId();
 
-        console.log("log den namen0: ich starte");
-
         let fileName: string | undefined;
         let fileEntry: FileEntry | undefined;
 
@@ -755,7 +732,6 @@ export class CoreFileUploaderProvider {
 
                 //transcode only videos bigger than 10MB
                 const filesize = await CoreFile.getFileSize(file.nativeURL);
-                console.log("Test 2 : " + filesize);
 
                 if (mimetype == undefined) {
                     var checkAudio = false;
@@ -773,14 +749,10 @@ export class CoreFileUploaderProvider {
 
                         var rand = Math.floor(Math.random() * 100);
                         var name = Math.round(+new Date() / 1000) + rand;
-                        console.log("log den namen0: " + name);
-                        console.log("log den namen0.1: " +  file.nativeURL);
 
                        VideoEditor.transcodeVideo(function (success = null) {
-                                console.log("log den namen1: " + name);
                                 resolve(success)
                             }, function (error = null) {
-                                console.log("log den namen2: " + name);
                                 reject(error)
                             },
                             {
@@ -800,14 +772,10 @@ export class CoreFileUploaderProvider {
                     fileEntry.nativeURL = result2 as string;
 
                     modal.dismiss();
-                } else {
-                    console.log("log den namen5: kein transloadit");
                 }
             }
 
         } else {
-
-            console.log("log den namen6: isFileEntry");
 
             // It's an online file. We need to download it and re-upload it.
             fileName = file.filename;
@@ -829,23 +797,13 @@ export class CoreFileUploaderProvider {
 
         }
 
-
-        console.log("log den namen7: ready to connect");
-
         // Now upload the file.
         const extension = CoreMimetypeUtils.getFileExtension(fileName!);
         const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
         const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
-
-        console.log("log den namen8: got options");
-
-
-        console.log("log den namen8.1.: " + fileEntry.nativeURL);
-
         const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
         uploaded = uploaded + 1;
 
-        console.log("log den namen9: uploaded" + uploaded);
         return result.itemid;
     }
 
@@ -883,7 +841,6 @@ export class CoreFileUploaderProvider {
 
         for (let i = 1; i < files.length; i++) {
             const file = files[i];
-            console.log("log den namen: " + i);
             var test = await this.uploadOrReuploadFile(file, itemId, component, componentId, siteId, i+1);
         }
 
@@ -915,13 +872,12 @@ export type CoreFileUploaderTypeListInfoEntry = {
 
 function success(result) {
     // result is the path to the trimmed video on the device
-    console.log('trimSuccess, result: ' + result);
     return "yeah";
 
 }
 
 function error(err) {
-    console.log('trimFail, err: ' + err);
+
 }
 
 
