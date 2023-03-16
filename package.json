@@ -84,6 +84,7 @@
     "@types/cordova-plugin-file-transfer": "1.6.2",
     "@types/dom-mediacapture-record": "1.0.7",
     "chart.js": "2.9.4",
+    "@moodlehq/cordova-plugin-intent": "2.2.0-moodle.1",
     "cordova": "10.0.0",
     "cordova-android": "9.1.0",
     "cordova-android-support-gradle-release": "3.0.1",
@@ -98,6 +99,7 @@
     "cordova-plugin-customurlscheme": "5.0.2",
     "cordova-plugin-device": "2.0.3",
     "cordova-plugin-file": "6.0.2",
+    "cordova-plugin-file-opener2": "3.0.5",
     "cordova-plugin-geolocation": "4.1.0",
     "cordova-plugin-globalization": "1.11.0",
     "cordova-plugin-ionic-keyboard": "2.2.0",
@@ -202,6 +204,9 @@
         "ANDROID_PATHPREFIX": "/"
       },
       "cordova-plugin-device": {},
+      "cordova-plugin-file-opener2": {
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      },
       "cordova-plugin-geolocation": {
         "GPS_REQUIRED": "false"
       },
@@ -226,6 +231,7 @@
         "ANDROID_SUPPORT_V13_VERSION": "27.+",
         "FCM_VERSION": "17.0.+"
       },
+      "@moodlehq/cordova-plugin-intent": {},
       "nl.kingsquare.cordova.background-audio": {},
       "cordova-android-support-gradle-release": {
         "ANDROID_SUPPORT_VERSION": "27.+"
