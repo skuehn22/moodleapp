@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "313335138772",
+    "project_id": "ontour-app-ecb39",
+    "storage_bucket": "ontour-app-ecb39.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313335138772:android:0ba2c791d5b0ca76afee41",
+        "android_client_info": {
+          "package_name": "org.ontour.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "313335138772-ne2hcdmc155hg77voeomckgfscrbkgf2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNIwKPgpd2lkJdXFNU4F_OdeMhCD2sJpk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "313335138772-ne2hcdmc155hg77voeomckgfscrbkgf2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
