@@ -98,7 +98,6 @@
     "cordova-plugin-customurlscheme": "5.0.2",
     "cordova-plugin-device": "2.0.3",
     "cordova-plugin-file": "6.0.2",
-    "cordova-plugin-file-opener2": "3.0.5",
     "cordova-plugin-geolocation": "4.1.0",
     "cordova-plugin-globalization": "1.11.0",
     "cordova-plugin-ionic-keyboard": "2.2.0",
@@ -203,9 +202,6 @@
         "ANDROID_PATHPREFIX": "/"
       },
       "cordova-plugin-device": {},
-      "cordova-plugin-file-opener2": {
-        "ANDROID_SUPPORT_V4_VERSION": "27.+"
-      },
       "cordova-plugin-geolocation": {
         "GPS_REQUIRED": "false"
       },
