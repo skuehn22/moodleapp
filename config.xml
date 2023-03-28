@@ -130,8 +130,11 @@
             <receiver android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.TriggerReceiver" />
             <receiver android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.ClearReceiver" />
             <service android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.ClickReceiver" />
-            <receiver  android:exported="false" android:directBootAware="true" android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver">
-
+            <receiver android:exported="false" android:directBootAware="true" android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver">
+                <intent-filter>
+                    <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                    <action android:name="android.intent.action.BOOT_COMPLETED" />
+                </intent-filter>
             </receiver>
         </config-file>
         <config-file parent="/*" target="res/xml/config.xml">
