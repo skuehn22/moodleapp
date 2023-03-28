@@ -176,7 +176,7 @@
     "jest-preset-angular": "8.3.1",
     "jsonc-parser": "2.3.1",
     "native-run": "^1.4.0",
-    "phonegap-plugin-push": "git+https://github.com/moodlemobile/phonegap-plugin-push.git#moodle-v4",
+    "phonegap-plugin-push": "github:AnmolSethi/phonegap-plugin-push",
     "ts-jest": "26.4.1",
     "ts-node": "8.3.0",
     "typescript": "3.9.9"
