@@ -57,14 +57,26 @@
         <resource-file src="resources/android/icon/drawable-mdpi-smallicon.png" target="app/src/main/res/mipmap-mdpi/smallicon.png" />
         <resource-file src="resources/android/icon/drawable-hdpi-smallicon.png" target="app/src/main/res/mipmap-hdpi/smallicon.png" />
         <resource-file src="resources/android/icon/drawable-xhdpi-smallicon.png" target="app/src/main/res/mipmap-xhdpi/smallicon.png" />
+        <resource-file src="resources/android/xml/network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
         <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application/activity[@android:name='MainActivity']">
-            <activity android:exported="true" android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize" />
+            <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|screenLayout|smallestScreenSize" android:exported="true" />
         </edit-config>
         <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
-            <application android:largeHeap="true" android:usesCleartextTraffic="true" />
+            <application android:largeHeap="true" android:networkSecurityConfig="@xml/network_security_config" />
         </edit-config>
         <config-file parent="/manifest/application" target="AndroidManifest.xml">
             <meta-data android:name="firebase_analytics_collection_deactivated" android:value="true" />
+        </config-file>
+        <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="IntentShim">
+                <param name="android-package" value="com.darryncampbell.cordova.plugin.intent.IntentShim" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+        <config-file mode="merge" parent="/manifest/application" platform="android" target="AndroidManifest.xml">
+            <provider android:authorities="${applicationId}.darryncampbell.cordova.plugin.intent.fileprovider" android:exported="false" android:grantUriPermissions="true" android:name="com.darryncampbell.cordova.plugin.intent.CordovaPluginIntentFileProvider">
+                <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/provider_paths" />
+            </provider>
         </config-file>
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="Clipboard">
@@ -99,6 +111,11 @@
             <allow-navigation href="cdvfile:*" />
         </config-file>
         <config-file parent="/*" target="res/xml/config.xml">
+            <feature name="FileOpener2">
+                <param name="android-package" value="io.github.pwlin.cordova.plugins.fileopener2.FileOpener2" />
+            </feature>
+        </config-file>
+        <config-file parent="/*" target="res/xml/config.xml">
             <feature name="FileTransfer">
                 <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
             </feature>
@@ -106,11 +123,6 @@
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="Geolocation">
                 <param name="android-package" value="org.apache.cordova.geolocation.Geolocation" />
-            </feature>
-        </config-file>
-        <config-file parent="/*" target="res/xml/config.xml">
-            <feature name="Globalization">
-                <param name="android-package" value="org.apache.cordova.globalization.Globalization" />
             </feature>
         </config-file>
         <config-file parent="/*" target="res/xml/config.xml">
@@ -130,7 +142,7 @@
             <receiver android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.TriggerReceiver" />
             <receiver android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.ClearReceiver" />
             <service android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.ClickReceiver" />
-            <receiver android:exported="false" android:directBootAware="true" android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver">
+            <receiver android:directBootAware="true" android:exported="false" android:name="de.appplant.cordova.plugin.localnotification.RestoreReceiver">
                 <intent-filter>
                     <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                     <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -170,12 +182,6 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="res/xml/config.xml">
-            <feature name="Whitelist">
-                <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
-                <param name="onload" value="true" />
-            </feature>
-        </config-file>
-        <config-file parent="/*" target="res/xml/config.xml">
             <feature name="SQLitePlugin">
                 <param name="android-package" value="io.sqlc.SQLitePlugin" />
             </feature>
@@ -185,13 +191,9 @@
                 <param name="android-package" value="com.adobe.phonegap.push.PushPlugin" />
             </feature>
         </config-file>
-        <config-file parent="/*" target="res/xml/config.xml">
-            <feature name="Media">
-                <param name="android-package" value="org.apache.cordova.media.AudioHandler" />
-            </feature>
-        </config-file>
         <config-file parent="/*" target="AndroidManifest.xml">
             <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
+            <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml">
             <queries>
@@ -203,30 +205,6 @@
                 </intent>
             </queries>
         </config-file>
-        <icon background="resources/android/icon/ldpi-background.png" density="ldpi" foreground="resources/android/icon/ldpi-foreground.png" />
-        <icon background="resources/android/icon/mdpi-background.png" density="mdpi" foreground="resources/android/icon/mdpi-foreground.png" />
-        <icon background="resources/android/icon/hdpi-background.png" density="hdpi" foreground="resources/android/icon/hdpi-foreground.png" />
-        <icon background="resources/android/icon/xhdpi-background.png" density="xhdpi" foreground="resources/android/icon/xhdpi-foreground.png" />
-        <icon background="resources/android/icon/xxhdpi-background.png" density="xxhdpi" foreground="resources/android/icon/xxhdpi-foreground.png" />
-        <icon background="resources/android/icon/xxxhdpi-background.png" density="xxxhdpi" foreground="resources/android/icon/xxxhdpi-foreground.png" />
-        <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
-        <icon density="mdpi" src="resources/android/icon/drawable-mdpi-icon.png" />
-        <icon density="hdpi" src="resources/android/icon/drawable-hdpi-icon.png" />
-        <icon density="xhdpi" src="resources/android/icon/drawable-xhdpi-icon.png" />
-        <icon density="xxhdpi" src="resources/android/icon/drawable-xxhdpi-icon.png" />
-        <icon density="xxxhdpi" src="resources/android/icon/drawable-xxxhdpi-icon.png" />
-        <splash density="land-ldpi" src="resources/android/splash/drawable-land-ldpi-screen.png" />
-        <splash density="land-mdpi" src="resources/android/splash/drawable-land-mdpi-screen.png" />
-        <splash density="land-hdpi" src="resources/android/splash/drawable-land-hdpi-screen.png" />
-        <splash density="land-xhdpi" src="resources/android/splash/drawable-land-xhdpi-screen.png" />
-        <splash density="land-xxhdpi" src="resources/android/splash/drawable-land-xxhdpi-screen.png" />
-        <splash density="land-xxxhdpi" src="resources/android/splash/drawable-land-xxxhdpi-screen.png" />
-        <splash density="port-ldpi" src="resources/android/splash/drawable-port-ldpi-screen.png" />
-        <splash density="port-mdpi" src="resources/android/splash/drawable-port-mdpi-screen.png" />
-        <splash density="port-hdpi" src="resources/android/splash/drawable-port-hdpi-screen.png" />
-        <splash density="port-xhdpi" src="resources/android/splash/drawable-port-xhdpi-screen.png" />
-        <splash density="port-xxhdpi" src="resources/android/splash/drawable-port-xxhdpi-screen.png" />
-        <splash density="port-xxxhdpi" src="resources/android/splash/drawable-port-xxxhdpi-screen.png" />
     </platform>
     <platform name="ios">
         <resource-file src="GoogleService-Info.plist" />
