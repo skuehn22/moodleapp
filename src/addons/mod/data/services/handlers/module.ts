@@ -12,46 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CoreConstants, ModPurpose } from '@/core/constants';
-import { Injectable, Type } from '@angular/core';
-import { CoreModuleHandlerBase } from '@features/course/classes/module-base-handler';
-import { CoreCourseModuleHandler } from '@features/course/services/module-delegate';
-import { makeSingleton } from '@singletons';
-import { AddonModDataIndexComponent } from '../../components/index';
+import { CoreConstants, ModPurpose } from "@/core/constants";
+import { Injectable, Type } from "@angular/core";
+import { CoreModuleHandlerBase } from "@features/course/classes/module-base-handler";
+import { CoreCourseModuleHandler } from "@features/course/services/module-delegate";
+import { makeSingleton } from "@singletons";
+import { AddonModDataIndexComponent } from "../../components/index";
 
 /**
  * Handler to support data modules.
  */
-@Injectable({ providedIn: 'root' })
-export class AddonModDataModuleHandlerService extends CoreModuleHandlerBase implements CoreCourseModuleHandler {
+@Injectable({ providedIn: "root" })
+export class AddonModDataModuleHandlerService
+  extends CoreModuleHandlerBase
+  implements CoreCourseModuleHandler
+{
+  static readonly PAGE_NAME = "mod_data";
 
-    static readonly PAGE_NAME = 'mod_data';
+  name = "AddonModData";
+  modName = "data";
+  protected pageName = AddonModDataModuleHandlerService.PAGE_NAME;
 
-    name = 'AddonModData';
-    modName = 'data';
-    protected pageName = AddonModDataModuleHandlerService.PAGE_NAME;
+  supportedFeatures = {
+    [CoreConstants.FEATURE_GROUPS]: true,
+    [CoreConstants.FEATURE_GROUPINGS]: true,
+    [CoreConstants.FEATURE_MOD_INTRO]: true,
+    [CoreConstants.FEATURE_COMPLETION_TRACKS_VIEWS]: true,
+    [CoreConstants.FEATURE_COMPLETION_HAS_RULES]: true,
+    [CoreConstants.FEATURE_GRADE_HAS_GRADE]: true,
+    [CoreConstants.FEATURE_GRADE_OUTCOMES]: true,
+    [CoreConstants.FEATURE_BACKUP_MOODLE2]: true,
+    [CoreConstants.FEATURE_SHOW_DESCRIPTION]: true,
+    [CoreConstants.FEATURE_RATE]: true,
+    [CoreConstants.FEATURE_COMMENT]: true,
+    [CoreConstants.FEATURE_MOD_PURPOSE]: ModPurpose.MOD_PURPOSE_COLLABORATION,
+  };
 
-    supportedFeatures = {
-        [CoreConstants.FEATURE_GROUPS]: true,
-        [CoreConstants.FEATURE_GROUPINGS]: true,
-        [CoreConstants.FEATURE_MOD_INTRO]: true,
-        [CoreConstants.FEATURE_COMPLETION_TRACKS_VIEWS]: true,
-        [CoreConstants.FEATURE_COMPLETION_HAS_RULES]: true,
-        [CoreConstants.FEATURE_GRADE_HAS_GRADE]: true,
-        [CoreConstants.FEATURE_GRADE_OUTCOMES]: true,
-        [CoreConstants.FEATURE_BACKUP_MOODLE2]: true,
-        [CoreConstants.FEATURE_SHOW_DESCRIPTION]: true,
-        [CoreConstants.FEATURE_RATE]: true,
-        [CoreConstants.FEATURE_COMMENT]: true,
-        [CoreConstants.FEATURE_MOD_PURPOSE]: ModPurpose.MOD_PURPOSE_COLLABORATION,
-    };
-
-    /**
-     * @inheritdoc
-     */
-    async getMainComponent(): Promise<Type<unknown>> {
-        return AddonModDataIndexComponent;
-    }
-
+  /**
+   * @inheritdoc
+   */
+  async getMainComponent(): Promise<Type<unknown>> {
+    return AddonModDataIndexComponent;
+  }
 }
-export const AddonModDataModuleHandler = makeSingleton(AddonModDataModuleHandlerService);
+export const AddonModDataModuleHandler = makeSingleton(
+  AddonModDataModuleHandlerService
+);
