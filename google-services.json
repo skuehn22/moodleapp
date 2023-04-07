@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:313335138772:android:0ba2c791d5b0ca76afee41",
         "android_client_info": {
-          "package_name": "org.ontour.app"
+          "package_name": "org.ontour.mobileapp"
         }
       },
       "oauth_client": [
