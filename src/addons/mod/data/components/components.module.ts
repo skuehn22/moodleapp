@@ -12,20 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { NgModule } from "@angular/core";
-import { CoreSharedModule } from "@/core/shared.module";
-import { CoreCourseComponentsModule } from "@features/course/components/components.module";
-import { AddonModDataIndexComponent } from "./index";
-import { AddonModDataSearchComponent } from "./search/search";
-import { CoreCompileHtmlComponentModule } from "@features/compile/components/compile-html/compile-html.module";
+import { NgModule } from '@angular/core';
+import { CoreSharedModule } from '@/core/shared.module';
+import { CoreCourseComponentsModule } from '@features/course/components/components.module';
+import { AddonModDataIndexComponent } from './index';
+import { AddonModDataSearchComponent } from './search/search';
+import { CoreCompileHtmlComponentModule } from '@features/compile/components/compile-html/compile-html.module';
 
 @NgModule({
-  declarations: [AddonModDataIndexComponent, AddonModDataSearchComponent],
-  imports: [
-    CoreSharedModule,
-    CoreCourseComponentsModule,
-    CoreCompileHtmlComponentModule,
-  ],
-  exports: [AddonModDataIndexComponent, AddonModDataSearchComponent],
+    declarations: [
+        AddonModDataIndexComponent,
+        AddonModDataSearchComponent,
+    ],
+    imports: [
+        CoreSharedModule,
+        CoreCourseComponentsModule,
+        CoreCompileHtmlComponentModule,
+    ],
+    exports: [
+        AddonModDataIndexComponent,
+        AddonModDataSearchComponent,
+    ],
 })
 export class AddonModDataComponentsModule {}

@@ -12,75 +12,68 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { APP_INITIALIZER, NgModule, Type } from "@angular/core";
-import { Routes } from "@angular/router";
-import { CoreMainMenuRoutingModule } from "@features/mainmenu/mainmenu-routing.module";
+import { APP_INITIALIZER, NgModule, Type } from '@angular/core';
+import { Routes } from '@angular/router';
+import { CoreMainMenuRoutingModule } from '@features/mainmenu/mainmenu-routing.module';
 
-import { CoreMainMenuDelegate } from "@features/mainmenu/services/mainmenu-delegate";
-import { CoreCronDelegate } from "@services/cron";
-import { CoreContentLinksDelegate } from "@features/contentlinks/services/contentlinks-delegate";
-import { AddonCalendarViewLinkHandler } from "./services/handlers/view-link";
-import {
-  AddonCalendarMainMenuHandler,
-  AddonCalendarMainMenuHandlerService,
-} from "./services/handlers/mainmenu";
-import { AddonCalendarSyncCronHandler } from "./services/handlers/sync-cron";
+import { CoreMainMenuDelegate } from '@features/mainmenu/services/mainmenu-delegate';
+import { CoreCronDelegate } from '@services/cron';
+import { CoreContentLinksDelegate } from '@features/contentlinks/services/contentlinks-delegate';
+import { AddonCalendarViewLinkHandler } from './services/handlers/view-link';
+import { AddonCalendarMainMenuHandler, AddonCalendarMainMenuHandlerService } from './services/handlers/mainmenu';
+import { AddonCalendarSyncCronHandler } from './services/handlers/sync-cron';
 
-import { CORE_SITE_SCHEMAS } from "@services/sites";
-import { CALENDAR_SITE_SCHEMA } from "./services/database/calendar";
-import { CALENDAR_OFFLINE_SITE_SCHEMA } from "./services/database/calendar-offline";
-import { AddonCalendarComponentsModule } from "./components/components.module";
-import { AddonCalendar, AddonCalendarProvider } from "./services/calendar";
-import { CoreMainMenuTabRoutingModule } from "@features/mainmenu/mainmenu-tab-routing.module";
-import { AddonCalendarOfflineProvider } from "./services/calendar-offline";
-import { AddonCalendarHelperProvider } from "./services/calendar-helper";
-import { AddonCalendarSyncProvider } from "./services/calendar-sync";
+import { CORE_SITE_SCHEMAS } from '@services/sites';
+import { CALENDAR_SITE_SCHEMA } from './services/database/calendar';
+import { CALENDAR_OFFLINE_SITE_SCHEMA } from './services/database/calendar-offline';
+import { AddonCalendarComponentsModule } from './components/components.module';
+import { AddonCalendar, AddonCalendarProvider } from './services/calendar';
+import { CoreMainMenuTabRoutingModule } from '@features/mainmenu/mainmenu-tab-routing.module';
+import { AddonCalendarOfflineProvider } from './services/calendar-offline';
+import { AddonCalendarHelperProvider } from './services/calendar-helper';
+import { AddonCalendarSyncProvider } from './services/calendar-sync';
 
 export const ADDON_CALENDAR_SERVICES: Type<unknown>[] = [
-  AddonCalendarProvider,
-  AddonCalendarOfflineProvider,
-  AddonCalendarHelperProvider,
-  AddonCalendarSyncProvider,
+    AddonCalendarProvider,
+    AddonCalendarOfflineProvider,
+    AddonCalendarHelperProvider,
+    AddonCalendarSyncProvider,
 ];
 
 const mainMenuChildrenRoutes: Routes = [
-  {
-    path: AddonCalendarMainMenuHandlerService.PAGE_NAME,
-    loadChildren: () =>
-      import("./calendar-lazy.module").then((m) => m.AddonCalendarLazyModule),
-  },
+    {
+        path: AddonCalendarMainMenuHandlerService.PAGE_NAME,
+        loadChildren: () => import('./calendar-lazy.module').then(m => m.AddonCalendarLazyModule),
+    },
 ];
 
 @NgModule({
-  imports: [
-    CoreMainMenuTabRoutingModule.forChild(mainMenuChildrenRoutes),
-    CoreMainMenuRoutingModule.forChild({ children: mainMenuChildrenRoutes }),
-    AddonCalendarComponentsModule,
-  ],
-  exports: [CoreMainMenuRoutingModule],
-  providers: [
-    {
-      provide: CORE_SITE_SCHEMAS,
-      useValue: [CALENDAR_SITE_SCHEMA, CALENDAR_OFFLINE_SITE_SCHEMA],
-      multi: true,
-    },
-    {
-      provide: APP_INITIALIZER,
-      multi: true,
-      useValue: async () => {
-        CoreContentLinksDelegate.registerHandler(
-          AddonCalendarViewLinkHandler.instance
-        );
-        CoreMainMenuDelegate.registerHandler(
-          AddonCalendarMainMenuHandler.instance
-        );
-        CoreCronDelegate.register(AddonCalendarSyncCronHandler.instance);
+    imports: [
+        CoreMainMenuTabRoutingModule.forChild(mainMenuChildrenRoutes),
+        CoreMainMenuRoutingModule.forChild({ children: mainMenuChildrenRoutes }),
+        AddonCalendarComponentsModule,
+    ],
+    exports: [CoreMainMenuRoutingModule],
+    providers: [
+        {
+            provide: CORE_SITE_SCHEMAS,
+            useValue: [CALENDAR_SITE_SCHEMA, CALENDAR_OFFLINE_SITE_SCHEMA],
+            multi: true,
+        },
+        {
+            provide: APP_INITIALIZER,
+            multi: true,
+            deps: [],
+            useFactory: () => async () => {
+                CoreContentLinksDelegate.registerHandler(AddonCalendarViewLinkHandler.instance);
+                CoreMainMenuDelegate.registerHandler(AddonCalendarMainMenuHandler.instance);
+                CoreCronDelegate.register(AddonCalendarSyncCronHandler.instance);
 
-        await AddonCalendar.initialize();
+                await AddonCalendar.initialize();
 
-        AddonCalendar.scheduleAllSitesEventsNotifications();
-      },
-    },
-  ],
+                AddonCalendar.scheduleAllSitesEventsNotifications();
+            },
+        },
+    ],
 })
 export class AddonCalendarModule {}

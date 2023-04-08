@@ -12,49 +12,74 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CoreConstants, ModPurpose } from "@/core/constants";
-import { Injectable, Type } from "@angular/core";
-import { CoreModuleHandlerBase } from "@features/course/classes/module-base-handler";
-import { CoreCourseModuleHandler } from "@features/course/services/module-delegate";
-import { makeSingleton } from "@singletons";
-import { AddonModDataIndexComponent } from "../../components/index";
+import { CoreConstants } from '@/core/constants';
+import { Injectable, Type } from '@angular/core';
+import { CoreCourse, CoreCourseAnyModuleData } from '@features/course/services/course';
+import { CoreCourseModule } from '@features/course/services/course-helper';
+import { CoreCourseModuleHandler, CoreCourseModuleHandlerData } from '@features/course/services/module-delegate';
+import { CoreNavigationOptions, CoreNavigator } from '@services/navigator';
+import { makeSingleton } from '@singletons';
+import { AddonModDataIndexComponent } from '../../components/index';
+import { AddonModData } from '../data';
 
 /**
  * Handler to support data modules.
  */
-@Injectable({ providedIn: "root" })
-export class AddonModDataModuleHandlerService
-  extends CoreModuleHandlerBase
-  implements CoreCourseModuleHandler
-{
-  static readonly PAGE_NAME = "mod_data";
+@Injectable({ providedIn: 'root' })
+export class AddonModDataModuleHandlerService implements CoreCourseModuleHandler {
 
-  name = "AddonModData";
-  modName = "data";
-  protected pageName = AddonModDataModuleHandlerService.PAGE_NAME;
+    static readonly PAGE_NAME = 'mod_data';
 
-  supportedFeatures = {
-    [CoreConstants.FEATURE_GROUPS]: true,
-    [CoreConstants.FEATURE_GROUPINGS]: true,
-    [CoreConstants.FEATURE_MOD_INTRO]: true,
-    [CoreConstants.FEATURE_COMPLETION_TRACKS_VIEWS]: true,
-    [CoreConstants.FEATURE_COMPLETION_HAS_RULES]: true,
-    [CoreConstants.FEATURE_GRADE_HAS_GRADE]: true,
-    [CoreConstants.FEATURE_GRADE_OUTCOMES]: true,
-    [CoreConstants.FEATURE_BACKUP_MOODLE2]: true,
-    [CoreConstants.FEATURE_SHOW_DESCRIPTION]: true,
-    [CoreConstants.FEATURE_RATE]: true,
-    [CoreConstants.FEATURE_COMMENT]: true,
-    [CoreConstants.FEATURE_MOD_PURPOSE]: ModPurpose.MOD_PURPOSE_COLLABORATION,
-  };
+    name = 'AddonModData';
+    modName = 'data';
 
-  /**
-   * @inheritdoc
-   */
-  async getMainComponent(): Promise<Type<unknown>> {
-    return AddonModDataIndexComponent;
-  }
+    supportedFeatures = {
+        [CoreConstants.FEATURE_GROUPS]: true,
+        [CoreConstants.FEATURE_GROUPINGS]: true,
+        [CoreConstants.FEATURE_MOD_INTRO]: true,
+        [CoreConstants.FEATURE_COMPLETION_TRACKS_VIEWS]: true,
+        [CoreConstants.FEATURE_COMPLETION_HAS_RULES]: true,
+        [CoreConstants.FEATURE_GRADE_HAS_GRADE]: true,
+        [CoreConstants.FEATURE_GRADE_OUTCOMES]: true,
+        [CoreConstants.FEATURE_BACKUP_MOODLE2]: true,
+        [CoreConstants.FEATURE_SHOW_DESCRIPTION]: true,
+        [CoreConstants.FEATURE_RATE]: true,
+        [CoreConstants.FEATURE_COMMENT]: true,
+    };
+
+    /**
+     * @inheritdoc
+     */
+    isEnabled(): Promise<boolean> {
+        return AddonModData.isPluginEnabled();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    getData(module: CoreCourseAnyModuleData): CoreCourseModuleHandlerData {
+        return {
+            icon: CoreCourse.getModuleIconSrc(this.modName, 'modicon' in module ? module.modicon : undefined),
+            title: module.name,
+            class: 'addon-mod_data-handler',
+            showDownloadButton: true,
+            action(event: Event, module: CoreCourseModule, courseId: number, options?: CoreNavigationOptions): void {
+                options = options || {};
+                options.params = options.params || {};
+                Object.assign(options.params, { module });
+                const routeParams = '/' + courseId + '/' + module.id;
+
+                CoreNavigator.navigateToSitePath(AddonModDataModuleHandlerService.PAGE_NAME + routeParams, options);
+            },
+        };
+    }
+
+    /**
+     * @inheritdoc
+     */
+    async getMainComponent(): Promise<Type<unknown>> {
+        return AddonModDataIndexComponent;
+    }
+
 }
-export const AddonModDataModuleHandler = makeSingleton(
-  AddonModDataModuleHandlerService
-);
+export const AddonModDataModuleHandler = makeSingleton(AddonModDataModuleHandlerService);
