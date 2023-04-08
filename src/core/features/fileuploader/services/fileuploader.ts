@@ -23,27 +23,36 @@ import {
 } from "@ionic-native/media-capture/ngx";
 import { Subject } from "rxjs";
 
-import { CoreApp } from '@services/app';
-import {CoreFile, CoreFileFormat, CoreFileProvider} from '@services/file';
-import { CoreFilepool } from '@services/filepool';
-import { CoreSites } from '@services/sites';
-import { CoreMimetypeUtils } from '@services/utils/mimetype';
-import { CoreTextUtils } from '@services/utils/text';
-import { CoreTimeUtils } from '@services/utils/time';
-import { CoreUtils } from '@services/utils/utils';
-import {CoreWS, CoreWSFile, CoreWSFileUploadOptions, CoreWSUploadFileResult} from '@services/ws';
-import { makeSingleton, Translate, MediaCapture, ModalController, Camera } from '@singletons';
-import { CoreLogger } from '@singletons/logger';
-import { CoreEmulatorCaptureMediaComponent } from '@features/emulator/components/capture-media/capture-media';
-import { CoreError } from '@classes/errors/error';
-import { CoreSite } from '@classes/site';
-import { CoreFileEntry, CoreFileHelper } from '@services/file-helper';
-import { CoreDomUtils } from '@services/utils/dom';
+import { CoreApp } from "@services/app";
+import { CoreFile, CoreFileProvider } from "@services/file";
+import { CoreFilepool } from "@services/filepool";
+import { CoreSites } from "@services/sites";
+import { CoreMimetypeUtils } from "@services/utils/mimetype";
+import { CoreTextUtils } from "@services/utils/text";
+import { CoreTimeUtils } from "@services/utils/time";
+import { CoreUtils } from "@services/utils/utils";
+import {
+  CoreWSFile,
+  CoreWSFileUploadOptions,
+  CoreWSUploadFileResult,
+} from "@services/ws";
+import {
+  makeSingleton,
+  Translate,
+  MediaCapture,
+  ModalController,
+  Camera,
+} from "@singletons";
+import { CoreLogger } from "@singletons/logger";
+import { CoreEmulatorCaptureMediaComponent } from "@features/emulator/components/capture-media/capture-media";
+import { CoreError } from "@classes/errors/error";
+import { CoreSite } from "@classes/site";
+import { CoreFileEntry, CoreFileHelper } from "@services/file-helper";
+import { CoreDomUtils } from "@services/utils/dom";
 //import { VideoEditor } from '@ionic-native/video-editor/ngx';
 //import { VideoEditor } from 'cordova-plugin-video-editor-fix/ngx';
 
 //import { VideoEditor } from '@awesome-cordova-plugins/video-editor';
-
 
 declare var VideoEditor: any;
 
@@ -148,7 +157,7 @@ export class CoreFileUploaderProvider {
    * @return Promise resolved with the result.
    */
   async captureAudio(
-    options: CaptureAudioOptions
+      options: CaptureAudioOptions
   ): Promise<MediaFile[] | CaptureError> {
     this.onAudioCapture.next(true);
 
@@ -178,9 +187,9 @@ export class CoreFileUploaderProvider {
       backdropDismiss: false,
     });
 
-        const params = {
-            type: 'audio',
-        };
+    await modal.present();
+
+    const result = await modal.onWillDismiss();
 
     if (result.role == "success") {
       console.log("audio aufnehmen 7 " + result.data[0]);
@@ -189,13 +198,7 @@ export class CoreFileUploaderProvider {
     } else {
       console.log("audio aufnehmen 8 " + result.data);
 
-        const result = await modal.onWillDismiss();
-
-        if (result.role == 'success') {
-            return result.data[0];
-        } else {
-            throw result.data;
-        }
+      throw result.data;
     }
   }
 
@@ -206,17 +209,16 @@ export class CoreFileUploaderProvider {
    * @return Promise resolved with the result.
    */
   async captureVideo(
-    options: CaptureVideoOptions
+      options: CaptureVideoOptions
   ): Promise<MediaFile[] | CaptureError> {
     console.log("audio aufnehmen 2");
 
-        this.onVideoCapture.next(true);
+    this.onVideoCapture.next(true);
 
-        try {
-            return await MediaCapture.captureVideo(options);
-        } finally {
-            this.onVideoCapture.next(false);
-        }
+    try {
+      return await MediaCapture.captureVideo(options);
+    } finally {
+      this.onVideoCapture.next(false);
     }
   }
 
@@ -230,10 +232,10 @@ export class CoreFileUploaderProvider {
     // Delete the temporary files.
     files.forEach((file) => {
       if (
-        "remove" in file &&
-        CoreFile.removeBasePath(file.toURL()).startsWith(
-          CoreFileProvider.TMPFOLDER
-        )
+          "remove" in file &&
+          CoreFile.removeBasePath(file.toURL()).startsWith(
+              CoreFileProvider.TMPFOLDER
+          )
       ) {
         // Pass an empty function to prevent missing parameter error.
         file.remove(() => {
@@ -252,9 +254,9 @@ export class CoreFileUploaderProvider {
    * @return Promise resolved when done.
    */
   async deleteDraftFiles(
-    draftId: number,
-    files: { filepath: string; filename: string }[],
-    siteId?: string
+      draftId: number,
+      files: { filepath: string; filename: string }[],
+      siteId?: string
   ): Promise<void> {
     const site = await CoreSites.getSite(siteId);
 
@@ -274,8 +276,8 @@ export class CoreFileUploaderProvider {
    * @return Options.
    */
   getCameraUploadOptions(
-    uri: string,
-    isFromAlbum?: boolean
+      uri: string,
+      isFromAlbum?: boolean
   ): CoreFileUploaderOptions {
     const extension = CoreMimetypeUtils.guessExtensionFromUrl(uri);
     const mimetype = CoreMimetypeUtils.getMimeType(extension);
@@ -308,14 +310,30 @@ export class CoreFileUploaderProvider {
       }
     }
 
-        return options;
-    }
+    console.log(" options.fileName :" + options.fileName);
+
+    return options;
+  }
+
+  /**
+   * Given a list of original files and a list of current files, return the list of files to delete.
+   *
+   * @param originalFiles Original files.
+   * @param currentFiles Current files.
+   * @return List of files to delete.
+   */
+  getFilesToDelete(
+      originalFiles: CoreWSFile[],
+      currentFiles: CoreFileEntry[]
+  ): { filepath: string; filename: string }[] {
+    const filesToDelete: { filepath: string; filename: string }[] = [];
+    currentFiles = currentFiles || [];
 
     originalFiles.forEach((file) => {
       const stillInList = currentFiles.some(
-        (currentFile) =>
-          CoreFileHelper.getFileUrl(<CoreWSFile>currentFile) ==
-          CoreFileHelper.getFileUrl(file)
+          (currentFile) =>
+              CoreFileHelper.getFileUrl(<CoreWSFile>currentFile) ==
+              CoreFileHelper.getFileUrl(file)
       );
 
       if (!stillInList) {
@@ -341,20 +359,20 @@ export class CoreFileUploaderProvider {
    * @return Options.
    */
   getFileUploadOptions(
-    uri: string,
-    name: string,
-    mimetype?: string,
-    deleteAfterUpload?: boolean,
-    fileArea?: string,
-    itemId?: number
+      uri: string,
+      name: string,
+      mimetype?: string,
+      deleteAfterUpload?: boolean,
+      fileArea?: string,
+      itemId?: number
   ): CoreFileUploaderOptions {
     const options: CoreFileUploaderOptions = {};
     options.fileName = name;
     options.mimeType =
-      mimetype ||
-      CoreMimetypeUtils.getMimeType(
-        CoreMimetypeUtils.getFileExtension(options.fileName)
-      );
+        mimetype ||
+        CoreMimetypeUtils.getMimeType(
+            CoreMimetypeUtils.getFileExtension(options.fileName)
+        );
     options.deleteAfterUpload = !!deleteAfterUpload;
     options.itemId = itemId || 0;
     options.fileArea = fileArea;
@@ -374,24 +392,11 @@ export class CoreFileUploaderProvider {
 
     console.log("mediafile" + filename);
 
-        if (!filename.match(/_\d{14}(\..*)?$/)) {
-            // Add a timestamp to the filename to make it unique.
-            const split = filename.split('.');
-            split[0] += '_' + CoreTimeUtils.readableTimestamp();
-            filename = split.join('.');
-        }
-
-        options.fileName = filename;
-        options.deleteAfterUpload = true;
-        if (mediaFile.type) {
-            options.mimeType = mediaFile.type;
-        } else {
-            options.mimeType = CoreMimetypeUtils.getMimeType(
-                CoreMimetypeUtils.getFileExtension(options.fileName),
-            );
-        }
-
-        return options;
+    if (!filename.match(/_\d{14}(\..*)?$/)) {
+      // Add a timestamp to the filename to make it unique.
+      const split = filename.split(".");
+      split[0] += "_" + CoreTimeUtils.readableTimestamp();
+      filename = split.join(".");
     }
 
     options.fileName = filename;
@@ -400,17 +405,12 @@ export class CoreFileUploaderProvider {
       options.mimeType = mediaFile.type;
     } else {
       options.mimeType = CoreMimetypeUtils.getMimeType(
-        CoreMimetypeUtils.getFileExtension(options.fileName)
+          CoreMimetypeUtils.getFileExtension(options.fileName)
       );
     }
 
-    /**
-     * Get the files stored in a folder, marking them as offline.
-     *
-     * @param folderPath Folder where to get the files.
-     * @return Promise resolved with the list of files.
-     */
-    async getStoredFiles(folderPath: string): Promise<FileEntry[]> {
+    return options;
+  }
 
   /**
    * Take a picture or video, or load one from the library.
@@ -446,8 +446,8 @@ export class CoreFileUploaderProvider {
    * @return Promise resolved with files.
    */
   async getStoredFilesFromOfflineFilesObject(
-    filesObject: CoreFileUploaderStoreFilesResult,
-    folderPath: string
+      filesObject: CoreFileUploaderStoreFilesResult,
+      folderPath: string
   ): Promise<CoreFileEntry[]> {
     let files: CoreFileEntry[] = [];
 
@@ -457,7 +457,7 @@ export class CoreFileUploaderProvider {
 
     if (filesObject.offline > 0) {
       const offlineFiles = await CoreUtils.ignoreErrors(
-        this.getStoredFiles(folderPath)
+          this.getStoredFiles(folderPath)
       );
 
       if (offlineFiles) {
@@ -478,9 +478,9 @@ export class CoreFileUploaderProvider {
    * @return Undefined if file is valid, error message if file is invalid.
    */
   isInvalidMimetype(
-    mimetypes?: string[],
-    path?: string,
-    mimetype?: string
+      mimetypes?: string[],
+      path?: string,
+      mimetype?: string
   ): string | undefined {
     let extension: string | undefined;
 
@@ -522,48 +522,20 @@ export class CoreFileUploaderProvider {
     return files;
   }
 
-        const result: CoreFileUploaderStoreFilesResult = {
-            online: [],
-            offline: 0,
-        };
+  /**
+   * Parse filetypeList to get the list of allowed mimetypes and the data to render information.
+   *
+   * @param filetypeList Formatted string list where the mimetypes can be checked.
+   * @return Mimetypes and the filetypes informations. Undefined if all types supported.
+   */
+  prepareFiletypeList(
+      filetypeList: string
+  ): CoreFileUploaderTypeList | undefined {
+    filetypeList = filetypeList?.trim();
 
-        if (!files || !files.length) {
-            return result;
-        }
-
-        // Remove unused files from previous saves.
-        await CoreFile.removeUnusedFiles(folderPath, files);
-
-        await Promise.all(files.map(async (file) => {
-
-
-
-            if (!CoreUtils.isFileEntry(file)) {
-
-                // It's an online file, add it to the result and ignore it.
-                result.online.push({
-                    filename: file.filename,
-                    fileurl: CoreFileHelper.getFileUrl(file),
-                });
-
-                let fileurl2 =  CoreFileHelper.getFileUrl(file);
-
-
-            } else if (file.fullPath?.indexOf(folderPath) != -1) {
-                // File already in the submission folder.
-                result.offline++;
-            } else {
-                // Local file, copy it.
-                // Use copy instead of move to prevent having a unstable state if some copies succeed and others don't.
-                const destFile = CoreTextUtils.concatenatePaths(folderPath, file.name);
-
-                result.offline++;
-
-                await CoreFile.copyFile(file.toURL(), destFile);
-            }
-        }));
-
-        return result;
+    if (!filetypeList || filetypeList == "*") {
+      // All types supported, return undefined.
+      return;
     }
 
     const filetypes = filetypeList.split(/[;, ]+/g);
@@ -582,8 +554,8 @@ export class CoreFileUploaderProvider {
         typesInfo.push({
           name: CoreMimetypeUtils.getMimetypeDescription(filetype),
           extlist: CoreMimetypeUtils.getExtensions(filetype)
-            .map(this.addDot)
-            .join(" "),
+              .map(this.addDot)
+              .join(" "),
         });
 
         mimetypes[filetype] = true;
@@ -601,12 +573,12 @@ export class CoreFileUploaderProvider {
       } else {
         // It's a group.
         const groupExtensions = CoreMimetypeUtils.getGroupMimeInfo(
-          filetype,
-          "extensions"
+            filetype,
+            "extensions"
         );
         const groupMimetypes = CoreMimetypeUtils.getGroupMimeInfo(
-          filetype,
-          "mimetypes"
+            filetype,
+            "mimetypes"
         );
 
         if (groupExtensions && groupExtensions.length > 0) {
@@ -627,7 +599,7 @@ export class CoreFileUploaderProvider {
           const mimetype = CoreMimetypeUtils.getMimeType(filetype);
           typesInfo.push({
             name:
-              mimetype && CoreMimetypeUtils.getMimetypeDescription(mimetype),
+                mimetype && CoreMimetypeUtils.getMimetypeDescription(mimetype),
             extlist: filetype,
           });
 
@@ -653,8 +625,8 @@ export class CoreFileUploaderProvider {
    * @return Promise resolved if success.
    */
   async storeFilesToUpload(
-    folderPath: string,
-    files: CoreFileEntry[]
+      folderPath: string,
+      files: CoreFileEntry[]
   ): Promise<CoreFileUploaderStoreFilesResult> {
     console.log("folderPath 2: " + folderPath);
 
@@ -667,120 +639,222 @@ export class CoreFileUploaderProvider {
       return result;
     }
 
-    /**
-     * Upload a file to a draft area and return the draft ID.
-     *
-     * If the file is an online file it will be downloaded and then re-uploaded.
-     * If the file is a local file it will not be deleted from the device after upload.
-     *
-     * @param file Online file or local FileEntry.
-     * @param itemId Draft ID to use. Undefined or 0 to create a new draft ID.
-     * @param component The component to set to the downloaded files.
-     * @param componentId An ID to use in conjunction with the component.
-     * @param siteId Site ID. If not defined, current site.
-     * @return Promise resolved with the itemId.
-     */
-    async uploadOrReuploadFile(
-        file: CoreFileEntry,
-        itemId?: number,
-        component?: string,
-        componentId?: string | number,
-        siteId?: string,
-        fileNumber?: number,
-    ): Promise<number> {
+    // Remove unused files from previous saves.
+    await CoreFile.removeUnusedFiles(folderPath, files);
 
     await Promise.all(
-      files.map(async (file) => {
-        if (!CoreUtils.isFileEntry(file)) {
-          console.log("filename: " + file.filename);
+        files.map(async (file) => {
+          if (!CoreUtils.isFileEntry(file)) {
+            console.log("filename: " + file.filename);
 
-          // It's an online file, add it to the result and ignore it.
-          result.online.push({
-            filename: file.filename,
-            fileurl: CoreFileHelper.getFileUrl(file),
+            // It's an online file, add it to the result and ignore it.
+            result.online.push({
+              filename: file.filename,
+              fileurl: CoreFileHelper.getFileUrl(file),
+            });
+
+            let fileurl2 = CoreFileHelper.getFileUrl(file);
+          } else if (file.fullPath?.indexOf(folderPath) != -1) {
+            // File already in the submission folder.
+            result.offline++;
+          } else {
+            // Local file, copy it.
+            // Use copy instead of move to prevent having a unstable state if some copies succeed and others don't.
+            const destFile = CoreTextUtils.concatenatePaths(
+                folderPath,
+                file.name
+            );
+
+            result.offline++;
+
+            await CoreFile.copyFile(file.toURL(), destFile);
+          }
+        })
+    );
+
+    return result;
+  }
+
+  /**
+   * Upload a file.
+   *
+   * @param uri File URI.
+   * @param options Options for the upload.
+   * @param onProgress Function to call on progress.
+   * @param siteId Id of the site to upload the file to. If not defined, use current site.
+   * @return Promise resolved when done.
+   */
+  async uploadFile(
+      uri: string,
+      options?: CoreFileUploaderOptions,
+      onProgress?: (event: ProgressEvent) => void,
+      siteId?: string
+  ): Promise<CoreWSUploadFileResult> {
+    options = options || {};
+
+    const deleteAfterUpload = options.deleteAfterUpload;
+    const ftOptions = CoreUtils.clone(options);
+
+    delete ftOptions.deleteAfterUpload;
+
+    const site = await CoreSites.getSite(siteId);
+
+    const result = await site.uploadFile(uri, ftOptions, onProgress);
+
+    if (deleteAfterUpload) {
+      CoreFile.removeExternalFile(uri);
+    }
+
+    return result;
+  }
+
+  /**
+   * Given a list of files (either online files or local files), upload the local files to the draft area.
+   * Local files are not deleted from the device after upload.
+   *
+   * @param itemId Draft ID.
+   * @param files List of files.
+   * @param siteId Site ID. If not defined, current site.
+   * @return Promise resolved with the itemId.
+   */
+  async uploadFiles(
+      itemId: number,
+      files: CoreFileEntry[],
+      siteId?: string
+  ): Promise<void> {
+    siteId = siteId || CoreSites.getCurrentSiteId();
+
+    if (!files || !files.length) {
+      return;
+    }
+
+    // Index the online files by name.
+    const usedNames: { [name: string]: CoreFileEntry } = {};
+    const filesToUpload: FileEntry[] = [];
+    files.forEach((file) => {
+      if (CoreUtils.isFileEntry(file)) {
+        filesToUpload.push(<FileEntry>file);
+      } else {
+        // It's an online file.
+        usedNames[file.filename!.toLowerCase()] = file;
+      }
+    });
+
+    await Promise.all(
+        filesToUpload.map(async (file) => {
+          // Make sure the file name is unique in the area.
+          const name = CoreFile.calculateUniqueName(usedNames, file.name);
+          usedNames[name] = file;
+
+          // Now upload the file.
+          const options = this.getFileUploadOptions(
+              file.toURL(),
+              name,
+              undefined,
+              false,
+              "draft",
+              itemId
+          );
+
+          await this.uploadFile(file.toURL(), options, undefined, siteId);
+        })
+    );
+  }
+
+  /**
+   * Upload a file to a draft area and return the draft ID.
+   *
+   * If the file is an online file it will be downloaded and then re-uploaded.
+   * If the file is a local file it will not be deleted from the device after upload.
+   *
+   * @param file Online file or local FileEntry.
+   * @param itemId Draft ID to use. Undefined or 0 to create a new draft ID.
+   * @param component The component to set to the downloaded files.
+   * @param componentId An ID to use in conjunction with the component.
+   * @param siteId Site ID. If not defined, current site.
+   * @return Promise resolved with the itemId.
+   */
+  async uploadOrReuploadFile(
+      file: CoreFileEntry,
+      itemId?: number,
+      component?: string,
+      componentId?: string | number,
+      siteId?: string
+  ): Promise<number> {
+    siteId = siteId || CoreSites.getCurrentSiteId();
+
+    let fileName: string | undefined;
+    let fileEntry: FileEntry | undefined;
+
+    const isOnline = !CoreUtils.isFileEntry(file);
+
+    if (CoreUtils.isFileEntry(file)) {
+      // Local file, we already have the file entry.
+      fileName = file.name;
+      fileEntry = file;
+
+      if (CoreApp.isAndroid()) {
+        const extension = CoreMimetypeUtils.getFileExtension(fileName!);
+        const mimetype = extension
+            ? CoreMimetypeUtils.getMimeType(extension)
+            : undefined;
+
+        if (mimetype == undefined) {
+          var checkAudio = false;
+        } else {
+          var checkAudio = mimetype.includes("audio");
+        }
+
+        console.log("mimetype " + mimetype);
+        console.log("checkAudio " + checkAudio);
+
+        if (
+            !checkAudio &&
+            mimetype != "image/jpeg" &&
+            mimetype != "image/png" &&
+            mimetype != "image/svg+xml"
+        ) {
+          console.log("bin reingerannt");
+
+          let modal = await CoreDomUtils.showModalLoading(
+              "Komprimierung: 0%",
+              true
+          );
+          let promise = new Promise((resolve, reject) => {
+            var name = Math.round(+new Date() / 1000);
+            console.log("error warnung 2");
+
+            VideoEditor.transcodeVideo(
+                function (success) {
+                  console.log("error warnung 3");
+                  resolve(success);
+                },
+                function (error) {
+                  console.log("error warnung " + error);
+                  reject(error);
+                },
+                {
+                  fileUri: file.nativeURL,
+                  outputFileName: name.toString(),
+                  videoBitrate: 3000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
+                  fps: 30, // optional (android only), defaults to 30
+
+                  progress: function (info) {
+                    modal.updateText(
+                        "Komprimierung: " + Math.round(info * 100) + "%"
+                    );
+                  },
+                }
+            );
           });
 
-        var uploaded = 0;
-
-        const isOnline = !CoreUtils.isFileEntry(file);
-
-        if (CoreUtils.isFileEntry(file)) {
-
-            // Local file, we already have the file entry.
-            fileName = file.name;
-            fileEntry = file;
-
-
-            if (CoreApp.isAndroid()) {
-
-                const extension = CoreMimetypeUtils.getFileExtension(fileName!);
-                const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
-
-                //transcode only videos bigger than 10MB
-                const filesize = await CoreFile.getFileSize(file.nativeURL);
-
-                if (mimetype == undefined) {
-                    var checkAudio = false;
-                } else {
-                    var checkAudio = mimetype.includes("audio");
-                }
-
-
-                if (!checkAudio && mimetype != "image/jpeg" && mimetype != "image/png" && mimetype != "image/svg+xml" && filesize > 15000000) {
-
-                    var modal = await CoreDomUtils.showModalLoading("Komprimiere Datei "+ fileNumber +": 0%", true);
-
-                    let promise = new Promise((resolve, reject) => {
-
-
-                        var rand = Math.floor(Math.random() * 100);
-                        var name = Math.round(+new Date() / 1000) + rand;
-
-                       VideoEditor.transcodeVideo(function (success = null) {
-                                resolve(success)
-                            }, function (error = null) {
-                                reject(error)
-                            },
-                            {
-                                fileUri: file.nativeURL,
-                                outputFileName: name.toString(),
-                                videoBitrate: 3000000, // optional, bitrate in bits, defaults to 9 megabit (9000000)
-                                fps: 30, // optional (android only), defaults to 30
-
-                                progress: function (info) {
-                                    modal.updateText("Komprimiere Datei "+ fileNumber + ": " +  + Math.round(info * 100) + "%");
-                                }
-                            },
-                        )
-                    });
-
-                    var result2 = await promise;
-                    fileEntry.nativeURL = result2 as string;
-
-                    modal.dismiss();
-                }
-            }
-
-        } else {
-
-            // It's an online file. We need to download it and re-upload it.
-            fileName = file.filename;
-
-            const path = await CoreFilepool.downloadUrl(
-                siteId,
-                CoreFileHelper.getFileUrl(file),
-                false,
-                component,
-                componentId,
-                file.timemodified,
-                undefined,
-                undefined,
-                file,
-            )
-
-            fileEntry = await CoreFile.getExternalFile(path);
-
-
+          try {
+            var result2 = await promise;
+            fileEntry.nativeURL = result2 as string;
+            modal.dismiss();
+          } catch (error) {
+            modal.dismiss();
+          }
         }
       } else {
         console.log("bin ein bild");
@@ -789,12 +863,17 @@ export class CoreFileUploaderProvider {
       // It's an online file. We need to download it and re-upload it.
       fileName = file.filename;
 
-        // Now upload the file.
-        const extension = CoreMimetypeUtils.getFileExtension(fileName!);
-        const mimetype = extension ? CoreMimetypeUtils.getMimeType(extension) : undefined;
-        const options = this.getFileUploadOptions(fileEntry.nativeURL, fileName!, mimetype, isOnline, 'draft', itemId);
-        const result = await this.uploadFile(fileEntry.nativeURL, options, undefined, siteId);
-        uploaded = uploaded + 1;
+      const path = await CoreFilepool.downloadUrl(
+          siteId,
+          CoreFileHelper.getFileUrl(file),
+          false,
+          component,
+          componentId,
+          file.timemodified,
+          undefined,
+          undefined,
+          file
+      );
 
       fileEntry = await CoreFile.getExternalFile(path);
     }
@@ -802,21 +881,21 @@ export class CoreFileUploaderProvider {
     // Now upload the file.
     const extension = CoreMimetypeUtils.getFileExtension(fileName!);
     const mimetype = extension
-      ? CoreMimetypeUtils.getMimeType(extension)
-      : undefined;
+        ? CoreMimetypeUtils.getMimeType(extension)
+        : undefined;
     const options = this.getFileUploadOptions(
-      fileEntry.nativeURL,
-      fileName!,
-      mimetype,
-      isOnline,
-      "draft",
-      itemId
+        fileEntry.nativeURL,
+        fileName!,
+        mimetype,
+        isOnline,
+        "draft",
+        itemId
     );
     const result = await this.uploadFile(
-      fileEntry.nativeURL,
-      options,
-      undefined,
-      siteId
+        fileEntry.nativeURL,
+        options,
+        undefined,
+        siteId
     );
 
     return result.itemid;
@@ -836,34 +915,33 @@ export class CoreFileUploaderProvider {
    * @return Promise resolved with the itemId.
    */
   async uploadOrReuploadFiles(
-    files: CoreFileEntry[],
-    component?: string,
-    componentId?: string | number,
-    siteId?: string
+      files: CoreFileEntry[],
+      component?: string,
+      componentId?: string | number,
+      siteId?: string
   ): Promise<number> {
     siteId = siteId || CoreSites.getCurrentSiteId();
 
-        // Upload only the first file first to get a draft id.
-        const itemId = await this.uploadOrReuploadFile(files[0], 0, component, componentId, siteId, 1);
+    if (!files || !files.length) {
+      // Return fake draft ID.
+      return 1;
+    }
 
     // Upload only the first file first to get a draft id.
     const itemId = await this.uploadOrReuploadFile(
-      files[0],
-      0,
-      component,
-      componentId,
-      siteId
+        files[0],
+        0,
+        component,
+        componentId,
+        siteId
     );
 
-        for (let i = 1; i < files.length; i++) {
-            const file = files[i];
-            var test = await this.uploadOrReuploadFile(file, itemId, component, componentId, siteId, i+1);
-        }
+    const promises: Promise<number>[] = [];
 
     for (let i = 1; i < files.length; i++) {
       const file = files[i];
       promises.push(
-        this.uploadOrReuploadFile(file, itemId, component, componentId, siteId)
+          this.uploadOrReuploadFile(file, itemId, component, componentId, siteId)
       );
     }
 
@@ -891,11 +969,11 @@ export type CoreFileUploaderTypeListInfoEntry = {
 };
 
 function success(result) {
-    // result is the path to the trimmed video on the device
-    return "yeah";
-
+  // result is the path to the trimmed video on the device
+  console.log("trimSuccess, result: " + result);
+  return "yeah";
 }
 
 function error(err) {
-
+  console.log("trimFail, err: " + err);
 }
